@@ -15,6 +15,11 @@ void me_ts_seismic_data_callback_handler(int mole_descriptor,
     qDebug() << "me_ts_seismic_data_callback_handler called";
 }
 
+void me_ts_stage_changed_callback_handler(int mole_descriptor,
+                                          me_test_suite_stage test_suite_stage) {
+    qDebug() << "me_ts_stage_changed_callback_handler called";
+}
+
 int mole_engine_test(void) {
     QLibrary me("mole-engine");
 
@@ -27,6 +32,7 @@ int mole_engine_test(void) {
     typedef int (*me_destroy_prototype)();
     typedef uint32_t (*me_get_default_retries_prototype)();
     typedef void (*me_ts_set_seismic_data_callback_prototype)(me_ts_seismic_data_callback_t callback);
+    typedef int (*me_open_mole_prototype)(const char *port_string);
 
     me_get_version_git_sha1_prototype me_get_version_git_sha1 = (me_get_version_git_sha1_prototype) me.resolve("me_get_version_git_sha1");
     me_get_version_prototype me_get_version = (me_get_version_prototype) me.resolve("me_get_version");
@@ -36,6 +42,7 @@ int mole_engine_test(void) {
     me_init_prototype me_init = (me_init_prototype) me.resolve("me_init");
     me_destroy_prototype me_destroy = (me_destroy_prototype) me.resolve("me_destroy");
     me_get_default_retries_prototype me_get_default_retries = (me_get_default_retries_prototype) me.resolve("me_get_default_retries");
+    me_open_mole_prototype me_open_mole = (me_open_mole_prototype) me.resolve("me_open_mole");
 
     if (me_get_version_git_sha1)
         qDebug() << "me_get_version_git_sha1" << me_get_version_git_sha1();
@@ -59,12 +66,20 @@ int mole_engine_test(void) {
         ret = me_init(), qDebug() << "me_init" << ret;
 
     if (ret < 0)
-        qDebug() << "Can't me_init(). ret=" << ret;
+        qDebug() << "Can't me_init(), ret=" << ret;
 
     if (me_get_default_retries)
         qDebug() << "me_get_default_retries" << me_get_default_retries();
 
     me_ts_set_seismic_data_callback(&me_ts_seismic_data_callback_handler);
+    me_ts_set_stage_changed_callback(&me_ts_stage_changed_callback_handler);
 
+    if (me_open_mole)
+        mole_descriptor = me_open_mole("COM3");
+
+    if (mole_descriptor < 0) {
+        qDebug() << "Can't me_open_mole(), mole_descriptor=" << mole_descriptor;
+        return(-1);
+    }
     return 0;
 }
