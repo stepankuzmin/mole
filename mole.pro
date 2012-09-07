@@ -13,7 +13,8 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    mole-engine-test.cpp
 
 HEADERS  += mainwindow.h \
     include/mole-engine/mole-engine-test-suite.h \

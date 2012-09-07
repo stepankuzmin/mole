@@ -1,9 +1,12 @@
 #ifndef SEGY_H
 #define SEGY_H
 
-#include "common.h"
-#include "config.h"
-#include "shared.h"
+//#include "common.h"
+//#include "config.h"
+//#include "shared.h"
+
+#include "shared/common.h"
+#include "shared/config.h"
 
 #pragma pack(push,1)
 

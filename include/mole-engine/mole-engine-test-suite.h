@@ -1,7 +1,8 @@
 #ifndef MOLE_ENGINE_TEST_SUITE_H
 #define MOLE_ENGINE_TEST_SUITE_H
 
-#include "common.h"
+//#include "common.h"
+#include "shared/common.h"
 #include "mole-engine.h"
 
 #pragma pack(push,1)
@@ -30,18 +31,18 @@ enum me_test_suite_stage
 {
 	ME_TSS_IDLE				= 0x00,		// Бездействие
 	ME_TSS_GAIN_COEFFICIENTS		= 0x01,		// Настройка крота
-	ME_TSS_GAIN_COEFFICIENTS_1		= 0x02,		// Регистрация и обработка данных
-	ME_TSS_GAIN_COEFFICIENTS_2		= 0x03,		// Регистрация и обработка данных
-	ME_TSS_GAIN_COEFFICIENTS_4		= 0x04,		// Регистрация и обработка данных
-	ME_TSS_GAIN_COEFFICIENTS_8		= 0x05,		// Регистрация и обработка данных
-	ME_TSS_GAIN_COEFFICIENTS_16		= 0x06,		// Регистрация и обработка данных
-	ME_TSS_GAIN_COEFFICIENTS_32		= 0x07,		// Регистрация и обработка данных
-	ME_TSS_GAIN_COEFFICIENTS_64		= 0x08,		// Регистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_1		= 0x02,		// � егистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_2		= 0x03,		// � егистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_4		= 0x04,		// � егистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_8		= 0x05,		// � егистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_16		= 0x06,		// � егистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_32		= 0x07,		// � егистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_64		= 0x08,		// � егистрация и обработка данных
 	ME_TSS_NOISE_FLOOR			= 0x09,		// Настройка крота, регистрация и обработка данных
 	ME_TSS_TOTAL_HARMONIC_DISTORTION	= 0x0A,		// Настройка крота, регистрация и обработка данных
 	ME_TSS_ZERO_SHIFT			= 0x0B,		// Настройка крота, регистрация и обработка данных
 	ME_TSS_COMMON_MODE_REJECTION_SIN	= 0x0C,		// Настройка крота, регистрация синуса и обработка данных
-	ME_TSS_COMMON_MODE_REJECTION_IN_PHASE	= 0x0D,		// Регистрация синфазного сигнала и обработка данных
+	ME_TSS_COMMON_MODE_REJECTION_IN_PHASE	= 0x0D,		// � егистрация синфазного сигнала и обработка данных
 	ME_TSS_COUNT				= 0x0E,
 };
 
@@ -54,6 +55,8 @@ enum me_test_suite_stage
  */
 typedef void(*me_ts_seismic_data_callback_t)(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 					     uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
+					     me_mole_module_datarate datarate,
+					     me_mole_module_gain gain,
 					     uint16 samples,
 					     uint8 *seismic_data);
 
@@ -70,7 +73,7 @@ typedef void(*me_ts_stage_changed_callback_t)(int mole_descriptor,me_test_suite_
 /**
  * Установить callback функцию.
  * Смотри me_ts_seismic_data_callback_t.
- * Разрешается установка NULL - не будет вызываться callback функция. По умолчанию NULL.
+ * � азрешается установка NULL - не будет вызываться callback функция. По умолчанию NULL.
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL void me_ts_set_seismic_data_callback(me_ts_seismic_data_callback_t callback);
 
@@ -82,7 +85,7 @@ extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL me_ts_seismic_data_callback_t me
 /**
  * Установить callback функцию.
  * Смотри me_ts_stage_changed_callback_t.
- * Разрешается установка NULL - не будет вызываться callback функция. По умолчанию NULL.
+ * � азрешается установка NULL - не будет вызываться callback функция. По умолчанию NULL.
  * Является альтернатиной для me_ts_get_stage.
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL void me_ts_set_stage_changed_callback(me_ts_stage_changed_callback_t callback);
