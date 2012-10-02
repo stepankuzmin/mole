@@ -1,11 +1,10 @@
 #ifndef MOLE_ENGINE_H
 #define MOLE_ENGINE_H
 
-//#include "common.h"
-//#include "Segy.h"
+#include "include/shared/common.h"
+#include "include/seg/Segy.h"
 
-#include "shared/common.h"
-#include "seg/Segy.h"
+typedef int32 angle_data_t;
 
 enum me_mole_errors
 {
@@ -21,9 +20,10 @@ enum me_mole_errors
 	ME_LIBRARY_CANT_RECEIVE_PACKET		= -0x07,		// "Не могу получить пакет"
 	ME_LIBRARY_BAD_PACKET_CRC		= -0x08,		// "Неправильная контрольная сумма у принятого пакета"
 	ME_LIBRARY_WRONG_COMMAND_IN_RESPONSE	= -0x09,		// "Получен ответ на другую команду"
-	ME_LIBRARY_CANT_INIT_MUTEX		= -0x0A,		// "Не могу проинициализировать mutex"
-	ME_LIBRARY_CANT_DESTROY_MUTEX		= -0x0B,		// "Не могу уничтожить mutex"
-	ME_LIBRARY_CANT_CREATE_THREAD		= -0x0C,		// "Не могу создать поток"
+	ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE	= -0x0A,		// "Получен ответ с полями, значения которых отличаются от значений полей в запросе"
+	ME_LIBRARY_CANT_INIT_MUTEX		= -0x0B,		// "Не могу проинициализировать mutex"
+	ME_LIBRARY_CANT_DESTROY_MUTEX		= -0x0C,		// "Не могу уничтожить mutex"
+	ME_LIBRARY_CANT_CREATE_THREAD		= -0x0D,		// "Не могу создать поток"
 	
 									// Тесты
 	ME_TS_CANT_GET_ENOUGH_SAMPLES		= -0x10,		// "Не удалось зарегистрировать необходимое число отсчётов"
@@ -35,11 +35,11 @@ enum me_mole_errors
 	ME_HARDWARE_CRC				= -0xF2,		// "Ошибка контрольной суммы"
 	ME_HARDWARE_LENGTH			= -0xF3,		// "Неправильная длина пакета"
 	ME_HARDWARE_FORMAT			= -0xF4,		// "Ошибка в параметрах команды"
-	ME_HARDWARE_EXECUTE			= -0xF5,		// "Ошибка исполнения команды"
-	ME_HARDWARE_TIMEOUT			= -0xF6,		// "Истёк таймаут"
+	ME_HARDWARE_EXECUTE			= -0xF5,		// "Ошибка исполнения команды" Смотри uint8 *last_address_actual.
+	ME_HARDWARE_TIMEOUT			= -0xF6,		// "Истёк таймаут" Смотри uint8 *last_address_actual.
 	ME_HARDWARE_UNEXPECT_CMD		= -0xF7,		// "Непредусмотренная команда"
 	ME_HARDWARE_NOT_MOUNT			= -0xF8,		// "ЛИНИЯ не смонтирована"
-	ME_HARDWARE_NOT_MODULE			= -0xF9,		// "Модуль с данным адресом отсутствует"
+	ME_HARDWARE_NOT_MODULE			= -0xF9,		// "Модуль с данным адресом отсутствует (0 или > 240)"
 	ME_HARDWARE_INVALID_ADDR		= -0xFA,		// "Недопустимый адрес"
 	ME_HARDWARE_MAX_SAMPLES			= -0xFB,		// "Недопустимое количество отсчетов"
 	ME_HARDWARE_PLL_TIME			= -0xFC,		// "Не истек таймаут для PLL после монтирования ЛИНИИ"
@@ -50,7 +50,7 @@ enum me_mole_module_mode
 {
 	ME_MMM_SLEEP				= 0x00,			// "� ежим сохранения энергии"
 	ME_MMM_SEISMIC				= 0x01,			// "� ежим измерения сейсмических параметров"
-	ME_MMM_INCLINE				= 0x02,			// "� ежим измерения углов"
+	ME_MMM_INCLINOMETER			= 0x02,			// "� ежим измерения углов"
 	ME_MMM_COUNT				= 0x03,
 };
 
@@ -146,7 +146,7 @@ enum me_mole_host_state
 enum me_mole_library_state
 {
 	ME_MLS_IDLE				= 0x00,
-	ME_MLS_HOST_GET_SEISMIC_DATA		= 0x01,
+	ME_MLS_HOST_GET_SAMPLES_DATA		= 0x01,
 	ME_MLS_TS_GAIN_COEFFICIENTS		= 0x02,
 	ME_MLS_TS_NOISE_FLOOR			= 0x03,
 	ME_MLS_TS_TOTAL_HARMONIC_DISTORTION	= 0x04,
@@ -483,14 +483,48 @@ inline uint8 me_get_module_count(uint8 first_address,uint8 last_address)
 	return(last_address - first_address + 1);
 }
 
-inline trace_data_t me_get_sample_data(uint8 module_index,uint16 sample,uint8 channel_index,
-				       uint8 first_address,uint8 last_address,
-				       uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
-				       const uint8 *seismic_data)
+/**
+ * Возвращает заданный отсчёт сейсмических данных выбранного канала указанного модуля.
+ * 
+ * channel_index:
+ * 
+ * 0 - X
+ * 1 - Y
+ * 2 - Z
+ * 
+ * Смотри me_host_get_samples_data.
+ */
+inline trace_data_t me_get_seismic_sample_data(uint8 module_index,uint16 sample,uint8 channel_index,
+					       uint8 first_address,uint8 last_address,
+					       uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
+					       const uint8 *samples_data)
 {
-	return(*(trace_data_t*)&seismic_data[bytes_in_line * sample +
+	return(*(trace_data_t*)&samples_data[bytes_in_line * sample +
 					     bytes_in_module * (me_get_module_count(first_address,last_address) - module_index - 1) +
 					     bytes_in_channel * channel_index]);
+}
+
+/**
+ * Возвращает заданный отсчёт данных инклинометра выбранного канала указанного модуля.
+ * 
+ * channel_index:
+ * 
+ * 0 - α
+ * 1 - β
+ * 2 - γ
+ * 
+ * β - всегда 0, так как нет реализации в модулях.
+ * 
+ * Смотри me_host_get_samples_data.
+ */
+inline angle_data_t me_get_inclinometer_sample_data(uint8 module_index,uint8 channel_index,
+					       uint8 first_address,uint8 last_address,
+					       uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
+					       const uint8 *inclinometer_data)
+{
+	return(*(angle_data_t*)&inclinometer_data[bytes_in_line * 0 +
+						  bytes_in_module * (me_get_module_count(first_address,last_address) - module_index - 1) +
+						  bytes_in_channel * channel_index]);
 }
 
 /**
@@ -579,85 +613,147 @@ extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_host_mount_all(int mole_d
 /**
  * Отмонтировать линию.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_host_unmount_line(int mole_descriptor);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_host_unmount(int mole_descriptor);
+
+
+/**
+ * Получить информацию о прошивке модуля.
+ */
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_info(int mole_descriptor,uint8 module_address,uint16 *device_id,uint8 *minor,uint8 *major);
 
 
 /**
  * Установить режим работы модулей. Смотри me_mole_module_mode.
+ * 
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_mode(int mole_descriptor,me_mole_module_mode module_mode);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_mode(int mole_descriptor,me_mole_module_mode module_mode,uint8 last_address,uint8 *last_address_actual);
 
 
 /**
  * Установить режим работы тестового генератора для модуля. Смотри me_mole_module_test_generator.
+ *  
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_test_generator(int mole_descriptor,uint8 module_address,me_mole_module_test_generator test_generator);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_test_generator(int mole_descriptor,uint8 module_address,me_mole_module_test_generator test_generator,uint8 *last_address_actual);
 
 /**
  * Установить режим работы тестового генератора для всех модулей. Смотри me_mole_module_test_generator.
+ *  
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_test_generator_all(int mole_descriptor,me_mole_module_test_generator test_generator);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_test_generator_all(int mole_descriptor,me_mole_module_test_generator test_generator,uint8 last_address,uint8 *last_address_actual);
 
 
 /**
  * Установить частоту дискретизации. Смотри me_mole_module_datarate.
+ * 
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_datarate(int mole_descriptor,me_mole_module_datarate datarate);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_datarate(int mole_descriptor,me_mole_module_datarate datarate,uint8 last_address,uint8 *last_address_actual);
 
 
 /**
  * Установить коэффициент усиления для модуля. Смотри me_mole_module_gain.
+ * 
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_gain(int mole_descriptor,uint8 module_address,me_mole_module_gain gain);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_gain(int mole_descriptor,uint8 module_address,me_mole_module_gain gain,uint8 *last_address_actual);
 
 /**
  * Установить коэффициент усиления для всех модулей. Смотри me_mole_module_gain.
+ *  
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_gain_all(int mole_descriptor,me_mole_module_gain gain);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_gain_all(int mole_descriptor,me_mole_module_gain gain,uint8 last_address,uint8 *last_address_actual);
 
 /**
  * Установить коэффициент усиления для X канала (X компоненты) всех модулей. Смотри me_mole_module_gain.
+ *  
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_gain_x_all(int mole_descriptor,me_mole_module_gain gain);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_gain_x_all(int mole_descriptor,me_mole_module_gain gain,uint8 last_address,uint8 *last_address_actual);
 
 /**
  * Установить коэффициент усиления для Y канала (Y компоненты) всех модулей. Смотри me_mole_module_gain.
+ *  
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_gain_y_all(int mole_descriptor,me_mole_module_gain gain);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_gain_y_all(int mole_descriptor,me_mole_module_gain gain,uint8 last_address,uint8 *last_address_actual);
 
 /**
  * Установить коэффициент усиления для Z канала (Z компоненты) всех модулей. Смотри me_mole_module_gain.
+ *  
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_gain_z_all(int mole_descriptor,me_mole_module_gain gain);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_gain_z_all(int mole_descriptor,me_mole_module_gain gain,uint8 last_address,uint8 *last_address_actual);
 
 
 /**
  * Установить тип входного сигнала для модуля. Смотри me_mole_module_input.
+ *  
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_input(int mole_descriptor,uint8 module_address,me_mole_module_input input);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_input(int mole_descriptor,uint8 module_address,me_mole_module_input input,uint8 *last_address_actual);
 
 /**
  * Установить тип входного сигнала для всех модулей. Смотри me_mole_module_input.
+ *  
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_input_all(int mole_descriptor,me_mole_module_input input);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_input_all(int mole_descriptor,me_mole_module_input input,uint8 last_address,uint8 *last_address_actual);
 
 
 /**
  * Установить разрешение АЦП для всех модулей. Смотри me_mole_module_resolution.
+ *  
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_resolution_all(int mole_descriptor,me_mole_module_resolution resolution);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_resolution_all(int mole_descriptor,me_mole_module_resolution resolution,uint8 last_address,uint8 *last_address_actual);
 
 
 /**
  * Установить частоту среза ФВЧ для всех модулей. Смотри me_mole_module_high_pass_filter.
+ *  
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_high_pass_filter_all(int mole_descriptor,me_mole_module_high_pass_filter high_pass_filter);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_set_high_pass_filter_all(int mole_descriptor,me_mole_module_high_pass_filter high_pass_filter,uint8 last_address,uint8 *last_address_actual);
 
 
 /**
  * Произвести калибровку оффсетов для всех модулей.
+ *  
+ * last_address_actual - содержит адрес модуля в линии к которому последним было произведено обращение. При ошибках ME_HARDWARE_EXECUTE и
+ * ME_HARDWARE_TIMEOUT будет означать адрес модуля с которым произошла данная ошибка. При ошибке ME_LIBRARY_WRONG_SOMETHING_IN_RESPONCE
+ * может принимать неопределённое значение. В остальных случаях  равно адресу (last_address) последнего смонтированного модуля.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_do_offset_calibration_all(int mole_descriptor);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_module_do_offset_calibration_all(int mole_descriptor,uint8 last_address,uint8 *last_address_actual);
 
 
 /**
@@ -678,31 +774,47 @@ extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_host_stop_conversion(int 
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_host_state(int mole_descriptor,me_mole_host_state *host_state,me_mole_module_mode *modules_mode,uint16 *samples_in_buffer);
 
 /**
- * Прочитать заданное число отсчётов (сейсмических данных) из крота (блокирующее чтение - вернёт управление программе только после вычитывания заданного числа отсчётов).
+ * Прочитать заданное число отсчётов из крота (блокирующее чтение - вернёт управление программе только после вычитывания заданного числа отсчётов).
  * 
- * � асположение данных в буфере:
- * 
- * <отсчёт 0 <последний модуль <X> <Y> <Z>> <последний модуль - 1 <X> <Y> <Z>> ... <первый модуль <X> <Y> <Z>>>
- * <отсчёт 1 <последний модуль <X> <Y> <Z>> <последний модуль - 1 <X> <Y> <Z>> ... <первый модуль <X> <Y> <Z>>> 
- * ...
- * <отсчёт N <последний модуль <X> <Y> <Z>> <последний модуль - 1 <X> <Y> <Z>> ... <первый модуль <X> <Y> <Z>>>
- */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_host_get_seismic_data(int mole_descriptor,uint16 samples,uint8 *seismic_data);
-
-/**
- * Прочитать заданное число отсчётов (сейсмических данных) из крота (асинхронное чтение - вернёт управление программе управление сразу).
- * 
- * � асположение данных в буфере:
+ * � асположение сейсмических данных в буфере:
  * 
  * <отсчёт 0 <последний модуль <X> <Y> <Z>> <последний модуль - 1 <X> <Y> <Z>> ... <первый модуль <X> <Y> <Z>>>
  * <отсчёт 1 <последний модуль <X> <Y> <Z>> <последний модуль - 1 <X> <Y> <Z>> ... <первый модуль <X> <Y> <Z>>> 
  * ...
  * <отсчёт N <последний модуль <X> <Y> <Z>> <последний модуль - 1 <X> <Y> <Z>> ... <первый модуль <X> <Y> <Z>>>
+ * 
+ * � асположение данных с инклинометров в буфере:
+ * 
+ * Для того чтобы получить данные с инклинометров, необходимо прочитать только один отсчёт, т.е. samples = 1
+ * 
+ * <отсчёт 0 <последний модуль <α> <β> <γ>> <последний модуль - 1 <α> <β> <γ>> ... <первый модуль <α> <β> <γ>>>
+ * 
+ * β - всегда 0, так как нет реализации в модулях.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_host_get_seismic_data_async(int mole_descriptor,uint16 samples,uint8 *seismic_data);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_host_get_samples_data(int mole_descriptor,uint16 samples,uint8 *samples_data);
 
 /**
- * Получить число отсчётов, прочитанных функцией me_host_get_seismic_data из крота на текущий момент.
+ * Прочитать заданное число отсчётов из крота (асинхронное чтение - вернёт управление программе управление сразу).
+ * 
+ * � асположение сейсмических данных в буфере:
+ * 
+ * <отсчёт 0 <последний модуль <X> <Y> <Z>> <последний модуль - 1 <X> <Y> <Z>> ... <первый модуль <X> <Y> <Z>>>
+ * <отсчёт 1 <последний модуль <X> <Y> <Z>> <последний модуль - 1 <X> <Y> <Z>> ... <первый модуль <X> <Y> <Z>>> 
+ * ...
+ * <отсчёт N <последний модуль <X> <Y> <Z>> <последний модуль - 1 <X> <Y> <Z>> ... <первый модуль <X> <Y> <Z>>>
+ * 
+ * � асположение данных с инклинометров в буфере:
+ * 
+ * Для того чтобы получить данные с инклинометров, необходимо прочитать только один отсчёт, т.е. samples = 1
+ * 
+ * <отсчёт 0 <последний модуль <α> <β> <γ>> <последний модуль - 1 <α> <β> <γ>> ... <первый модуль <α> <β> <γ>>>
+ * 
+ * β - всегда 0, так как нет реализации в модулях.
+ */
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_host_get_samples_data_async(int mole_descriptor,uint16 samples,uint8 *samples_data);
+
+/**
+ * Получить число отсчётов, прочитанных функцией me_host_get_samples_data из крота на текущий момент.
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_get_read_samples(int mole_descriptor,uint16 *samples);
 
@@ -723,6 +835,11 @@ extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL uint8 me_get_adc_resolution();
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL double me_get_adc_lsb_weight();
 
 /**
+ * Получить вес одного разряда инклинометра в градусах
+ */
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL double me_get_inclinometer_lsb_weight();
+
+/**
  * Получить амплитуду тестового сигнала в микровольтах
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL double me_get_test_signal_amplitude();
@@ -735,8 +852,8 @@ extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_get_library_state(int mol
 
 /**
  * Получить ошибку, которую вернула не асинхронная функция при использовании асинхронной обёртки данной функции.
- * Например: сделан вызов me_host_get_seismic_data_async. Чтобы получить информацию
- * об ошибке для me_host_get_seismic_data необходимо использовать me_get_last_error.
+ * Например: сделан вызов me_host_get_samples_data_async. Чтобы получить информацию
+ * об ошибке для me_host_get_samples_data необходимо использовать me_get_last_error.
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_get_last_error(int mole_descriptor,int *mole_error);
 

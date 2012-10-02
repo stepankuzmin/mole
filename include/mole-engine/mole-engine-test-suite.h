@@ -1,9 +1,8 @@
 #ifndef MOLE_ENGINE_TEST_SUITE_H
 #define MOLE_ENGINE_TEST_SUITE_H
 
-//#include "common.h"
-#include "shared/common.h"
-#include "mole-engine.h"
+#include "include/shared/common.h"
+#include "include/mole-engine/mole-engine.h"
 
 #pragma pack(push,1)
 
@@ -53,12 +52,12 @@ enum me_test_suite_stage
  * (не столько в разных платформах/компиляторах, сколько в языках).
  * https://en.wikipedia.org/wiki/X86_calling_conventions#List_of_x86_calling_conventions
  */
-typedef void(*me_ts_seismic_data_callback_t)(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
+typedef void(*me_ts_samples_data_callback_t)(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 					     uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
 					     me_mole_module_datarate datarate,
 					     me_mole_module_gain gain,
 					     uint16 samples,
-					     uint8 *seismic_data);
+					     uint8 *samples_data);
 
 /**
  * Прототип callback функции, которая вызывается при смене стадии теста.
@@ -72,15 +71,15 @@ typedef void(*me_ts_stage_changed_callback_t)(int mole_descriptor,me_test_suite_
 
 /**
  * Установить callback функцию.
- * Смотри me_ts_seismic_data_callback_t.
+ * Смотри me_ts_samples_data_callback_t.
  * � азрешается установка NULL - не будет вызываться callback функция. По умолчанию NULL.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL void me_ts_set_seismic_data_callback(me_ts_seismic_data_callback_t callback);
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL void me_ts_set_samples_data_callback(me_ts_samples_data_callback_t callback);
 
 /**
  * Взять установленную callback функцию.
  */
-extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL me_ts_seismic_data_callback_t me_ts_get_seismic_data_callback();
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL me_ts_samples_data_callback_t me_ts_get_samples_data_callback();
 
 /**
  * Установить callback функцию.
@@ -110,70 +109,70 @@ inline me_ts_result_channel_t* me_ts_get_result_channel(uint8 module_index,uint8
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_gain_coefficients(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 									    uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
-									    me_ts_result_gain_channel_t *results);
+									    me_ts_result_gain_channel_t *results,uint8 *last_address_actual);
 
 /**
  * Тест: "Коэффициенты усиления" (асинхронный вызов)
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_gain_coefficients_async(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 										  uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
-										  me_ts_result_gain_channel_t *results);
+										  me_ts_result_gain_channel_t *results,uint8 *last_address_actual);
 
 /**
  * Тест: "Уровень собственных шумов, мкВ"
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_noise_floor(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 								      uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
-								      me_ts_result_channel_t *results);
+								      me_ts_result_channel_t *results,uint8 *last_address_actual);
 
 /**
  * Тест: "Уровень собственных шумов, мкВ" (асинхронный вызов)
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_noise_floor_async(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 									    uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
-									    me_ts_result_channel_t *results);
+									    me_ts_result_channel_t *results,uint8 *last_address_actual);
 
 /**
  * Тест: "Коэффициент нелинейных искажений, %"
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_total_harmonic_distortion(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 										    uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
-										    me_ts_result_channel_t *results);
+										    me_ts_result_channel_t *results,uint8 *last_address_actual);
 
 /**
  * Тест: "Коэффициент нелинейных искажений, %" (асинхронный вызов)
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_total_harmonic_distortion_async(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 											  uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
-											  me_ts_result_channel_t *results);
+											  me_ts_result_channel_t *results,uint8 *last_address_actual);
 
 /**
  * Тест: "Уровень смещения нуля, мкВ"
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_zero_shift(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 								     uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
-								     me_ts_result_channel_t *results);
+								     me_ts_result_channel_t *results,uint8 *last_address_actual);
 
 /**
  * Тест: "Уровень смещения нуля, мкВ" (асинхронный вызов)
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_zero_shift_async(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 									   uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
-									   me_ts_result_channel_t *results);
+									   me_ts_result_channel_t *results,uint8 *last_address_actual);
 
 /**
 * Тест: "Подавление синфазного сигнала, дБ"
 */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_common_mode_rejection(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 										uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
-										me_ts_result_channel_t *results);
+										me_ts_result_channel_t *results,uint8 *last_address_actual);
 
 /**
 * Тест: "Подавление синфазного сигнала, дБ" (асинхронный вызов)
 */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_common_mode_rejection_async(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 										      uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
-										      me_ts_result_channel_t *results);
+										      me_ts_result_channel_t *results,uint8 *last_address_actual);
 
 /**
  * Получить информацию о том, какая стадия теста выполняется в данный момент над кротом.

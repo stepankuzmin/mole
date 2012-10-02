@@ -31,7 +31,7 @@ int mole_engine_test(void) {
     typedef int (*me_init_prototype)();
     typedef int (*me_destroy_prototype)();
     typedef uint32_t (*me_get_default_retries_prototype)();
-    typedef void (*me_ts_set_seismic_data_callback_prototype)(me_ts_seismic_data_callback_t callback);
+    //typedef void (*me_ts_set_seismic_data_callback_prototype)(me_ts_seismic_data_callback_t callback);
     typedef int (*me_open_mole_prototype)(const char *port_string);
 
     me_get_version_git_sha1_prototype me_get_version_git_sha1 = (me_get_version_git_sha1_prototype) me.resolve("me_get_version_git_sha1");
@@ -71,14 +71,14 @@ int mole_engine_test(void) {
     if (me_get_default_retries)
         qDebug() << "me_get_default_retries" << me_get_default_retries();
 
-    me_ts_set_seismic_data_callback(&me_ts_seismic_data_callback_handler);
+    //me_ts_set_seismic_data_callback(&me_ts_seismic_data_callback_handler);
     me_ts_set_stage_changed_callback(&me_ts_stage_changed_callback_handler);
 
     if (me_open_mole)
-        mole_descriptor = me_open_mole("COM3");
+        mole_descriptor = me_open_mole("COM1");
 
     if (mole_descriptor < 0) {
-        qDebug() << "Can't me_open_mole(), mole_descriptor=" << mole_descriptor;
+        qDebug() << "Can't me_open_mole(), mole_descriptor =" << mole_descriptor;
         return(-1);
     }
     return 0;
