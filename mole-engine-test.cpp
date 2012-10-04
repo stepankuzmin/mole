@@ -5,7 +5,7 @@
 #include "mole-engine/mole-engine.h"
 #include "mole-engine/mole-engine-test-suite.h"
 
-void me_ts_seismic_data_callback_handler(int mole_descriptor,
+void me_ts_samples_data_callback_handler(int mole_descriptor,
                                          uint8 first_address, uint8 last_address,
                                          uint8 channel_count, uint8 bytes_in_channel,
                                          uint8 bytes_in_module, uint16 bytes_in_line,
@@ -71,7 +71,7 @@ int mole_engine_test(void) {
     if (me_get_default_retries)
         qDebug() << "me_get_default_retries" << me_get_default_retries();
 
-    //me_ts_set_seismic_data_callback(&me_ts_seismic_data_callback_handler);
+    me_ts_set_samples_data_callback(&me_ts_samples_data_callback_handler);
     me_ts_set_stage_changed_callback(&me_ts_stage_changed_callback_handler);
 
     if (me_open_mole)
