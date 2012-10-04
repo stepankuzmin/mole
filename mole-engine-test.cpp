@@ -75,11 +75,24 @@ int mole_engine_test(void) {
     me_ts_set_stage_changed_callback(&me_ts_stage_changed_callback_handler);
 
     if (me_open_mole)
-        mole_descriptor = me_open_mole("COM1");
+        mole_descriptor = me_open_mole("COM1"); // @TODO: move to settings
 
     if (mole_descriptor < 0) {
         qDebug() << "Can't me_open_mole(), mole_descriptor =" << mole_descriptor;
         return(-1);
     }
+    qDebug() << "mole_descriptor =" << mole_descriptor;
+
+    // Close mole
+    ret = me_close_mole(mole_descriptor);
+    if (ret < 0)
+        qDebug() << "Can't me_close_mole(), ret =" << ret;
+
+    ret = me_destroy();
+    if (ret < 0) {
+        qDebug() << "Can't me_destroy(), ret =" << ret;
+        return(-1);
+    }
+
     return 0;
 }
