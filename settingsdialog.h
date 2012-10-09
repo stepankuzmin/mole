@@ -15,6 +15,9 @@ public:
     explicit SettingsDialog(QWidget *parent = 0);
     ~SettingsDialog();
     
+private slots:
+    void on_ConnectToCOMPortPushButton_clicked();
+
 private:
     Ui::SettingsDialog *ui;
 };
