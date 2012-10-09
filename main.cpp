@@ -1,13 +1,14 @@
+#include <QDebug>
 #include <QApplication>
+
+#include "mole.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
-#include "mole-engine-test.cpp"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
-    //mole_engine_test();
+    Mole* mole = Mole::getInstance();
 
     MainWindow w;
     w.show();

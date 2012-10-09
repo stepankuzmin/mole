@@ -16,7 +16,8 @@ CONFIG += extserialport
 SOURCES += main.cpp\
         mainwindow.cpp \
     mole-engine-test.cpp \
-    settingsdialog.cpp
+    settingsdialog.cpp \
+    mole.cpp
 
 HEADERS  += mainwindow.h \
     include/mole-engine/mole-engine-test-suite.h \
@@ -24,7 +25,8 @@ HEADERS  += mainwindow.h \
     include/seg/Segy.h \
     include/shared/config.h \
     include/shared/common.h \
-    settingsdialog.h
+    settingsdialog.h \
+    mole.h
 
 FORMS    += mainwindow.ui \
     settingsdialog.ui
