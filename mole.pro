@@ -14,16 +14,19 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    mole-engine-test.cpp
+    mole-engine-test.cpp \
+    settingsdialog.cpp
 
 HEADERS  += mainwindow.h \
     include/mole-engine/mole-engine-test-suite.h \
     include/mole-engine/mole-engine.h \
     include/seg/Segy.h \
     include/shared/config.h \
-    include/shared/common.h
+    include/shared/common.h \
+    settingsdialog.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    settingsdialog.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/lib/ -lmole-engine
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/lib/ -lmole-engine
