@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = mole
 TEMPLATE = app
 
+CONFIG += extserialport
 
 SOURCES += main.cpp\
         mainwindow.cpp \
