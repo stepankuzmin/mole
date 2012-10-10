@@ -1,5 +1,8 @@
 #include <QDebug>
 #include <QVariant>
+#include <QMessageBox>
+
+#include "mole.h"
 #include "qextserialenumerator.h"
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
@@ -33,5 +36,34 @@ SettingsDialog::~SettingsDialog()
 void SettingsDialog::on_ConnectToCOMPortPushButton_clicked()
 {
     QString portName = this->ui->COMPortsComboBox->itemData(this->ui->COMPortsComboBox->currentIndex()).toString();
-    qDebug() << "Connect to: " << portName;
+    std::string str = portName.toStdString();
+    const char *portString = str.c_str();
+    qDebug() << "connect to: " << portString;
+
+    Mole *mole = Mole::getInstance();
+
+    int ret = 0;
+    int moleDescriptor = -1;
+    moleDescriptor = mole->open(portString);
+
+    if (moleDescriptor < 0) {
+        qDebug() << "Can't mole.open(), moleDescriptor:" << moleDescriptor;
+        QMessageBox::critical(0, "Can't open connection", "Can't open connection.");
+    }
+    else {
+        qDebug() << "moleDescriptor: " << moleDescriptor;
+
+        // Close mole
+        ret = mole->close(moleDescriptor);
+        if (ret < 0)
+            qDebug() << "Can't mole.close(), ret: " << ret;
+
+        ret = mole->destroy();
+        if (ret < 0) {
+            qDebug() << "Can't mole.destroy(), ret: " << ret;
+        }
+        else
+            qDebug("Successful");
+            QMessageBox::information(0, "Connected", "Successfully connected.");
+    }
 }

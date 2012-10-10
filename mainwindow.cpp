@@ -1,3 +1,5 @@
+#include "qwt_plot.h"
+
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "ui_mainwindow.h"

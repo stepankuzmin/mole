@@ -11,7 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = mole
 TEMPLATE = app
 
-CONFIG += extserialport
+CONFIG += extserialport\
+        qwt
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -38,3 +39,6 @@ else:unix: LIBS += -L$$PWD/lib/ -lmole-engine
 
 INCLUDEPATH += $$PWD/include
 DEPENDPATH += $$PWD/include
+
+INCLUDEPATH += $$PWD/3rdparty/qwt-6.0.1/include
+LIBS += -L$$PWD/3rdparty/qwt-6.0.1/lib -lqwt

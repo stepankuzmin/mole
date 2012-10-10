@@ -10,9 +10,20 @@
 class Mole : public QObject
 {
     Q_OBJECT
-    static Mole* instance;
+    static Mole *instance;
+
 public:
-    static Mole* getInstance();
+    static Mole *getInstance();
+
+    // Mole engine wrappers
+    int init();
+    int open(const char *portString);
+    int close(int moleDescriptor);
+    int destroy();
+
+    uint16 getDefaultRetries();
+    int getDescriptor();
+
 protected:
     Mole(QObject *parent = 0);
     
