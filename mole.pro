@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2012-08-25T12:38:50
+# Project created by QtCreator 2012-10-15T20:23:27
 #
 #-------------------------------------------------
 
@@ -11,34 +11,35 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = mole
 TEMPLATE = app
 
-CONFIG += extserialport\
-        qwt
+DEPENDPATH +=.
+INCLUDEPATH +=.
+TRANSLATIONS += mole_ru.ts
+
+CONFIG += qwt\
+        extserialport
+
+win32: INCLUDEPATH += $$PWD/3rdparty/Qwt-6.0.1/include
+win32: LIBS += -L$$PWD/3rdparty/Qwt-6.0.1/lib -lqwt
+win32: LIBS += -L$$PWD/3rdparty/mole-engine/include
+win32: LIBS += -L$$PWD/3rdparty/mole-engine/lib/ -lmole-engine
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    mole-engine-test.cpp \
-    settingsdialog.cpp \
-    mole.cpp
+        connectiondialog.cpp \
+        mole.cpp \
+        registrationsettingsdialog.cpp
 
 HEADERS  += mainwindow.h \
-    include/mole-engine/mole-engine-test-suite.h \
-    include/mole-engine/mole-engine.h \
-    include/seg/Segy.h \
-    include/shared/config.h \
-    include/shared/common.h \
-    settingsdialog.h \
-    mole.h
+            connectiondialog.h \
+            mole.h \
+            registrationsettingsdialog.h \
+            3rdparty/mole-engine/include/mole-engine/mole-engine-test-suite.h \
+            3rdparty/mole-engine/include/mole-engine/mole-engine.h \
+            3rdparty/mole-engine/include/seg/Segy.h \
+            3rdparty/mole-engine/include/shared/config.h \
+            3rdparty/mole-engine/include/shared/common.h \
 
 FORMS    += mainwindow.ui \
-    settingsdialog.ui
+            connectiondialog.ui \
+            registrationsettingsdialog.ui
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/lib/ -lmole-engine
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/lib/ -lmole-engine
-else:symbian: LIBS += -lmole-engine
-else:unix: LIBS += -L$$PWD/lib/ -lmole-engine
-
-INCLUDEPATH += $$PWD/include
-DEPENDPATH += $$PWD/include
-
-INCLUDEPATH += $$PWD/3rdparty/qwt-6.0.1/include
-LIBS += -L$$PWD/3rdparty/qwt-6.0.1/lib -lqwt

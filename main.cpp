@@ -1,28 +1,31 @@
-#include <QDebug>
 #include <QApplication>
-
-
+#include <QTranslator>
 
 #include "mole.h"
 #include "mainwindow.h"
-#include "settingsdialog.h"
+#include "connectiondialog.h"
+#include "registrationsettingsdialog.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QTranslator translator;
+    translator.load("mole_" + QLocale::system().name());
+    a.installTranslator(&translator);
+
 
     Mole *mole = Mole::getInstance();
 
-    int mole_descriptor = -1;
-    int ret = 0;
-
-    ret = mole->init();
-    if (ret < 0)
-        qDebug() << "Can't me_init(), ret=" << ret;
-    qDebug() << "getDefaultRetries" << mole->getDefaultRetries();
-
     MainWindow w;
+    ConnectionDialog connectionDialog;
+    RegistrationSettingsDialog registrationSettingsDialog;
+
     w.show();
+
+    QObject::connect(&w, SIGNAL(showConnectionDialog()), &connectionDialog, SLOT(show()));
+    QObject::connect(&w, SIGNAL(showRegistrationSettingsDialog()), &registrationSettingsDialog, SLOT(show()));
+
+    QObject::connect(mole, SIGNAL(stateChange(QString)), &w, SLOT(setStatusBarText(QString)));
     
     return a.exec();
 }

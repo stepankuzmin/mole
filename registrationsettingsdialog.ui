@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RegistrationSettingsDialog</class>
+ <widget class="QDialog" name="RegistrationSettingsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>299</width>
+    <height>476</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Registration settings</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="registrationSettingsGroupBox">
+     <property name="title">
+      <string/>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="modeLabel">
+        <property name="text">
+         <string>Module mode</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="ModeComboBox"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="testGeneratorModeLabel">
+        <property name="text">
+         <string>Test generator mode</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="testGeneratorModeComboBox"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="datarateLabel">
+        <property name="text">
+         <string>Datarate</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="datarateComboBox">
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="inputLabel">
+        <property name="text">
+         <string>Input</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QComboBox" name="inputComboBox"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gainGroupBox">
+     <property name="title">
+      <string>Gain</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="gainLabel">
+        <property name="text">
+         <string>Gain</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="gainComboBox"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="gainAllLabel">
+        <property name="text">
+         <string>Gain all</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="gainAllComboBox"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="gainXAllLabel">
+        <property name="text">
+         <string>Gain X all</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="gainXAllComboBox"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="gainYAllLabel">
+        <property name="text">
+         <string>Gain Y all</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QComboBox" name="gainYAllComboBox"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="gainZAllLabel">
+        <property name="text">
+         <string>Gain Z all</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QComboBox" name="gainZAllComboBox"/>
+      </item>
+     </layout>
+     <zorder>gainLabel</zorder>
+     <zorder>gainLabel</zorder>
+     <zorder>gainComboBox</zorder>
+     <zorder>gainAllLabel</zorder>
+     <zorder>gainAllComboBox</zorder>
+     <zorder>gainXAllLabel</zorder>
+     <zorder>gainXAllComboBox</zorder>
+     <zorder>gainYAllLabel</zorder>
+     <zorder>gainYAllComboBox</zorder>
+     <zorder>gainZAllLabel</zorder>
+     <zorder>gainZAllComboBox</zorder>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>RegistrationSettingsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>RegistrationSettingsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

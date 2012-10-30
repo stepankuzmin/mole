@@ -6,39 +6,60 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>518</width>
-    <height>429</height>
+    <width>467</width>
+    <height>366</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Крот</string>
+   <string>Mole</string>
   </property>
-  <widget class="QWidget" name="centralWidget"/>
+  <property name="locale">
+   <locale language="English" country="UnitedStates"/>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout"/>
+  </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>518</width>
+     <width>467</width>
      <height>18</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_settings">
+   <widget class="QMenu" name="menuSettings">
     <property name="title">
-     <string>Настройки</string>
+     <string>Settings</string>
     </property>
-    <addaction name="action_settings"/>
+    <addaction name="actionConnection"/>
+    <addaction name="actionRegistration"/>
     <addaction name="separator"/>
-    <addaction name="action_quit"/>
+    <addaction name="actionQuit"/>
    </widget>
-   <widget class="QMenu" name="menu_help">
+   <widget class="QMenu" name="menuTest">
     <property name="title">
-     <string>Справка</string>
+     <string>Diagnostics</string>
     </property>
-    <addaction name="action_about"/>
+    <widget class="QMenu" name="menuGain_coefficients">
+     <property name="title">
+      <string>Gain coefficients</string>
+     </property>
+     <addaction name="actionTestGainCoefficientsSync"/>
+     <addaction name="actionTestGainCoefficientsAsync"/>
+    </widget>
+    <widget class="QMenu" name="menuNoise_floor">
+     <property name="title">
+      <string>Noise floor</string>
+     </property>
+     <addaction name="actionTestNoiseFloorSync"/>
+     <addaction name="actionTestNoiseFloorAsync"/>
+    </widget>
+    <addaction name="menuGain_coefficients"/>
+    <addaction name="menuNoise_floor"/>
    </widget>
-   <addaction name="menu_settings"/>
-   <addaction name="menu_help"/>
+   <addaction name="menuSettings"/>
+   <addaction name="menuTest"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -49,40 +70,52 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="action_settings">
+  <action name="actionConnection">
    <property name="text">
-    <string>Настройки</string>
+    <string>Connection</string>
+   </property>
+   <property name="toolTip">
+    <string>Connection settings</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
    </property>
   </action>
-  <action name="action_about">
+  <action name="actionRegistration">
    <property name="text">
-    <string>О программе</string>
+    <string>Registration</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
    </property>
   </action>
-  <action name="action_quit">
+  <action name="actionTestGainCoefficientsSync">
    <property name="text">
-    <string>Выход</string>
+    <string>Sync</string>
+   </property>
+  </action>
+  <action name="actionTestGainCoefficientsAsync">
+   <property name="text">
+    <string>Async</string>
+   </property>
+  </action>
+  <action name="actionTestNoiseFloorSync">
+   <property name="text">
+    <string>Sync</string>
+   </property>
+  </action>
+  <action name="actionTestNoiseFloorAsync">
+   <property name="text">
+    <string>Async</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
- <connections>
-  <connection>
-   <sender>action_quit</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>258</x>
-     <y>214</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
