@@ -10,6 +10,21 @@ void samplesDataCallbackHandler(int mole_descriptor,
                                 uint16 samples, uint8 *seismic_data);
 void stageChangedCallbackHandler(int mole_descriptor, me_test_suite_stage test_suite_stage);
 
+/*
+ * samples data callback handler
+ * @param int mole_descriptor
+ * @param uint8 first_addres
+ * @param uint8 last_address
+ * @param uint8 channel_count
+ * @param uint8 bytes_in_channel
+ * @param uint8 bytes_in_module
+ * @param uint6 bytes_in_line
+ * @param me_mole_module_datarate datarate
+ * @param me_mole_module_gain gain
+ * @param uin16 samples
+ * @param uint8 seismic_data
+ *
+ */
 void samplesDataCallbackHandler(int mole_descriptor,
                                       uint8 first_address, uint8 last_address,
                                       uint8 channel_count, uint8 bytes_in_channel,
@@ -18,6 +33,60 @@ void samplesDataCallbackHandler(int mole_descriptor,
                                       me_mole_module_gain gain,
                                       uint16 samples, uint8 *seismic_data) {
     qDebug() << "me_ts_seismic_data_callback_handler called";
+
+    int ret = ME_NO_ERROR;
+
+    me_test_suite_stage test_suite_stage = ME_TSS_IDLE;
+    Mole *mole = Mole::getInstance();
+    ret = me_ts_get_stage(mole_descriptor, &test_suite_stage);
+
+    if (ret < 0) {
+        qDebug("Can't me_ts_get_stage (ret = 0x%.2x)\n", -ret);
+        return;
+    }
+
+    switch(test_suite_stage) {
+    case ME_TSS_GAIN_COEFFICIENTS_1: {
+        //file_name += "/01. gain-coefficients-001";
+    } break;
+    case ME_TSS_GAIN_COEFFICIENTS_2: {
+        //file_name += "/01. gain-coefficients-002";
+    } break;
+    case ME_TSS_GAIN_COEFFICIENTS_4: {
+        //file_name += "/01. gain-coefficients-004";
+    } break;
+    case ME_TSS_GAIN_COEFFICIENTS_8: {
+        //file_name += "/01. gain-coefficients-008";
+    } break;
+    case ME_TSS_GAIN_COEFFICIENTS_16: {
+        //file_name += "/01. gain-coefficients-016";
+    } break;
+    case ME_TSS_GAIN_COEFFICIENTS_32: {
+        //file_name += "/01. gain-coefficients-032";
+    } break;
+    case ME_TSS_GAIN_COEFFICIENTS_64: {
+        //file_name += "/01. gain-coefficients-064";
+    } break;
+    case ME_TSS_NOISE_FLOOR: {
+        //file_name += "/02. noise-floor";
+    } break;
+    case ME_TSS_TOTAL_HARMONIC_DISTORTION: {
+        //file_name += "/03. total-harmonic-distortion";
+    } break;
+    case ME_TSS_ZERO_SHIFT: {
+        //file_name += "/04. zero-shift";
+    } break;
+    case ME_TSS_COMMON_MODE_REJECTION_SIN: {
+        //file_name += "/05.01. common-mode-rejection-sin";
+    } break;
+    case ME_TSS_COMMON_MODE_REJECTION_IN_PHASE: {
+        //file_name += "/05.02 common-mode-rejection-in-phase";
+    } break;
+    default: {
+        qDebug("Internal erorr?\n");
+        return;
+    }
+    }
 }
 
 void stageChangedCallbackHandler(int mole_descriptor, me_test_suite_stage test_suite_stage) {

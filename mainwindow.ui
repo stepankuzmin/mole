@@ -55,8 +55,32 @@
      <addaction name="actionTestNoiseFloorSync"/>
      <addaction name="actionTestNoiseFloorAsync"/>
     </widget>
+    <widget class="QMenu" name="menuTotal_harmonic_distortion">
+     <property name="title">
+      <string>Total harmonic distortion</string>
+     </property>
+     <addaction name="actionSync"/>
+     <addaction name="actionAsync"/>
+    </widget>
+    <widget class="QMenu" name="menuZero_shift">
+     <property name="title">
+      <string>Zero shift</string>
+     </property>
+     <addaction name="actionSync_2"/>
+     <addaction name="actionAsync_2"/>
+    </widget>
+    <widget class="QMenu" name="menuCommon_mode_rejection">
+     <property name="title">
+      <string>Common-mode rejection</string>
+     </property>
+     <addaction name="actionSync_3"/>
+     <addaction name="actionAsync_3"/>
+    </widget>
     <addaction name="menuGain_coefficients"/>
     <addaction name="menuNoise_floor"/>
+    <addaction name="menuTotal_harmonic_distortion"/>
+    <addaction name="menuZero_shift"/>
+    <addaction name="menuCommon_mode_rejection"/>
    </widget>
    <addaction name="menuSettings"/>
    <addaction name="menuTest"/>
@@ -114,8 +138,55 @@
     <string>Quit</string>
    </property>
   </action>
+  <action name="actionSync">
+   <property name="text">
+    <string>Sync</string>
+   </property>
+  </action>
+  <action name="actionAsync">
+   <property name="text">
+    <string>Async</string>
+   </property>
+  </action>
+  <action name="actionSync_2">
+   <property name="text">
+    <string>Sync</string>
+   </property>
+  </action>
+  <action name="actionAsync_2">
+   <property name="text">
+    <string>Async</string>
+   </property>
+  </action>
+  <action name="actionSync_3">
+   <property name="text">
+    <string>Sync</string>
+   </property>
+  </action>
+  <action name="actionAsync_3">
+   <property name="text">
+    <string>Async</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionQuit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>233</x>
+     <y>182</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
