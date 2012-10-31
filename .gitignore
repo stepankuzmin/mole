@@ -19,3 +19,6 @@
 
 # Vim swap files
 *.swp
+
+# QExtSerialPort
+include/qextserialport
