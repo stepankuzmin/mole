@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     ConnectionDialog connectionDialog;
     RegistrationSettingsDialog registrationSettingsDialog;
 
-    w.show();
+    w.showMaximized();
 
     QObject::connect(&w, SIGNAL(showConnectionDialog()), &connectionDialog, SLOT(show()));
     QObject::connect(&w, SIGNAL(showRegistrationSettingsDialog()), &registrationSettingsDialog, SLOT(show()));

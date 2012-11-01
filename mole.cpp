@@ -170,6 +170,9 @@ Mole::Mole(QObject *parent) :
 
     if (ret < 0)
         qDebug("Can't me_init (ret=0x%.2x)\n", ret);
+    else
+        qDebug("[*] init successfull\n");
+
     qDebug("me_init (ret=0x%.2x)", ret);
     qDebug("me_get_default_retries = %u\n", me_get_default_retries());
 
@@ -178,7 +181,15 @@ Mole::Mole(QObject *parent) :
 }
 
 Mole::~Mole() {
-    qDebug("mole destructed");
+    int ret = 0;
+    ret = me_destroy();
+
+    if (ret < 0) {
+        qDebug("Can't me_destroy (ret = 0x%.2x)", -ret);
+        //return(-1);
+    }
+    else
+        qDebug() << "[*] me_destroy successfull\n";
 }
 
 /*
@@ -198,8 +209,10 @@ int Mole::open(const char *portString) {
 
     if (this->descriptor < 0)
         qDebug("Can't open mole (ret = 0x%.2x)", -this->descriptor);
+    else
+        qDebug("[*] open successfull\n");
 
-    qDebug("mole_descriptor = %d\n", this->descriptor);
+    qDebug("mole_descriptor = %d", this->descriptor);
 
     emit stateChange(MOLE_OPEN);
     emit stateChange(tr("Mole opened at %1").arg(portString));
@@ -210,11 +223,88 @@ int Mole::open(const char *portString) {
  * Mole close
  */
 int Mole::close() {
+    int ret = 0;
+    ret = me_close_mole(this->getDescriptor());
+
+    if (ret < 0)
+        qDebug("Can't close mole (ret = 0x%.2x)", -ret);
+    else
+        qDebug("[*] close successfull\n");
+
     emit stateChange(MOLE_CLOSE);
     emit stateChange(tr("Mole closed"));
     return 0;
 }
 
+/*
+ * Get Mole host info
+ */
+void Mole::getHostInfo() {
+    int ret;
+
+    uint16 device_id = 0;
+    uint8 minor = 0;
+    uint8 major = 0;
+
+    int mole_descriptor = this->getDescriptor();
+
+    ret =  me_host_info(mole_descriptor, &device_id, &minor, &major);
+    qDebug("me_get_retries = %d", me_get_retries(mole_descriptor));
+
+    qDebug("device_id = %u minor = %u major = %u", device_id, minor, major);
+
+    if (ret < 0)
+        qDebug("Can't me_host_info (ret = 0x%.2x)", -ret);
+    else
+        qDebug("[*] getHostInfo successfull\n");
+}
+
+/*
+ * Mole host mount all
+ */
+void Mole::hostMountAll() {
+    int ret;
+
+    uint8 first_address = 0;
+    uint8 last_address = 0;
+    uint8 channel_count = 0;
+    uint8 bytes_in_channel = 0;
+    uint8 bytes_in_module = 0;
+    uint16 bytes_in_line = 0;
+    uint16 maximum_samples = 0;
+    //uint8 last_address_actual = 0;
+
+    int mole_descriptor = this->getDescriptor();
+
+    ret =  me_host_mount_all(mole_descriptor,
+                             &last_address,
+                             &channel_count,
+                             &bytes_in_channel,
+                             &bytes_in_module,
+                             &bytes_in_line,
+                             &maximum_samples);
+    qDebug("me_get_retries = %d", me_get_retries(mole_descriptor));
+
+    qDebug("first_address = %u\nlast_address = %u\nchannel_count = %u\nbytes_in_channel = %u\nbytes_in_module = %u\nbytes_in_line = %u\nmaximum_samples = %u\n",
+           first_address, last_address,channel_count,bytes_in_channel,bytes_in_module,bytes_in_line,maximum_samples);
+
+    if (ret < 0)
+        qDebug("Can't me_host_mount_all (ret = 0x%.2x)\n", -ret);
+    else
+        qDebug("[*] hostMountAll successfull\n");
+}
+
+void Mole::hostUnmountLine() {
+    int ret = 0;
+    int mole_descriptor = this->getDescriptor();
+    ret =  me_host_unmount(mole_descriptor);
+    qDebug("me_get_retries = %d", me_get_retries(mole_descriptor));
+
+    if (ret < 0)
+        qDebug("Can't me_host_unmount (ret = 0x%.2x)\n", -ret);
+    else
+        qDebug("[*] hostUnmountLine sucessfull\n");
+}
 
 /*
  * Mole test gain coefficients

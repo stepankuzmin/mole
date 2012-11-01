@@ -36,12 +36,20 @@ void ConnectionDialog::setConnectionPushButtonText(const QString &text) {
 
 void ConnectionDialog::on_connectionPushButton_toggled(bool checked)
 {
+    QString portName = this->ui->COMPortComboBox->itemData(this->ui->COMPortComboBox->currentIndex()).toString();
+    std::string str = portName.toStdString();
+    const char *portString = str.c_str();
+    qDebug() << "connect to: " << portString;
+
     Mole *mole = Mole::getInstance();
     if (checked) {
-        mole->open("COM1");
+        mole->open(portString);
+        mole->getHostInfo();
+        mole->hostMountAll();
         ui->connectionPushButton->setText(tr("Disconnect"));
     }
     else {
+        mole->hostUnmountLine();
         mole->close();
         ui->connectionPushButton->setText(tr("Connect"));
     }

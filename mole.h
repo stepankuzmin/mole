@@ -20,13 +20,25 @@ class Mole : public QObject
 public:
     static Mole *getInstance();
     ~Mole();
-    int getDescriptor();
 
+    int getDescriptor();
+    void getHostInfo();
+    void hostMountAll();
+    void hostUnmountLine();
     void testGainCoefficients(bool isSync);
     void testNoiseFloor(bool isSync);
 
 private:
     int descriptor;
+
+    uint8 first_address;
+    uint8 last_address;
+    uint8 channel_count;
+    uint8 bytes_in_channel;
+    uint8 bytes_in_module;
+    uint16 bytes_in_line;
+    uint16 maximum_samples;
+    uint8 last_address_actual;
 
 protected:
     explicit Mole(QObject *parent = 0);
