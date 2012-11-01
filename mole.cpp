@@ -201,6 +201,134 @@ int Mole::getDescriptor() {
 }
 
 /*
+ * Set first address
+ * @param uint8 first address
+ */
+void Mole::setFirstAddress(uint8 firstAddress) {
+    this->firstAddress = firstAddress;
+}
+
+/*
+ * Get first address
+ * @return uint8 first address
+ */
+uint8 Mole::getFirstAddress() {
+    return this->firstAddress;
+}
+
+/*
+ * Set last address
+ * @param uint8 last address
+ */
+void Mole::setLastAddress(uint8 lastAddress) {
+    this->lastAddress = lastAddress;
+}
+
+/*
+ * Get last address
+ * @return uint8 last address
+ */
+uint8 Mole::getLastAddress() {
+    return this->lastAddress;
+}
+
+/*
+ * Set channel count
+ * @param uint8 channel count
+ */
+void Mole::setChannelCount(uint8 channelCount) {
+    this->channelCount = channelCount;
+}
+
+/*
+ * Get channel count
+ * @return uint8 channel count
+ */
+uint8 Mole::getChannelCount() {
+    return this->channelCount;
+}
+
+/*
+ * Set bytes in channel
+ * @param uint8 bytes in channel
+ */
+void Mole::setBytesInChannel(uint8 bytesInChannel) {
+    this->bytesInChannel = bytesInChannel;
+}
+
+/*
+ * Get bytes in channel
+ * @return uint8 bytes in channel
+ */
+uint8 Mole::getBytesInChannel() {
+    return this->bytesInChannel;
+}
+
+/*
+ * Set bytes in module
+ * @param uint8 bytes in module
+ */
+void Mole::setBytesInModule(uint8 bytesInModule) {
+    this->bytesInModule = bytesInModule;
+}
+
+/*
+ * Get bytes in module
+ * @return uint8 bytes in module
+ */
+uint8 Mole::getBytesInModule() {
+    return this->bytesInModule;
+}
+
+/*
+ * Set bytes in line
+ * @param uint16 bytes in line
+ */
+void Mole::setBytesInLine(uint16 bytesInLine) {
+    this->bytesInLine = bytesInLine;
+}
+
+/*
+ * Get bytes in line
+ * @return uint16 bytes in line
+ */
+uint16 Mole::getBytesInLine() {
+    return this->bytesInLine;
+}
+
+/*
+ * Set maximum samples
+ * @param uint16 maximum samples
+ */
+void Mole::setMaximumSamples(uint16 maximumSamples) {
+    this->maximumSamples = maximumSamples;
+}
+
+/*
+ * Get maximum samples
+ * @return uint16 maximum samples
+ */
+uint16 Mole::getMaximumSamples() {
+    return this->maximumSamples;
+}
+
+/*
+ * Set last actual address
+ * @param uint8 last actual address
+ */
+void Mole::setLastAddressActual(uint8 lastAddressActual) {
+    this->lastAddressActual = lastAddressActual;
+}
+
+/*
+ * Get actual last address
+ * @return uint8 actual last address
+ */
+uint8 Mole::getLastAddressActual() {
+    return this->lastAddressActual;
+}
+
+/*
  * Mole open
  * @param const char *portString
  */

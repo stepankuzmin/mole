@@ -23,6 +23,15 @@ public:
 
     int getDescriptor();
     void getHostInfo();
+    uint8 getFirstAddress();
+    uint8 getLastAddress();
+    uint8 getChannelCount();
+    uint8 getBytesInChannel();
+    uint8 getBytesInModule();
+    uint16 getBytesInLine();
+    uint16 getMaximumSamples();
+    uint8 getLastAddressActual();
+
     void hostMountAll();
     void hostUnmountLine();
     void testGainCoefficients(bool isSync);
@@ -31,14 +40,23 @@ public:
 private:
     int descriptor;
 
-    uint8 first_address;
-    uint8 last_address;
-    uint8 channel_count;
-    uint8 bytes_in_channel;
-    uint8 bytes_in_module;
-    uint16 bytes_in_line;
-    uint16 maximum_samples;
-    uint8 last_address_actual;
+    uint8 firstAddress;
+    uint8 lastAddress;
+    uint8 channelCount;
+    uint8 bytesInChannel;
+    uint8 bytesInModule;
+    uint16 bytesInLine;
+    uint16 maximumSamples;
+    uint8 lastAddressActual;
+
+    void setFirstAddress(uint8 firstAddress);
+    void setLastAddress(uint8 lastAddress);
+    void setChannelCount(uint8 channelCount);
+    void setBytesInChannel(uint8 bytesInChannel);
+    void setBytesInModule(uint8 bytesInModule);
+    void setBytesInLine(uint16 bytesInLine);
+    void setMaximumSamples(uint16 maximumSamples);
+    void setLastAddressActual(uint8 lastAddressActual);
 
 protected:
     explicit Mole(QObject *parent = 0);
