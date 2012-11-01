@@ -49,7 +49,7 @@ void ConnectionDialog::on_connectionPushButton_toggled(bool checked)
         ui->connectionPushButton->setText(tr("Disconnect"));
     }
     else {
-        mole->hostUnmountLine();
+        mole->hostUnmount();
         mole->close();
         ui->connectionPushButton->setText(tr("Connect"));
     }

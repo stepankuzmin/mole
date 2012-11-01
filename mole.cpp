@@ -155,8 +155,6 @@ Mole *Mole::getInstance() {
 Mole::Mole(QObject *parent) :
     QObject(parent)
 {
-    // @TODO: me_destroy on destructor
-
     qDebug() << "Library version (git sha1): "  << me_get_version_git_sha1();
     qDebug() << "Library version (uint32): "    << me_get_version();
     qDebug() << "Library version (string): "    << me_get_version_string();
@@ -169,9 +167,9 @@ Mole::Mole(QObject *parent) :
     ret = me_init();
 
     if (ret < 0)
-        qDebug("Can't me_init (ret=0x%.2x)\n", ret);
+        qDebug("[Error] Can't me_init (ret=0x%.2x)\n", ret);
     else
-        qDebug("[*] init successfull\n");
+        qDebug("[Success] init successfull\n");
 
     qDebug("me_init (ret=0x%.2x)", ret);
     qDebug("me_get_default_retries = %u\n", me_get_default_retries());
@@ -185,11 +183,11 @@ Mole::~Mole() {
     ret = me_destroy();
 
     if (ret < 0) {
-        qDebug("Can't me_destroy (ret = 0x%.2x)", -ret);
+        qDebug("[Error] Can't me_destroy (ret = 0x%.2x)", -ret);
         //return(-1);
     }
     else
-        qDebug() << "[*] me_destroy successfull\n";
+        qDebug() << "[Success] me_destroy successfull\n";
 }
 
 /*
@@ -336,9 +334,9 @@ int Mole::open(const char *portString) {
     this->descriptor = me_open_mole(portString);
 
     if (this->descriptor < 0)
-        qDebug("Can't open mole (ret = 0x%.2x)", -this->descriptor);
+        qDebug("[Error] Can't open mole (ret = 0x%.2x)", -this->descriptor);
     else
-        qDebug("[*] open successfull\n");
+        qDebug("[Success] open successfull\n");
 
     qDebug("mole_descriptor = %d", this->descriptor);
 
@@ -355,9 +353,9 @@ int Mole::close() {
     ret = me_close_mole(this->getDescriptor());
 
     if (ret < 0)
-        qDebug("Can't close mole (ret = 0x%.2x)", -ret);
+        qDebug("[Error] Can't close mole (ret = 0x%.2x)", -ret);
     else
-        qDebug("[*] close successfull\n");
+        qDebug("[Success] close successfull\n");
 
     emit stateChange(MOLE_CLOSE);
     emit stateChange(tr("Mole closed"));
@@ -382,9 +380,9 @@ void Mole::getHostInfo() {
     qDebug("device_id = %u minor = %u major = %u", device_id, minor, major);
 
     if (ret < 0)
-        qDebug("Can't me_host_info (ret = 0x%.2x)", -ret);
+        qDebug("[Error] Can't me_host_info (ret = 0x%.2x)", -ret);
     else
-        qDebug("[*] getHostInfo successfull\n");
+        qDebug("[Success] getHostInfo successfull\n");
 }
 
 /*
@@ -393,45 +391,31 @@ void Mole::getHostInfo() {
 void Mole::hostMountAll() {
     int ret;
 
-    uint8 first_address = 0;
-    uint8 last_address = 0;
-    uint8 channel_count = 0;
-    uint8 bytes_in_channel = 0;
-    uint8 bytes_in_module = 0;
-    uint16 bytes_in_line = 0;
-    uint16 maximum_samples = 0;
-    //uint8 last_address_actual = 0;
-
-    int mole_descriptor = this->getDescriptor();
-
-    ret =  me_host_mount_all(mole_descriptor,
-                             &last_address,
-                             &channel_count,
-                             &bytes_in_channel,
-                             &bytes_in_module,
-                             &bytes_in_line,
-                             &maximum_samples);
-    qDebug("me_get_retries = %d", me_get_retries(mole_descriptor));
+    ret =  me_host_mount_all(descriptor,
+                             &lastAddress,
+                             &channelCount,
+                             &bytesInChannel,
+                             &bytesInModule,
+                             &bytesInLine,
+                             &maximumSamples);
+    qDebug("me_get_retries = %d", me_get_retries(descriptor));
 
     qDebug("first_address = %u\nlast_address = %u\nchannel_count = %u\nbytes_in_channel = %u\nbytes_in_module = %u\nbytes_in_line = %u\nmaximum_samples = %u\n",
-           first_address, last_address,channel_count,bytes_in_channel,bytes_in_module,bytes_in_line,maximum_samples);
+           firstAddress, lastAddress,channelCount,bytesInChannel,bytesInModule,bytesInLine,maximumSamples);
 
     if (ret < 0)
-        qDebug("Can't me_host_mount_all (ret = 0x%.2x)\n", -ret);
-    else
-        qDebug("[*] hostMountAll successfull\n");
+        qDebug("[Error] Can't me_host_mount_all (ret = 0x%.2x)\n", -ret);
+    else {
+        qDebug("[Success] hostMountAll successfull\n");
+    }
 }
 
-void Mole::hostUnmountLine() {
-    int ret = 0;
-    int mole_descriptor = this->getDescriptor();
-    ret =  me_host_unmount(mole_descriptor);
-    qDebug("me_get_retries = %d", me_get_retries(mole_descriptor));
-
+void Mole::hostUnmount() {
+    int ret = me_host_unmount(descriptor);
     if (ret < 0)
-        qDebug("Can't me_host_unmount (ret = 0x%.2x)\n", -ret);
+        qDebug("[Error] Can't me_host_unmount (ret = 0x%.2x)\n", -ret);
     else
-        qDebug("[*] hostUnmountLine sucessfull\n");
+        qDebug("[Success] hostUnmount sucessfull\n");
 }
 
 /*
@@ -441,49 +425,35 @@ void Mole::hostUnmountLine() {
 void Mole::testGainCoefficients(bool isSync) {
     int ret;
 
-    uint8 first_address = 0;
-    uint8 last_address = 0;
-    uint8 channel_count = 0;
-    uint8 bytes_in_channel = 0;
-    uint8 bytes_in_module = 0;
-    uint16 bytes_in_line = 0;
-    //uint16 maximum_samples = 0;
-    uint8 last_address_actual = 0;
-
-    me_ts_result_gain_channel_t *results = new me_ts_result_gain_channel_t[me_get_module_count(first_address,last_address) * channel_count];
+    me_ts_result_gain_channel_t *results = new me_ts_result_gain_channel_t[me_get_module_count(firstAddress, lastAddress) * channelCount];
     switch (isSync) {
     case true: {
-        ret = me_ts_gain_coefficients(this->getDescriptor(),
-                                      first_address, last_address, channel_count,
-                                      bytes_in_channel, bytes_in_module, bytes_in_line,
-                                      results, &last_address_actual);
+        ret = me_ts_gain_coefficients(descriptor,
+                                      firstAddress, lastAddress, channelCount,
+                                      bytesInChannel, bytesInModule, bytesInLine,
+                                      results, &lastAddressActual);
 
         if (ret < 0)
-            qDebug("Can't me_ts_gain_coefficients (last_address_actual = %d) (ret = 0x%.2x)\n", last_address_actual, -ret);
+            qDebug("[Error] Can't me_ts_gain_coefficients (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
         else
-            qDebug("ret > 0");
-            //qDebug("%d, %d, %d, %d", first_address, last_address, channel_count, results);
-
-        qDebug("sync");
-        break;
-    }
+            qDebug("[Success] me_ts_gain_coefficients");
+            qDebug("first_addres=%d, last_address=%d, channel_count=%d, results=%d", firstAddress, lastAddress, channelCount, results);
+    } break;
     case false: {
-        ret = me_ts_gain_coefficients_async(this->getDescriptor(),
-                                            first_address, last_address, channel_count,
-                                            bytes_in_channel,bytes_in_module,bytes_in_line,
-                                            results, &last_address_actual);
+        ret = me_ts_gain_coefficients_async(descriptor,
+                                            firstAddress, lastAddress, channelCount,
+                                            bytesInChannel, bytesInModule, bytesInLine,
+                                            results, &lastAddressActual);
 
         if (ret < 0)
-            qDebug("Can't me_ts_gain_coefficients_async (last_address_actual = %d) (ret = 0x%.2x)\n", last_address_actual, -ret);
+            qDebug("[Error] Can't me_ts_gain_coefficients_async (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
         else
         {
-            qDebug("ret > 0");
+            qDebug("[Success] me_ts_gain_coefficients_async");
             //if (wait_test_with_error_handler(mole_descriptor))
             //    print_me_ts_get_result_gain(first_address, last_address, channel_count, results);
         }
-        qDebug("async");
-        break;
-    }
+    } break;
     };
     delete[] results;
 }

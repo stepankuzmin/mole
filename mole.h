@@ -33,7 +33,7 @@ public:
     uint8 getLastAddressActual();
 
     void hostMountAll();
-    void hostUnmountLine();
+    void hostUnmount();
     void testGainCoefficients(bool isSync);
     void testNoiseFloor(bool isSync);
 
