@@ -55,16 +55,31 @@ private:
     uint16 maximumSamples;
     uint8 lastAddressActual;
 
+    static void samplesDataCallbackHandler(int mole_descriptor,
+                                     uint8 first_address, uint8 last_address,
+                                     uint8 channel_count, uint8 bytes_in_channel,
+                                     uint8 bytes_in_module, uint16 bytes_in_line,
+                                     me_mole_module_datarate datarate,
+                                     me_mole_module_gain gain,
+                                     uint16 samples, uint8 *seismic_data);
+
+    void emitStageChanged(me_test_suite_stage stage);
+    static void stageChangedCallbackHandler(int mole_descriptor,
+                                            me_test_suite_stage test_suite_stage);
+
 protected:
     explicit Mole(QObject *parent = 0);
     
 signals:
-    void stateChange(const QString&);
-    void stateChange(MoleState state);
+    void stageChanged(me_test_suite_stage stage);
+    //void stateChange(const QString&);
+    //void stateChange(MoleState state);
     
 public slots:
     int open(const char *portString);
     int close();
+
+private slots:
 
 };
 

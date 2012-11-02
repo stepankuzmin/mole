@@ -1,14 +1,10 @@
 #include <QDebug>
+#include <QApplication>
+
 #include "mole.h"
 
-void samplesDataCallbackHandler(int mole_descriptor,
-                                uint8 first_address, uint8 last_address,
-                                uint8 channel_count, uint8 bytes_in_channel,
-                                uint8 bytes_in_module, uint16 bytes_in_line,
-                                me_mole_module_datarate datarate,
-                                me_mole_module_gain gain,
-                                uint16 samples, uint8 *seismic_data);
-void stageChangedCallbackHandler(int mole_descriptor, me_test_suite_stage test_suite_stage);
+// Global pointer to Mole singleton object
+Mole *ptrMole;
 
 /*
  * samples data callback handler
@@ -25,19 +21,18 @@ void stageChangedCallbackHandler(int mole_descriptor, me_test_suite_stage test_s
  * @param uint8 seismic_data
  *
  */
-void samplesDataCallbackHandler(int mole_descriptor,
-                                      uint8 first_address, uint8 last_address,
-                                      uint8 channel_count, uint8 bytes_in_channel,
-                                      uint8 bytes_in_module, uint16 bytes_in_line,
-                                      me_mole_module_datarate datarate,
-                                      me_mole_module_gain gain,
-                                      uint16 samples, uint8 *seismic_data) {
+void Mole::samplesDataCallbackHandler(int mole_descriptor,
+                                       uint8 first_address, uint8 last_address,
+                                       uint8 channel_count, uint8 bytes_in_channel,
+                                       uint8 bytes_in_module, uint16 bytes_in_line,
+                                       me_mole_module_datarate datarate,
+                                       me_mole_module_gain gain,
+                                       uint16 samples, uint8 *seismic_data) {
     qDebug() << "me_ts_seismic_data_callback_handler called";
 
     int ret = ME_NO_ERROR;
 
     me_test_suite_stage test_suite_stage = ME_TSS_IDLE;
-    Mole *mole = Mole::getInstance();
     ret = me_ts_get_stage(mole_descriptor, &test_suite_stage);
 
     if (ret < 0) {
@@ -89,55 +84,73 @@ void samplesDataCallbackHandler(int mole_descriptor,
     }
 }
 
-void stageChangedCallbackHandler(int mole_descriptor, me_test_suite_stage test_suite_stage) {
+void Mole::stageChangedCallbackHandler(int mole_descriptor, me_test_suite_stage test_suite_stage) {
     qDebug() << "me_ts_stage_changed_callback_handler called";
 
     switch (test_suite_stage) {
     case ME_TSS_IDLE: {
+        ptrMole->emitStageChanged(ME_TSS_IDLE);
         qDebug("ME_TSS_IDLE");
     } break;
     case ME_TSS_GAIN_COEFFICIENTS: {
+        ptrMole->emitStageChanged(ME_TSS_GAIN_COEFFICIENTS);
         qDebug("ME_TSS_GAIN_COEFFICIENTS");
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_1: {
+        ptrMole->emitStageChanged(ME_TSS_GAIN_COEFFICIENTS_1);
         qDebug("ME_TSS_GAIN_COEFFICIENTS_1");
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_2: {
+        ptrMole->emitStageChanged(ME_TSS_GAIN_COEFFICIENTS_2);
         qDebug("ME_TSS_GAIN_COEFFICIENTS_2");
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_4: {
+        ptrMole->emitStageChanged(ME_TSS_GAIN_COEFFICIENTS_4);
         qDebug("ME_TSS_GAIN_COEFFICIENTS_4");
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_8: {
+        ptrMole->emitStageChanged(ME_TSS_GAIN_COEFFICIENTS_8);
         qDebug("ME_TSS_GAIN_COEFFICIENTS_8");
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_16: {
+        ptrMole->emitStageChanged(ME_TSS_GAIN_COEFFICIENTS_16);
         qDebug("ME_TSS_GAIN_COEFFICIENTS_16");
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_32: {
+        ptrMole->emitStageChanged(ME_TSS_GAIN_COEFFICIENTS_32);
         qDebug("ME_TSS_GAIN_COEFFICIENTS_32");
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_64: {
+        ptrMole->emitStageChanged(ME_TSS_GAIN_COEFFICIENTS_64);
         qDebug("ME_TSS_GAIN_COEFFICIENTS_64");
     } break;
     case ME_TSS_NOISE_FLOOR: {
+        ptrMole->emitStageChanged(ME_TSS_NOISE_FLOOR);
         qDebug("ME_TSS_NOISE_FLOOR");
     } break;
     case ME_TSS_TOTAL_HARMONIC_DISTORTION: {
+        ptrMole->emitStageChanged(ME_TSS_TOTAL_HARMONIC_DISTORTION);
         qDebug("ME_TSS_TOTAL_HARMONIC_DISTORTION");
     } break;
     case ME_TSS_ZERO_SHIFT: {
+        ptrMole->emitStageChanged(ME_TSS_ZERO_SHIFT);
         qDebug("ME_TSS_ZERO_SHIFT");
     } break;
     case ME_TSS_COMMON_MODE_REJECTION_SIN: {
+        ptrMole->emitStageChanged(ME_TSS_COMMON_MODE_REJECTION_SIN);
         qDebug("ME_TSS_COMMON_MODE_REJECTION_SIN");
     } break;
     case ME_TSS_COMMON_MODE_REJECTION_IN_PHASE: {
+        ptrMole->emitStageChanged(ME_TSS_COMMON_MODE_REJECTION_IN_PHASE);
         qDebug("ME_TSS_COMMON_MODE_REJECTION_IN_PHASE");
     } break;
     default:
         qDebug("BUG: ME_TSS_COUNT");
     }
+}
+
+void Mole::emitStageChanged(me_test_suite_stage stage) {
+    emit stageChanged(stage);
 }
 
 /*
@@ -155,6 +168,8 @@ Mole *Mole::getInstance() {
 Mole::Mole(QObject *parent) :
     QObject(parent)
 {
+    ptrMole = this;
+
     qDebug() << "Library version (git sha1): "  << me_get_version_git_sha1();
     qDebug() << "Library version (uint32): "    << me_get_version();
     qDebug() << "Library version (string): "    << me_get_version_string();
@@ -174,8 +189,8 @@ Mole::Mole(QObject *parent) :
     qDebug("me_init (ret=0x%.2x)", ret);
     qDebug("me_get_default_retries = %u\n", me_get_default_retries());
 
-    me_ts_set_samples_data_callback(&samplesDataCallbackHandler);
-    me_ts_set_stage_changed_callback(&stageChangedCallbackHandler);
+    me_ts_set_samples_data_callback(&Mole::samplesDataCallbackHandler);
+    me_ts_set_stage_changed_callback(&Mole::stageChangedCallbackHandler);
 }
 
 Mole::~Mole() {
@@ -300,8 +315,8 @@ int Mole::open(const char *portString) {
 
     qDebug("mole_descriptor = %d", this->descriptor);
 
-    emit stateChange(MOLE_OPEN);
-    emit stateChange(tr("Mole opened at %1").arg(portString));
+    //emit stateChange(MOLE_OPEN);
+    //emit stateChange(tr("Mole opened at %1").arg(portString));
 
     return this->descriptor;
 }
@@ -318,8 +333,8 @@ int Mole::close() {
     else
         qDebug("[Success] close successfull\n");
 
-    emit stateChange(MOLE_CLOSE);
-    emit stateChange(tr("Mole closed"));
+    //emit stateChange(MOLE_CLOSE);
+    //emit stateChange(tr("Mole closed"));
     return 0;
 }
 

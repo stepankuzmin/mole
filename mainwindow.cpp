@@ -171,6 +171,7 @@ void MainWindow::on_connectPushButton_toggled(bool checked)
         }
         else {
             mole->getHostInfo(); // @TODO: Display host info
+            ui->logTextEdit->insertPlainText(tr("[*] Devide id = %1\n").arg(mole->getDeviceId()));
             if (mole->hostMount() < 0) {
                 ui->connectPushButton->setChecked(false);
                 ui->logTextEdit->insertPlainText(tr("[Error] Can't mount host.\n"));

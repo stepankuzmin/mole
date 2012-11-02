@@ -8,10 +8,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
     QTranslator translator;
     translator.load("mole_" + QLocale::system().name());
     a.installTranslator(&translator);
-
 
     Mole *mole = Mole::getInstance();
 
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(&w, SIGNAL(showRegistrationSettingsDialog()), &registrationSettingsDialog, SLOT(show()));
 
-    QObject::connect(mole, SIGNAL(stateChange(QString)), &w, SLOT(setStatusBarText(QString)));
+    //QObject::connect(mole, SIGNAL(stateChange(QString)), &w, SLOT(setStatusBarText(QString)));
     
     return a.exec();
 }
