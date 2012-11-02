@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     w.showMaximized();
 
     QObject::connect(&w, SIGNAL(showRegistrationSettingsDialog()), &registrationSettingsDialog, SLOT(show()));
-
+    QObject::connect(mole, SIGNAL(stageChanged(me_test_suite_stage)), &w, SLOT(setStage(me_test_suite_stage)));
     //QObject::connect(mole, SIGNAL(stateChange(QString)), &w, SLOT(setStatusBarText(QString)));
     
     return a.exec();

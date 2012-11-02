@@ -333,9 +333,7 @@ int Mole::close() {
     else
         qDebug("[Success] close successfull\n");
 
-    //emit stateChange(MOLE_CLOSE);
-    //emit stateChange(tr("Mole closed"));
-    return 0;
+    return ret;
 }
 
 /*
