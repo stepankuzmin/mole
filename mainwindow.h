@@ -45,6 +45,8 @@ private slots:
 
     void on_actionTestNoiseFloorSync_triggered();
 
+    void on_connectPushButton_toggled(bool checked);
+
 private:
     Ui::MainWindow *ui;
     QwtPlot *plot;

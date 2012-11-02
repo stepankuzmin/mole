@@ -32,7 +32,7 @@ public:
     uint16 getMaximumSamples();
     uint8 getLastAddressActual();
 
-    void hostMountAll();
+    int hostMount();
     void hostUnmount();
     void testGainCoefficients(bool isSync);
     void testNoiseFloor(bool isSync);

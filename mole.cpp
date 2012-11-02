@@ -342,7 +342,8 @@ int Mole::open(const char *portString) {
 
     emit stateChange(MOLE_OPEN);
     emit stateChange(tr("Mole opened at %1").arg(portString));
-    return 0;
+
+    return this->descriptor;
 }
 
 /*
@@ -386,9 +387,9 @@ void Mole::getHostInfo() {
 }
 
 /*
- * Mole host mount all
+ * Mole host mount
  */
-void Mole::hostMountAll() {
+int Mole::hostMount() {
     int ret;
 
     ret =  me_host_mount_all(descriptor,
@@ -408,6 +409,8 @@ void Mole::hostMountAll() {
     else {
         qDebug("[Success] hostMountAll successfull\n");
     }
+
+    return ret;
 }
 
 void Mole::hostUnmount() {

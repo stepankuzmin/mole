@@ -1,13 +1,33 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QMessageBox>
+#include "qextserialenumerator.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->centralWidget->setAutoFillBackground(true);
-    ui->centralWidget->setPalette(Qt::black);
+
+    // Connection settings
+    // List all avaliable COM ports
+    QList<QextPortInfo> ports = QextSerialEnumerator::getPorts();
+    qDebug() << "List of avaliable ports:";
+    for (int i=0; i<ports.size(); i++) {
+        qDebug() << "port name: " << ports.at(i).portName;
+        qDebug() << "friendly name: " << ports.at(i).friendName;
+        qDebug() << "physical name: " << ports.at(i).physName;
+        qDebug() << "enumerator name: " << ports.at(i).enumName << "\n";
+
+        // Add port friendly name to COM Ports ComboBox
+        this->ui->COMPortComboBox->addItem(ports.at(i).friendName, QVariant(ports.at(i).portName));
+    }
+
+
+    // Plots settings
+    //ui->centralWidget->setAutoFillBackground(true);
+    //ui->centralWidget->setPalette(Qt::black);
     ui->gridLayout->setMargin(0);
 
     ui->retranslateUi(this);
@@ -158,4 +178,31 @@ void MainWindow::on_actionTestNoiseFloorSync_triggered()
 {
     Mole *mole = Mole::getInstance();
     mole->testNoiseFloor(true);
+}
+
+void MainWindow::on_connectPushButton_toggled(bool checked)
+{
+    QString portName = this->ui->COMPortComboBox->itemData(this->ui->COMPortComboBox->currentIndex()).toString();
+    std::string str = portName.toStdString();
+    const char *portString = str.c_str();
+    qDebug() << "Connecting to: " << portString;
+
+    Mole *mole = Mole::getInstance();
+    if (checked) {
+        if (mole->open(portString) < 0)
+            QMessageBox::critical(0, "Error", "Can't open connection.");
+        else {
+            mole->getHostInfo();
+            if (mole->hostMount() < 0)
+                QMessageBox::critical(0, "Error", "Can't mount host.");
+            else {
+                ui->connectPushButton->setText(tr("Disconnect"));
+            }
+        }
+    }
+    else {
+        mole->hostUnmount();
+        mole->close();
+        ui->connectPushButton->setText(tr("Connect"));
+    }
 }

@@ -25,12 +25,10 @@ win32: LIBS += -L$$PWD/3rdparty/mole-engine/lib/ -lmole-engine
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-        connectiondialog.cpp \
         mole.cpp \
         registrationsettingsdialog.cpp
 
 HEADERS  += mainwindow.h \
-            connectiondialog.h \
             mole.h \
             registrationsettingsdialog.h \
             3rdparty/mole-engine/include/mole-engine/mole-engine-test-suite.h \
@@ -40,6 +38,5 @@ HEADERS  += mainwindow.h \
             3rdparty/mole-engine/include/shared/common.h \
 
 FORMS    += mainwindow.ui \
-            connectiondialog.ui \
             registrationsettingsdialog.ui
 
