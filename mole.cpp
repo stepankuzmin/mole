@@ -199,11 +199,27 @@ int Mole::getDescriptor() {
 }
 
 /*
- * Set first address
- * @param uint8 first address
+ * Get device id
+ * @return uint16 device id
  */
-void Mole::setFirstAddress(uint8 firstAddress) {
-    this->firstAddress = firstAddress;
+uint16 Mole::getDeviceId() {
+    return this->deviceId;
+}
+
+/*
+ * Get minor
+ * @return uin8 minor
+ */
+uint8 Mole::getMinor() {
+    return this->minor;
+}
+
+/*
+ * Get minor
+ * @return uin8 minor
+ */
+uint8 Mole::getMajor() {
+    return this->major;
 }
 
 /*
@@ -215,27 +231,11 @@ uint8 Mole::getFirstAddress() {
 }
 
 /*
- * Set last address
- * @param uint8 last address
- */
-void Mole::setLastAddress(uint8 lastAddress) {
-    this->lastAddress = lastAddress;
-}
-
-/*
  * Get last address
  * @return uint8 last address
  */
 uint8 Mole::getLastAddress() {
     return this->lastAddress;
-}
-
-/*
- * Set channel count
- * @param uint8 channel count
- */
-void Mole::setChannelCount(uint8 channelCount) {
-    this->channelCount = channelCount;
 }
 
 /*
@@ -247,27 +247,11 @@ uint8 Mole::getChannelCount() {
 }
 
 /*
- * Set bytes in channel
- * @param uint8 bytes in channel
- */
-void Mole::setBytesInChannel(uint8 bytesInChannel) {
-    this->bytesInChannel = bytesInChannel;
-}
-
-/*
  * Get bytes in channel
  * @return uint8 bytes in channel
  */
 uint8 Mole::getBytesInChannel() {
     return this->bytesInChannel;
-}
-
-/*
- * Set bytes in module
- * @param uint8 bytes in module
- */
-void Mole::setBytesInModule(uint8 bytesInModule) {
-    this->bytesInModule = bytesInModule;
 }
 
 /*
@@ -279,14 +263,6 @@ uint8 Mole::getBytesInModule() {
 }
 
 /*
- * Set bytes in line
- * @param uint16 bytes in line
- */
-void Mole::setBytesInLine(uint16 bytesInLine) {
-    this->bytesInLine = bytesInLine;
-}
-
-/*
  * Get bytes in line
  * @return uint16 bytes in line
  */
@@ -295,27 +271,11 @@ uint16 Mole::getBytesInLine() {
 }
 
 /*
- * Set maximum samples
- * @param uint16 maximum samples
- */
-void Mole::setMaximumSamples(uint16 maximumSamples) {
-    this->maximumSamples = maximumSamples;
-}
-
-/*
  * Get maximum samples
  * @return uint16 maximum samples
  */
 uint16 Mole::getMaximumSamples() {
     return this->maximumSamples;
-}
-
-/*
- * Set last actual address
- * @param uint8 last actual address
- */
-void Mole::setLastAddressActual(uint8 lastAddressActual) {
-    this->lastAddressActual = lastAddressActual;
 }
 
 /*
@@ -369,16 +329,10 @@ int Mole::close() {
 void Mole::getHostInfo() {
     int ret;
 
-    uint16 device_id = 0;
-    uint8 minor = 0;
-    uint8 major = 0;
+    ret =  me_host_info(descriptor, &deviceId, &minor, &major);
+    qDebug("me_get_retries = %d", me_get_retries(descriptor));
 
-    int mole_descriptor = this->getDescriptor();
-
-    ret =  me_host_info(mole_descriptor, &device_id, &minor, &major);
-    qDebug("me_get_retries = %d", me_get_retries(mole_descriptor));
-
-    qDebug("device_id = %u minor = %u major = %u", device_id, minor, major);
+    qDebug("device_id = %u minor = %u major = %u", deviceId, minor, major);
 
     if (ret < 0)
         qDebug("[Error] Can't me_host_info (ret = 0x%.2x)", -ret);

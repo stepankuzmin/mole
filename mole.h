@@ -23,6 +23,9 @@ public:
 
     int getDescriptor();
     void getHostInfo();
+    uint16 getDeviceId();
+    uint8 getMinor();
+    uint8 getMajor();
     uint8 getFirstAddress();
     uint8 getLastAddress();
     uint8 getChannelCount();
@@ -40,6 +43,9 @@ public:
 private:
     int descriptor;
 
+    uint16 deviceId;
+    uint8 minor;
+    uint8 major;
     uint8 firstAddress;
     uint8 lastAddress;
     uint8 channelCount;
@@ -48,15 +54,6 @@ private:
     uint16 bytesInLine;
     uint16 maximumSamples;
     uint8 lastAddressActual;
-
-    void setFirstAddress(uint8 firstAddress);
-    void setLastAddress(uint8 lastAddress);
-    void setChannelCount(uint8 channelCount);
-    void setBytesInChannel(uint8 bytesInChannel);
-    void setBytesInModule(uint8 bytesInModule);
-    void setBytesInLine(uint16 bytesInLine);
-    void setMaximumSamples(uint16 maximumSamples);
-    void setLastAddressActual(uint8 lastAddressActual);
 
 protected:
     explicit Mole(QObject *parent = 0);

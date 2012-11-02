@@ -36,15 +36,10 @@ public slots:
     void setStatusBarText(const QString text);
 
 private slots:
-    void on_actionConnection_triggered();
     void on_actionRegistration_triggered();
-
     void on_actionTestGainCoefficientsSync_triggered();
-
     void on_actionTestGainCoefficientsAsync_triggered();
-
     void on_actionTestNoiseFloorSync_triggered();
-
     void on_connectPushButton_toggled(bool checked);
 
 private:

@@ -11,25 +11,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // Connection settings
-    // List all avaliable COM ports
     QList<QextPortInfo> ports = QextSerialEnumerator::getPorts();
-    qDebug() << "List of avaliable ports:";
     for (int i=0; i<ports.size(); i++) {
-        qDebug() << "port name: " << ports.at(i).portName;
-        qDebug() << "friendly name: " << ports.at(i).friendName;
-        qDebug() << "physical name: " << ports.at(i).physName;
-        qDebug() << "enumerator name: " << ports.at(i).enumName << "\n";
-
-        // Add port friendly name to COM Ports ComboBox
         this->ui->COMPortComboBox->addItem(ports.at(i).friendName, QVariant(ports.at(i).portName));
     }
 
-
     // Plots settings
-    //ui->centralWidget->setAutoFillBackground(true);
-    //ui->centralWidget->setPalette(Qt::black);
-    ui->gridLayout->setMargin(0);
-
     ui->retranslateUi(this);
 
     QwtPlot *plot1 = new QwtPlot();
@@ -45,12 +32,6 @@ MainWindow::MainWindow(QWidget *parent) :
     plot4->setTitle(tr("#4"));
     plot5->setTitle(tr("#5"));
     plot6->setTitle(tr("#6"));
-
-    (void) new QwtPlotPanner(plot1->canvas());
-    (void) new QwtPlotMagnifier(plot1->canvas());
-
-    //QwtLegend *legend = new QwtLegend;
-    //plot->insertLegend(legend, QwtPlot::RightLegend);
 
     plot1->setAutoFillBackground(true);
     plot1->setPalette(Qt::black);
@@ -100,7 +81,7 @@ MainWindow::MainWindow(QWidget *parent) :
         xval[i] = j;
         yval[i] = qSin(j);
         yval2[i] = qCos(j);
-        yval3[i] = qSin(j)+qCos(j);
+        yval3[i] = qSin(j)+2;
         j+=0.1;
     }
 
@@ -152,11 +133,6 @@ void MainWindow::setStatusBarText(const QString text) {
     ui->statusBar->showMessage(tr("State: %1").arg(text));
 }
 
-void MainWindow::on_actionConnection_triggered()
-{
-    emit showConnectionDialog();
-}
-
 void MainWindow::on_actionRegistration_triggered()
 {
     emit showRegistrationSettingsDialog();
@@ -185,17 +161,24 @@ void MainWindow::on_connectPushButton_toggled(bool checked)
     QString portName = this->ui->COMPortComboBox->itemData(this->ui->COMPortComboBox->currentIndex()).toString();
     std::string str = portName.toStdString();
     const char *portString = str.c_str();
-    qDebug() << "Connecting to: " << portString;
 
     Mole *mole = Mole::getInstance();
     if (checked) {
-        if (mole->open(portString) < 0)
+        if (mole->open(portString) < 0) {
+            ui->connectPushButton->setChecked(false);
+            ui->logTextEdit->insertPlainText(tr("[Error] Can't open connection at %1.\n").arg(portString));
             QMessageBox::critical(0, "Error", "Can't open connection.");
+        }
         else {
-            mole->getHostInfo();
-            if (mole->hostMount() < 0)
+            mole->getHostInfo(); // @TODO: Display host info
+            if (mole->hostMount() < 0) {
+                ui->connectPushButton->setChecked(false);
+                ui->logTextEdit->insertPlainText(tr("[Error] Can't mount host.\n"));
                 QMessageBox::critical(0, "Error", "Can't mount host.");
+            }
             else {
+                // @TODO: Display mount host info
+                ui->logTextEdit->insertPlainText(tr("[Success] Connection opened at %1.\n").arg(portString));
                 ui->connectPushButton->setText(tr("Disconnect"));
             }
         }
