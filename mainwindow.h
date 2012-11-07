@@ -34,7 +34,6 @@ signals:
 
 public slots:
     void setStage(me_test_suite_stage stage);
-    void setStatusBarText(const QString text);
 
 private slots:
     void on_actionRegistration_triggered();

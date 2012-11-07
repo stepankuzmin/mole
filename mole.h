@@ -36,7 +36,7 @@ public:
     uint8 getLastAddressActual();
 
     int hostMount();
-    void hostUnmount();
+    int hostUnmount();
     void testGainCoefficients(bool isSync);
     void testNoiseFloor(bool isSync);
 

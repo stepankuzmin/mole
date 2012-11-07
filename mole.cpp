@@ -43,6 +43,8 @@ void Mole::samplesDataCallbackHandler(int mole_descriptor,
     switch(test_suite_stage) {
     case ME_TSS_GAIN_COEFFICIENTS_1: {
         //file_name += "/01. gain-coefficients-001";
+        qDebug() << "samples: " << samples;
+        qDebug() << "seismic_data: " << seismic_data;
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_2: {
         //file_name += "/01. gain-coefficients-002";
@@ -315,9 +317,6 @@ int Mole::open(const char *portString) {
 
     qDebug("mole_descriptor = %d", this->descriptor);
 
-    //emit stateChange(MOLE_OPEN);
-    //emit stateChange(tr("Mole opened at %1").arg(portString));
-
     return this->descriptor;
 }
 
@@ -369,7 +368,7 @@ int Mole::hostMount() {
     qDebug("me_get_retries = %d", me_get_retries(descriptor));
 
     qDebug("first_address = %u\nlast_address = %u\nchannel_count = %u\nbytes_in_channel = %u\nbytes_in_module = %u\nbytes_in_line = %u\nmaximum_samples = %u\n",
-           firstAddress, lastAddress,channelCount,bytesInChannel,bytesInModule,bytesInLine,maximumSamples);
+           firstAddress, lastAddress, channelCount, bytesInChannel, bytesInModule, bytesInLine, maximumSamples);
 
     if (ret < 0)
         qDebug("[Error] Can't me_host_mount_all (ret = 0x%.2x)\n", -ret);
@@ -380,12 +379,14 @@ int Mole::hostMount() {
     return ret;
 }
 
-void Mole::hostUnmount() {
+int Mole::hostUnmount() {
     int ret = me_host_unmount(descriptor);
     if (ret < 0)
         qDebug("[Error] Can't me_host_unmount (ret = 0x%.2x)\n", -ret);
     else
         qDebug("[Success] hostUnmount sucessfull\n");
+
+    return ret;
 }
 
 /*
@@ -394,6 +395,8 @@ void Mole::hostUnmount() {
  */
 void Mole::testGainCoefficients(bool isSync) {
     int ret;
+
+    qDebug() << "channelCount:" << channelCount;
 
     me_ts_result_gain_channel_t *results = new me_ts_result_gain_channel_t[me_get_module_count(firstAddress, lastAddress) * channelCount];
     switch (isSync) {

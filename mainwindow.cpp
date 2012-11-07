@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QLabel>
+#include <QDebug>
 #include <QMessageBox>
 #include <QProgressBar>
 #include "qextserialenumerator.h"
@@ -10,9 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    QProgressBar *progressBar = new QProgressBar();
-    ui->statusBar->addWidget(progressBar);
+    ui->retranslateUi(this);
 
     // Connection settings
     QList<QextPortInfo> ports = QextSerialEnumerator::getPorts();
@@ -20,112 +20,77 @@ MainWindow::MainWindow(QWidget *parent) :
         this->ui->COMPortComboBox->addItem(ports.at(i).friendName, QVariant(ports.at(i).portName));
     }
 
-    // Plots settings
-    ui->retranslateUi(this);
-
-    QwtPlot *plot1 = new QwtPlot();
-    QwtPlot *plot2 = new QwtPlot();
-    QwtPlot *plot3 = new QwtPlot();
-    QwtPlot *plot4 = new QwtPlot();
-    QwtPlot *plot5 = new QwtPlot();
-    QwtPlot *plot6 = new QwtPlot();
-
-    plot1->setTitle(tr("#1"));
-    plot2->setTitle(tr("#2"));
-    plot3->setTitle(tr("#3"));
-    plot4->setTitle(tr("#4"));
-    plot5->setTitle(tr("#5"));
-    plot6->setTitle(tr("#6"));
-
-    plot1->setAutoFillBackground(true);
-    plot1->setPalette(Qt::black);
-    plot2->setAutoFillBackground(true);
-    plot2->setPalette(Qt::black);
-    plot3->setAutoFillBackground(true);
-    plot3->setPalette(Qt::black);
-    plot4->setAutoFillBackground(true);
-    plot4->setPalette(Qt::black);
-    plot5->setAutoFillBackground(true);
-    plot5->setPalette(Qt::black);
-    plot6->setAutoFillBackground(true);
-    plot6->setPalette(Qt::black);
-
-    QwtPlotCurve *curve11 = new QwtPlotCurve();
-    QwtPlotCurve *curve12 = new QwtPlotCurve();
-    QwtPlotCurve *curve13 = new QwtPlotCurve();
-
-    QwtPlotCurve *curve2 = new QwtPlotCurve();
-    QwtPlotCurve *curve3 = new QwtPlotCurve();
-    QwtPlotCurve *curve4 = new QwtPlotCurve();
-    QwtPlotCurve *curve5 = new QwtPlotCurve();
-    QwtPlotCurve *curve6 = new QwtPlotCurve();
-
-    curve11->setRenderHint(QwtPlotItem::RenderAntialiased);
-    curve12->setRenderHint(QwtPlotItem::RenderAntialiased);
-    curve13->setRenderHint(QwtPlotItem::RenderAntialiased);
-
-    curve11->setPen(QPen(Qt::white));
-    curve12->setPen(QPen(Qt::gray));
-    curve13->setPen(QPen(Qt::lightGray));
-
-    curve2->setPen(QPen(Qt::white));
-    curve3->setPen(QPen(Qt::white));
-    curve4->setPen(QPen(Qt::white));
-    curve5->setPen(QPen(Qt::white));
-    curve6->setPen(QPen(Qt::white));
-
-    int i;
-    double j;
+    int ik;
+    double jk;
     const int Size = 1000;
     double xval[Size];
-    double yval[Size], yval2[Size], yval3[Size];
+    double yval[Size];
 
-    for(i=0, j=0; i<Size;i++)
+    for(ik=0, jk=0; ik<Size; ik++)
     {
-        xval[i] = j;
-        yval[i] = qSin(j);
-        yval2[i] = qCos(j);
-        yval3[i] = qSin(j)+2;
-        j+=0.1;
+        xval[ik] = jk;
+        yval[ik] = qSin(jk);
+        jk+=0.1;
     }
 
-    curve11->setSamples(xval, yval, Size);
-    curve12->setSamples(xval, yval2, Size);
-    curve13->setSamples(xval, yval3, Size);
+    int geophonesCount = 6;
+    int channelsCount = 3;
 
-    curve2->setSamples(xval, yval2, Size);
-    curve3->setSamples(xval, yval, Size);
-    curve4->setSamples(xval, yval2, Size);
-    curve5->setSamples(xval, yval, Size);
-    curve6->setSamples(xval, yval2, Size);
+    QLabel *plotLabel[geophonesCount];
+    QWidget *plotWidget[geophonesCount];
+    QVBoxLayout *plotLayout[geophonesCount];
+    QwtPlot *plot[geophonesCount][channelsCount];
+    QwtPlotCurve *curve[geophonesCount][channelsCount];
+    for (int i=0; i<geophonesCount; i++) {
+        // Initialize widgets
+        plotLabel[i] = new QLabel();
+        //plotLabel[i] = new QLabel();
+        plotWidget[i] = new QWidget();
+        plotLayout[i] = new QVBoxLayout();
 
-    curve11->attach(plot1);
-    curve12->attach(plot1);
-    curve13->attach(plot1);
+        // Widget settings
+        plotLabel[i]->setText(tr("Geophon #%1").arg(i+1));
+        plotWidget[i]->setAutoFillBackground(true);
+        plotWidget[i]->setPalette(Qt::black);
+        plotLayout[i]->addWidget(plotLabel[i]);
 
-    curve2->attach(plot2);
-    curve3->attach(plot3);
-    curve4->attach(plot4);
-    curve5->attach(plot5);
-    curve6->attach(plot6);
+        // Add plots to widget
+        for (int j=0; j<channelsCount; j++) {
+            // Initialize plot
+            plot[i][j] = new QwtPlot();
 
-    plot1->replot();
-    plot2->replot();
-    plot3->replot();
-    plot4->replot();
-    plot5->replot();
-    plot6->replot();
+            // Plot settings
+            plot[i][j]->setAutoFillBackground(true);
+            plot[i][j]->setPalette(Qt::black);
 
-    ui->gridLayout->addWidget(plot1, 0, 0);
-    ui->gridLayout->addWidget(plot2, 0, 1);
-    ui->gridLayout->addWidget(plot3, 1, 0);
-    ui->gridLayout->addWidget(plot4, 1, 1);
-    ui->gridLayout->addWidget(plot5, 2, 0);
-    ui->gridLayout->addWidget(plot6, 2, 1);
+            // Initialize curve
+            curve[i][j] = new QwtPlotCurve();
+
+            // Curve settings
+            curve[i][j]->setRenderHint(QwtPlotItem::RenderAntialiased);
+            curve[i][j]->setPen(QPen(Qt::white));
+
+            // Set data
+            curve[i][j]->setSamples(xval, yval, Size);
+            curve[i][j]->attach(plot[i][j]);
+
+            plot[i][j]->replot();
+
+            // Add plot to widget
+            plotLayout[i]->addWidget(plot[i][j]);
+        }
+        plotWidget[i]->setLayout(plotLayout[i]);
+        if (i<3)
+            ui->gridLayout->addWidget(plotWidget[i], 0, i);
+        else
+            ui->gridLayout->addWidget(plotWidget[i], 1, i-3);
+    }
 }
 
 MainWindow::~MainWindow()
 {
+    if (ui->connectPushButton->isChecked())
+        this->on_connectPushButton_toggled(false);
     delete ui;
 
     // Destroy mole
@@ -133,70 +98,52 @@ MainWindow::~MainWindow()
     mole->~Mole();
 }
 
-void MainWindow::setStatusBarText(const QString text) {
-    ui->statusBar->showMessage(tr("State: %1").arg(text));
-}
-
 void MainWindow::setStage(me_test_suite_stage stage) {
     switch (stage) {
     case ME_TSS_IDLE: {
-        ui->statusBar->showMessage(tr("Stage: IDLE"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] IDLE.\n"));
+        ui->statusBar->showMessage(tr("[Stage] IDLE"));
     } break;
     case ME_TSS_GAIN_COEFFICIENTS: {
-        ui->statusBar->showMessage(tr("Stage: GAIN_COEFFICIENTS"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] GAIN_COEFFICIENTS.\n"));
+        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS"));
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_1: {
-        ui->statusBar->showMessage(tr("Stage: GAIN_COEFFICIENTS_1"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] GAIN_COEFFICIENTS_1.\n"));
+        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_1"));
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_2: {
-        ui->statusBar->showMessage(tr("Stage: GAIN_COEFFICIENTS_2"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] GAIN_COEFFICIENTS_2.\n"));
+        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_2"));
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_4: {
-        ui->statusBar->showMessage(tr("Stage: GAIN_COEFFICIENTS_4"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] GAIN_COEFFICIENTS_4.\n"));
+        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_4"));
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_8: {
-        ui->statusBar->showMessage(tr("Stage: GAIN_COEFFICIENTS_8"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] GAIN_COEFFICIENTS_8.\n"));
+        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_8"));
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_16: {
-        ui->statusBar->showMessage(tr("Stage: GAIN_COEFFICIENTS_16"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] GAIN_COEFFICIENTS_16.\n"));
+        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_16"));
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_32: {
-        ui->statusBar->showMessage(tr("Stage: GAIN_COEFFICIENTS_32"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] GAIN_COEFFICIENTS_32.\n"));
+        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_32"));
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_64: {
-        ui->statusBar->showMessage(tr("Stage: GAIN_COEFFICIENTS_64"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] GAIN_COEFFICIENTS_64.\n"));
+        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_64"));
     } break;
     case ME_TSS_NOISE_FLOOR: {
-        ui->statusBar->showMessage(tr("Stage: NOISE FLOOR"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] NOISE FLOOR.\n"));
+        ui->statusBar->showMessage(tr("[Stage] NOISE FLOOR"));
     } break;
     case ME_TSS_TOTAL_HARMONIC_DISTORTION: {
-        ui->statusBar->showMessage(tr("Stage: TOTAL HARMONIC DISTORTION"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] TOTAL HARMONIC DISTORTION.\n"));
+        ui->statusBar->showMessage(tr("[Stage] TOTAL HARMONIC DISTORTION"));
     } break;
     case ME_TSS_ZERO_SHIFT: {
-        ui->statusBar->showMessage(tr("Stage: ZERO SHIFT"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] ZERO SHIFT.\n"));
+        ui->statusBar->showMessage(tr("[Stage:] ZERO SHIFT"));
     } break;
     case ME_TSS_COMMON_MODE_REJECTION_SIN: {
-        ui->statusBar->showMessage(tr("Stage: COMMON MODE REJECTION SIN"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] COMMON MODE REJECTION SIN.\n"));
+        ui->statusBar->showMessage(tr("[Stage] COMMON MODE REJECTION SIN"));
     } break;
     case ME_TSS_COMMON_MODE_REJECTION_IN_PHASE: {
-        ui->statusBar->showMessage(tr("Stage: COMMON MODE REJECTION IN PHASE"));
-        ui->logTextEdit->insertPlainText(tr("[Stage] COMMON MODE REJECTION IN PHASE.\n"));
+        ui->statusBar->showMessage(tr("[Stage] COMMON MODE REJECTION IN PHASE"));
     } break;
     default:
-        qDebug("BUG: ME_TSS_COUNT");
+        qDebug("[Bug] ME_TSS_COUNT");
     }
 }
 
@@ -233,47 +180,34 @@ void MainWindow::on_connectPushButton_toggled(bool checked)
     if (checked) {
         if (mole->open(portString) < 0) {
             ui->connectPushButton->setChecked(false);
-            ui->logTextEdit->insertPlainText(tr("[Error] Can't open connection at %1.\n").arg(portString));
+            qDebug() << "[Error] Can't open connection at " << portString;
             QMessageBox::critical(0, "Error", "Can't open connection.");
         }
         else {
             mole->getHostInfo();
-            ui->logTextEdit->insertPlainText(tr("Host info:\n"
-                                                "\t[*] Device id = %1\n"
-                                                "\t[*] Minor = %2\n"
-                                                "\t[*] Major = %3\n")
-                                                .arg(mole->getDeviceId())
-                                                .arg(mole->getMinor())
-                                                .arg(mole->getMajor()));
+            qDebug() << "[Success] Connection opened at " << portString;
             if (mole->hostMount() < 0) {
                 ui->connectPushButton->setChecked(false);
-                ui->logTextEdit->insertPlainText(tr("[Error] Can't mount host.\n"));
+                qDebug() << "[Error] Can't mount host";
                 QMessageBox::critical(0, "Error", "Can't mount host.");
             }
             else {
-                ui->logTextEdit->insertPlainText(tr("Host mounted:\n"
-                                                    "\t[*] First address = %1\n"
-                                                    "\t[*] Last address = %2\n"
-                                                    "\t[*] Channel count = %3\n"
-                                                    "\t[*] Bytes in channel = %4\n"
-                                                    "\t[*] Bytes in module = %5\n"
-                                                    "\t[*] Bytes in line = %6\n"
-                                                    "\t[*] Maximum samples = %7\n")
-                                                    .arg(mole->getFirstAddress())
-                                                    .arg(mole->getLastAddress())
-                                                    .arg(mole->getChannelCount())
-                                                    .arg(mole->getBytesInChannel())
-                                                    .arg(mole->getBytesInModule())
-                                                    .arg(mole->getBytesInLine())
-                                                    .arg(mole->getMaximumSamples()));
-                ui->logTextEdit->insertPlainText(tr("[Success] Connection opened at %1.\n").arg(portString));
+                qDebug() << "[Success] Host mounted";
                 ui->connectPushButton->setText(tr("Disconnect"));
             }
         }
     }
     else {
-        mole->hostUnmount();
-        mole->close();
-        ui->connectPushButton->setText(tr("Connect"));
+        if (mole->hostUnmount() < 0)
+            qDebug() << "[Error] Can't unmount host";
+        else {
+            qDebug() << "[Success] Host unmounted";
+            if (mole->close() < 0)
+                qDebug() << "[Error] Can't close connection";
+            else {
+                qDebug() << "[Success] Connection closed";
+                ui->connectPushButton->setText(tr("Connect"));
+            }
+        }
     }
 }
