@@ -5,13 +5,6 @@
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine.h"
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine-test-suite.h"
 
-enum MoleState {
-    MOLE_INIT       = 0x00,
-    MOLE_OPEN       = 0x01,
-    MOLE_CLOSE      = 0x02,
-    MOLE_DESTROY    = 0x03
-};
-
 class Mole : public QObject
 {
     Q_OBJECT
@@ -23,6 +16,10 @@ public:
 
     int getDescriptor();
     void getHostInfo();
+
+    me_mole_module_mode getModuleMode();
+    me_mole_module_gain getModuleGain();
+    me_mole_module_datarate getModuleDatarate();
     uint16 getDeviceId();
     uint8 getMinor();
     uint8 getMajor();
@@ -35,14 +32,21 @@ public:
     uint16 getMaximumSamples();
     uint8 getLastAddressActual();
 
+    int setModuleMode(me_mole_module_mode moduleMode);
+    int setModuleGain(me_mole_module_gain moduleGain);
+    int setModuleDatarate(me_mole_module_datarate moduleDatarate);
+
     int hostMount();
     int hostUnmount();
-    void testGainCoefficients(bool isSync);
+    int testGainCoefficients(bool isSync);
     void testNoiseFloor(bool isSync);
 
 private:
     int descriptor;
 
+    me_mole_module_datarate moduleDatarate;
+    me_mole_module_gain moduleGain;
+    me_mole_module_mode moduleMode;
     uint16 deviceId;
     uint8 minor;
     uint8 major;

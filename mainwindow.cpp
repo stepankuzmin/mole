@@ -154,8 +154,14 @@ void MainWindow::on_actionRegistration_triggered()
 
 void MainWindow::on_actionTestGainCoefficientsSync_triggered()
 {
+    int ret = 0;
     Mole *mole = Mole::getInstance();
-    mole->testGainCoefficients(true);
+    ret = mole->testGainCoefficients(true);
+
+    if (ret < 0)
+        QMessageBox::critical(0, "Error", "Gain coefficients test failed.");
+    else
+        QMessageBox::information(0, "Information", "Gain coefficients test succeed.");
 }
 
 void MainWindow::on_actionTestGainCoefficientsAsync_triggered()

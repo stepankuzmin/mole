@@ -48,6 +48,8 @@ void Mole::samplesDataCallbackHandler(int mole_descriptor,
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_2: {
         //file_name += "/01. gain-coefficients-002";
+        qDebug() << "samples: " << samples;
+        qDebug() << "seismic_data: " << seismic_data;
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_4: {
         //file_name += "/01. gain-coefficients-004";
@@ -193,6 +195,10 @@ Mole::Mole(QObject *parent) :
 
     me_ts_set_samples_data_callback(&Mole::samplesDataCallbackHandler);
     me_ts_set_stage_changed_callback(&Mole::stageChangedCallbackHandler);
+
+    this->moduleDatarate = ME_MMD_COUNT;
+    this->moduleGain = ME_MMG_COUNT;
+    this->moduleMode = ME_MMM_COUNT;
 }
 
 Mole::~Mole() {
@@ -213,6 +219,30 @@ Mole::~Mole() {
  */
 int Mole::getDescriptor() {
     return this->descriptor;
+}
+
+/*
+ * Get module datarate
+ * @param me_mole_module_datarate datarate
+ */
+me_mole_module_datarate Mole::getModuleDatarate() {
+    return this->moduleDatarate;
+}
+
+/*
+ * Mole get module gain
+ * @return me_mole_module_gain module gain
+ */
+me_mole_module_gain Mole::getModuleGain() {
+    return this->moduleGain;
+}
+
+/*
+ * Get module mode
+ * @return me_mole_module_mode module mode
+ */
+me_mole_module_mode Mole::getModuleMode() {
+    return this->moduleMode;
 }
 
 /*
@@ -304,6 +334,41 @@ uint8 Mole::getLastAddressActual() {
 }
 
 /*
+ * Set module mode
+ * @param me_mole_module_mode moduleMode
+ *
+ * @return int
+ */
+int Mole::setModuleMode(me_mole_module_mode moduleMode) {
+    int ret = 0;
+    ret =  me_module_set_mode(this->descriptor, moduleMode, this->lastAddress, &this->lastAddressActual);
+    if (ret < 0)
+        qDebug("[Error] Can't me_module_set_mode (last_address_actual = %d) (ret = 0x%.2x)\n", this->lastAddressActual, -ret);
+    else {
+        this->moduleMode = moduleMode;
+        qDebug("[Success] Set module mode");
+    }
+
+    return ret;
+}
+
+int Mole::setModuleGain(me_mole_module_gain moduleGain) {
+
+}
+
+int Mole::setModuleDatarate(me_mole_module_datarate moduleDatarate) {
+    int ret = 0;
+    ret =  me_module_set_datarate(this->descriptor, moduleDatarate, this->lastAddress,&this->lastAddressActual);
+    if (ret < 0)
+        qDebug("Can't me_module_set_datarate (last_address_actual = %d) (ret = 0x%.2x)\n", this->lastAddressActual, -ret);
+    else {
+        this->moduleDatarate = moduleDatarate;
+        qDebug("[Success] Set module datarate");
+    }
+    return ret;
+}
+
+/*
  * Mole open
  * @param const char *portString
  */
@@ -392,11 +457,11 @@ int Mole::hostUnmount() {
 /*
  * Mole test gain coefficients
  * @param bool isSync
+ *
+ * @return int ret
  */
-void Mole::testGainCoefficients(bool isSync) {
+int Mole::testGainCoefficients(bool isSync) {
     int ret;
-
-    qDebug() << "channelCount:" << channelCount;
 
     me_ts_result_gain_channel_t *results = new me_ts_result_gain_channel_t[me_get_module_count(firstAddress, lastAddress) * channelCount];
     switch (isSync) {
@@ -429,6 +494,8 @@ void Mole::testGainCoefficients(bool isSync) {
     } break;
     };
     delete[] results;
+
+    return ret;
 }
 
 /*

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>299</width>
-    <height>476</height>
+    <width>303</width>
+    <height>218</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,19 +19,23 @@
      <property name="title">
       <string/>
      </property>
-     <layout class="QFormLayout" name="formLayout">
-      <property name="fieldGrowthPolicy">
-       <enum>QFormLayout::FieldsStayAtSizeHint</enum>
-      </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="modeLabel">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="3" column="0">
+       <widget class="QLabel" name="inputLabel">
         <property name="text">
-         <string>Module mode</string>
+         <string>Input</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="ModeComboBox"/>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="testGeneratorModeComboBox"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="moduleDatarateComboBox">
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="testGeneratorModeLabel">
@@ -40,9 +44,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="testGeneratorModeComboBox"/>
-      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="datarateLabel">
         <property name="text">
@@ -50,84 +51,62 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="datarateComboBox">
-        <property name="editable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="inputLabel">
-        <property name="text">
-         <string>Input</string>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="1">
        <widget class="QComboBox" name="inputComboBox"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="modeLabel">
+        <property name="text">
+         <string>Module mode</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="moduleModeComboBox"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="setModuleModePushButton">
+        <property name="text">
+         <string>Set</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="setTestGeneratorModePushButton">
+        <property name="text">
+         <string>Set</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QPushButton" name="setDataratePushButton">
+        <property name="text">
+         <string>Set</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="setInputPushButton">
+        <property name="text">
+         <string>Set</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="gainGroupBox">
-     <property name="title">
-      <string>Gain</string>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
      </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="gainLabel">
-        <property name="text">
-         <string>Gain</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="gainComboBox"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="gainAllLabel">
-        <property name="text">
-         <string>Gain all</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="gainAllComboBox"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="gainXAllLabel">
-        <property name="text">
-         <string>Gain X all</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="gainXAllComboBox"/>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="gainYAllLabel">
-        <property name="text">
-         <string>Gain Y all</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QComboBox" name="gainYAllComboBox"/>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="gainZAllLabel">
-        <property name="text">
-         <string>Gain Z all</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QComboBox" name="gainZAllComboBox"/>
-      </item>
-     </layout>
-    </widget>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

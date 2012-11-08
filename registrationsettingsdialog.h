@@ -1,6 +1,7 @@
 #ifndef REGISTRATIONSETTINGSDIALOG_H
 #define REGISTRATIONSETTINGSDIALOG_H
 
+#include "mole.h"
 #include <QDialog>
 
 namespace Ui {
@@ -15,6 +16,13 @@ public:
     explicit RegistrationSettingsDialog(QWidget *parent = 0);
     ~RegistrationSettingsDialog();
     
+private slots:
+    void on_buttonBox_accepted();
+
+    void on_setModuleModePushButton_clicked();
+
+    void on_setDataratePushButton_clicked();
+
 private:
     Ui::RegistrationSettingsDialog *ui;
 };
