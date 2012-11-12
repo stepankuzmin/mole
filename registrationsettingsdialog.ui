@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>303</width>
-    <height>218</height>
+    <width>428</width>
+    <height>344</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,20 +27,10 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="testGeneratorModeComboBox"/>
-      </item>
       <item row="2" column="1">
        <widget class="QComboBox" name="moduleDatarateComboBox">
         <property name="editable">
          <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="testGeneratorModeLabel">
-        <property name="text">
-         <string>Test generator mode</string>
         </property>
        </widget>
       </item>
@@ -71,13 +61,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="setTestGeneratorModePushButton">
-        <property name="text">
-         <string>Set</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="2">
        <widget class="QPushButton" name="setDataratePushButton">
         <property name="text">
@@ -87,6 +70,32 @@
       </item>
       <item row="3" column="2">
        <widget class="QPushButton" name="setInputPushButton">
+        <property name="text">
+         <string>Set</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="testGeneratorGroupBox">
+     <property name="title">
+      <string>Test generator</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="testGeneratorModeLabel">
+        <property name="text">
+         <string>Test generator mode for all modules</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="testGeneratorModeComboBox"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="setTestGeneratorModePushButton">
         <property name="text">
          <string>Set</string>
         </property>

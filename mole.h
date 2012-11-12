@@ -34,8 +34,12 @@ public:
     uint8 getLastAddressActual();
 
     int setModuleMode(me_mole_module_mode moduleMode);
-    int setModuleGain(me_mole_module_gain moduleGain);
+    int setModuleGainAll(me_mole_module_gain moduleGain);
+    int setModuleGainXAll(me_mole_module_gain moduleGain);
+    int setModuleGainYAll(me_mole_module_gain moduleGain);
+    int setModuleGainZAll(me_mole_module_gain moduleGain);
     int setModuleDatarate(me_mole_module_datarate moduleDatarate);
+    int setModuleTestGeneratorAll(me_mole_module_test_generator testGenerator = ME_MMTG_COUNT);
 
     int hostMount();
     int hostUnmount();

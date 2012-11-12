@@ -12,6 +12,9 @@ RegistrationSettingsDialog::RegistrationSettingsDialog(QWidget *parent) :
     ui->moduleModeComboBox->addItem("Seismic",      QVariant(ME_MMM_SEISMIC));
     ui->moduleModeComboBox->addItem("Inclinometer", QVariant(ME_MMM_INCLINOMETER));
 
+    ui->testGeneratorModeComboBox->addItem("ON", QVariant(ME_MMTG_ON));
+    ui->testGeneratorModeComboBox->addItem("OFF", QVariant(ME_MMTG_OFF));
+
     ui->moduleDatarateComboBox->addItem("ME_MMD_250",   QVariant(ME_MMD_250));
     ui->moduleDatarateComboBox->addItem("ME_MMD_500",   QVariant(ME_MMD_500));
     ui->moduleDatarateComboBox->addItem("ME_MMD_1000",  QVariant(ME_MMD_1000));
@@ -63,5 +66,18 @@ void RegistrationSettingsDialog::on_setDataratePushButton_clicked()
     case ME_MMD_4000: {
         mole->setModuleDatarate(ME_MMD_4000);
     } break;
+    }
+}
+
+void RegistrationSettingsDialog::on_setTestGeneratorModePushButton_clicked()
+{
+    Mole *mole = Mole::getInstance();
+    switch(ui->testGeneratorModeComboBox->itemData(ui->testGeneratorModeComboBox->currentIndex()).toInt()) {
+        case ME_MMTG_OFF: {
+            mole->setModuleTestGeneratorAll(ME_MMTG_OFF);
+        } break;
+        case ME_MMTG_ON: {
+            mole->setModuleTestGeneratorAll(ME_MMTG_OFF);
+        } break;
     }
 }

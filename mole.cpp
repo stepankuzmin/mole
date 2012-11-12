@@ -375,10 +375,80 @@ int Mole::setModuleMode(me_mole_module_mode moduleMode) {
     return ret;
 }
 
-int Mole::setModuleGain(me_mole_module_gain moduleGain) {
+/*
+ * Mole set gain for all modules
+ * @param me_mole_module_gain moduleGain
+ *
+ * @return int ret
+ */
+int Mole::setModuleGainAll(me_mole_module_gain moduleGain) {
+    int ret;
+    ret =  me_module_set_gain_all(descriptor, moduleGain, lastAddress, &lastAddressActual);
+    if(ret < 0)
+        qDebug("[Error] Can't me_module_set_gain_all (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
+    else
+        qDebug("[Success] me_module_set_gain_all");
 
+    return ret;
 }
 
+/*
+ * Mole set gain for X all modules
+ * @param me_mole_module_gain moduleGain
+ *
+ * @return int ret
+ */
+int Mole::setModuleGainXAll(me_mole_module_gain moduleGain) {
+    int ret;
+    ret =  me_module_set_gain_x_all(descriptor, moduleGain, lastAddress, &lastAddressActual);
+    if(ret < 0)
+        qDebug("[Error] Can't me_module_set_gain_x_all (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
+    else
+        qDebug("[Success] me_module_set_gain_x_all");
+
+    return ret;
+}
+
+/*
+ * Mole set gain for Y all modules
+ * @param me_mole_module_gain moduleGain
+ *
+ * @return int ret
+ */
+int Mole::setModuleGainYAll(me_mole_module_gain moduleGain) {
+    int ret;
+    ret =  me_module_set_gain_y_all(descriptor, moduleGain, lastAddress, &lastAddressActual);
+    if(ret < 0)
+        qDebug("[Error] Can't me_module_set_gain_y_all (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
+    else
+        qDebug("[Success] me_module_set_gain_y_all");
+
+    return ret;
+}
+
+/*
+ * Mole set gain for Z all modules
+ * @param me_mole_module_gain moduleGain
+ *
+ * @return int ret
+ */
+int Mole::setModuleGainZAll(me_mole_module_gain moduleGain) {
+    int ret;
+    ret =  me_module_set_gain_z_all(descriptor, moduleGain, lastAddress, &lastAddressActual);
+    if(ret < 0)
+        qDebug("[Error] Can't me_module_set_gain_z_all (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
+    else
+        qDebug("[Success] me_module_set_gain_z_all");
+
+    return ret;
+}
+
+/*
+ * Mole set datarate
+ * @param me_mole_module_datarate moduleDatarate
+ *
+ * @return int ret
+ */
 int Mole::setModuleDatarate(me_mole_module_datarate moduleDatarate) {
     int ret = 0;
     ret =  me_module_set_datarate(this->descriptor, moduleDatarate, this->lastAddress,&this->lastAddressActual);
@@ -388,6 +458,24 @@ int Mole::setModuleDatarate(me_mole_module_datarate moduleDatarate) {
         this->moduleDatarate = moduleDatarate;
         qDebug("[Success] Set module datarate");
     }
+
+    return ret;
+}
+
+/*
+ * Mole set test generator for all modules
+ * @param me_mole_module_test_generator testGenerator
+ *
+ * @return int ret
+ */
+int Mole::setModuleTestGeneratorAll(me_mole_module_test_generator testGenerator) {
+    int ret;
+    ret =  me_module_set_test_generator_all(descriptor, testGenerator, lastAddress, &lastAddressActual);
+    if (ret < 0)
+        qDebug("[Error] Can't me_module_set_test_generator_all (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
+    else
+        qDebug("[Success] me_module_set_test_generator_all");
+
     return ret;
 }
 

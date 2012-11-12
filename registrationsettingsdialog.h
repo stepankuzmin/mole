@@ -23,6 +23,8 @@ private slots:
 
     void on_setDataratePushButton_clicked();
 
+    void on_setTestGeneratorModePushButton_clicked();
+
 private:
     Ui::RegistrationSettingsDialog *ui;
 };
