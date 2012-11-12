@@ -35,6 +35,9 @@ signals:
 public slots:
     void setStage(me_test_suite_stage stage);
 
+    void plotData(uint8 moduleIndex, uint8 channelIndex,
+                   uint16 size, QList<double> samples, QList<double> data);
+
 private slots:
     void on_actionRegistration_triggered();
     void on_actionTestGainCoefficientsSync_triggered();
@@ -42,9 +45,22 @@ private slots:
     void on_actionTestNoiseFloorSync_triggered();
     void on_connectPushButton_toggled(bool checked);
 
+    void on_startTestsPushButton_clicked();
+
+    void on_actionClear_plots_triggered();
+
+    void on_actionTestTotalHarmonicDistortionSync_triggered();
+
+    void on_actionTestZeroShiftSync_triggered();
+
+    void on_actionTestCommonModeRejectionSync_triggered();
+
 private:
     Ui::MainWindow *ui;
-    QwtPlot *plot;
+    QwtPlot *plot[6][3]; // 6 геофонов по три канала
+    QwtPlotCurve *curve[6][3];
+
+    QVector< QVector<QwtPlot*> > *vplot;
 };
 
 #endif // MAINWINDOW_H

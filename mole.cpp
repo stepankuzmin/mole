@@ -27,7 +27,7 @@ void Mole::samplesDataCallbackHandler(int mole_descriptor,
                                        uint8 bytes_in_module, uint16 bytes_in_line,
                                        me_mole_module_datarate datarate,
                                        me_mole_module_gain gain,
-                                       uint16 samples, uint8 *seismic_data) {
+                                       uint16 samples, uint8 *samples_data) {
     qDebug() << "me_ts_seismic_data_callback_handler called";
 
     int ret = ME_NO_ERROR;
@@ -43,13 +43,9 @@ void Mole::samplesDataCallbackHandler(int mole_descriptor,
     switch(test_suite_stage) {
     case ME_TSS_GAIN_COEFFICIENTS_1: {
         //file_name += "/01. gain-coefficients-001";
-        qDebug() << "samples: " << samples;
-        qDebug() << "seismic_data: " << seismic_data;
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_2: {
         //file_name += "/01. gain-coefficients-002";
-        qDebug() << "samples: " << samples;
-        qDebug() << "seismic_data: " << seismic_data;
     } break;
     case ME_TSS_GAIN_COEFFICIENTS_4: {
         //file_name += "/01. gain-coefficients-004";
@@ -85,6 +81,28 @@ void Mole::samplesDataCallbackHandler(int mole_descriptor,
         qDebug("Internal erorr?\n");
         return;
     }
+    }
+
+    QList<double> samplesList;
+    QList<double> dataList;
+    //QList<uint16> samplesList;
+    //QList<int32> dataList;
+
+    for(uint8 moduleIndex = 0; moduleIndex < me_get_module_count(first_address, last_address); ++moduleIndex) {
+        for(uint8 channelIndex = 0; channelIndex < channel_count; ++channelIndex) {
+            for (uint16 sample = 0; sample < samples; ++sample) {
+                trace_data_t data = me_get_seismic_sample_data(moduleIndex, sample, channelIndex,
+                                           first_address, last_address,
+                                           bytes_in_channel, bytes_in_module, bytes_in_line,
+                                           samples_data);
+                samplesList << sample;
+                dataList << data;
+            }
+            ptrMole->emitDataDump(moduleIndex, channelIndex,
+                                  samples, samplesList, dataList);
+            samplesList.clear();
+            dataList.clear();
+        }
     }
 }
 
@@ -155,6 +173,11 @@ void Mole::stageChangedCallbackHandler(int mole_descriptor, me_test_suite_stage 
 
 void Mole::emitStageChanged(me_test_suite_stage stage) {
     emit stageChanged(stage);
+}
+
+void Mole::emitDataDump(uint8 moduleIndex, uint8 channelIndex,
+                         uint16 size, QList<double> samples, QList<double> data) {
+    emit dataDump(moduleIndex, channelIndex, size, samples, data);
 }
 
 /*
@@ -454,6 +477,29 @@ int Mole::hostUnmount() {
     return ret;
 }
 
+
+void pr_gain(uint8 firstAddress, uint8 lastAddress, uint8 channelCount, me_ts_result_gain_channel_t *results) {
+    qDebug("print results: ");
+    for(uint8 i = 0; i < me_get_module_count(firstAddress, lastAddress); ++i) {
+        for(uint8 j = 0; j < channelCount; ++j) {
+            qDebug("---> module %3u channel %u <---", i, j);
+
+            for(uint8 k = 0; k < ME_MMG_COUNT; ++k) {
+                char out_of_tolerance_sign = 0;
+
+                if (me_ts_get_result_gain_channel(i, j, channelCount, results)->out_of_tolerance[k] )
+                    out_of_tolerance_sign = '*';
+                else
+                    out_of_tolerance_sign = ' ';
+
+                    qDebug("%2u (%f) %c ", me_ts_get_result_gain_channel(i, j, channelCount, results)->multiplier[k],
+                                   me_ts_get_result_gain_channel(i, j, channelCount, results)->calculated_value[k],
+                                   out_of_tolerance_sign);
+            }
+        }
+    }
+}
+
 /*
  * Mole test gain coefficients
  * @param bool isSync
@@ -466,6 +512,7 @@ int Mole::testGainCoefficients(bool isSync) {
     me_ts_result_gain_channel_t *results = new me_ts_result_gain_channel_t[me_get_module_count(firstAddress, lastAddress) * channelCount];
     switch (isSync) {
     case true: {
+        qDebug() << "sync gain coefficients";
         ret = me_ts_gain_coefficients(descriptor,
                                       firstAddress, lastAddress, channelCount,
                                       bytesInChannel, bytesInModule, bytesInLine,
@@ -473,9 +520,11 @@ int Mole::testGainCoefficients(bool isSync) {
 
         if (ret < 0)
             qDebug("[Error] Can't me_ts_gain_coefficients (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
-        else
+        else {
             qDebug("[Success] me_ts_gain_coefficients");
+            pr_gain(firstAddress, lastAddress, channelCount, results);
             qDebug("first_addres=%d, last_address=%d, channel_count=%d, results=%d", firstAddress, lastAddress, channelCount, results);
+        }
     } break;
     case false: {
         ret = me_ts_gain_coefficients_async(descriptor,
@@ -488,6 +537,7 @@ int Mole::testGainCoefficients(bool isSync) {
         else
         {
             qDebug("[Success] me_ts_gain_coefficients_async");
+            //pr_gain(firstAddress, lastAddress, channelCount, results);
             //if (wait_test_with_error_handler(mole_descriptor))
             //    print_me_ts_get_result_gain(first_address, last_address, channel_count, results);
         }
@@ -501,76 +551,148 @@ int Mole::testGainCoefficients(bool isSync) {
 /*
  * Mole test noise floor
  * @param bool isSync
+ *
+ * @return int ret
  */
-void Mole::testNoiseFloor(bool isSync) {
+int Mole::testNoiseFloor(bool isSync) {
     int ret;
+    me_ts_result_channel_t *results = new me_ts_result_channel_t[me_get_module_count(firstAddress, lastAddress) * channelCount];
+    switch(isSync) {
+        case true: {
+            ret = me_ts_noise_floor(descriptor, firstAddress, lastAddress, channelCount,
+                                    bytesInChannel, bytesInModule, bytesInLine,
+                                    results, &lastAddressActual);
 
-    uint8 first_address = 0;
-    uint8 last_address = 0;
-    uint8 channel_count = 0;
-    uint8 bytes_in_channel = 0;
-    uint8 bytes_in_module = 0;
-    uint16 bytes_in_line = 0;
-    //uint16 maximum_samples = 0;
-    uint8 last_address_actual = 0;
-
-    me_ts_result_channel_t *results = new me_ts_result_channel_t[me_get_module_count(first_address,last_address) * channel_count];
-    switch (isSync) {
-    case true: {
-        ret = me_ts_noise_floor(this->getDescriptor(),
-                                first_address, last_address, channel_count,
-                                bytes_in_channel, bytes_in_module, bytes_in_line,
-                                results, &last_address_actual);
-
-        if (ret < 0)
-            qDebug("Can't me_ts_noise_floor (last_address_actual = %d) (ret = 0x%.2x)\n", last_address_actual, -ret);
-        else {
-            /*
-            save_summary_table((std::string(default_tests_folder) + std::string("/") + folder_name_date).c_str(),
-                       first_address,last_address,channel_count,
-                       results,
-                       NULL,
-                       NULL,
-                       NULL,
-                       raw_time);
-
-            print_me_ts_get_result(first_address,last_address,channel_count,
-                           results);
-                           */
-        }
-
-        qDebug("sync");
-    } break;
-    case false: {
-        ret = me_ts_noise_floor_async(this->getDescriptor(),
-                                      first_address, last_address, channel_count,
-                                      bytes_in_channel, bytes_in_module, bytes_in_line,
-                                      results, &last_address_actual);
-
-        if (ret < 0)
-            qDebug("Can't me_ts_noise_floor_async (last_address_actual = %d) (ret = 0x%.2x)\n", last_address_actual, -ret);
-        else {
-            /*
-            if( wait_test_with_error_handler(mole_descriptor)  )
-            {
-                save_summary_table((std::string(default_tests_folder) + std::string("/") + folder_name_date).c_str(),
-                           first_address,last_address,channel_count,
-                           results,
-                           NULL,
-                           NULL,
-                           NULL,
-                           raw_time);
-
-                print_me_ts_get_result(first_address,last_address,channel_count,
-                               results);
+            if (ret < 0)
+                qDebug("[Error] Can't me_ts_noise_floor (last_address_actual = %d) (ret = 0x%.2x)\n",lastAddressActual, -ret);
+            else {
+                qDebug("[Success] me_ts_noise_floor");
             }
-            */
-        }
-        qDebug("async");
-    } break;
-    };
+        } break;
+        case false: {
+            ret = me_ts_noise_floor_async(descriptor, firstAddress, lastAddress, channelCount,
+                                          bytesInChannel, bytesInModule, bytesInLine,
+                                          results, &lastAddressActual);
 
+            if (ret < 0)
+                qDebug("Can't me_ts_noise_floor_async (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
+            else {
+                qDebug("testNoiseFloor async success");
+                //if (wait_test_with_error_handler(descriptor)) {
+                //}
+            }
+        } break;
+    }
     delete[] results;
+    return ret;
+}
+
+/*
+ * Mole test total harmonic distortion
+ * @param bool isSync
+ *
+ * @return int ret;
+ */
+int Mole::testTotalHarmonicDistortion(bool isSync) {
+    int ret;
+    qDebug("---> test: total harmonic distortion\n");
+    me_ts_result_channel_t *results = new me_ts_result_channel_t[me_get_module_count(firstAddress, lastAddress) * channelCount];
+    switch(isSync) {
+        case true: {
+            ret = me_ts_total_harmonic_distortion(descriptor, firstAddress, lastAddress, channelCount,
+                                                  bytesInChannel, bytesInModule, bytesInLine,
+                                                  results, &lastAddressActual);
+
+            if (ret < 0)
+                qDebug("Can't me_ts_total_harmonic_distortion (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
+            else {
+                qDebug("[Success] me_ts_total_harmonic_distortion");
+            }
+        } break;
+        case false: {
+            ret = me_ts_total_harmonic_distortion_async(descriptor, firstAddress, lastAddress, channelCount,
+                                    bytesInChannel, bytesInModule,bytesInLine,
+                                    results, &lastAddressActual);
+
+            if (ret < 0)
+                qDebug("Can't me_ts_total_harmonic_distortion_async (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
+            else {
+                qDebug("[Success] me_ts_total_harmonic_distortion_async");
+            }
+        } break;
+    }
+    delete[] results;
+    return ret;
+}
+
+/*
+ * Mole test zero shift
+ * @param bool isSync
+ *
+ * @return int ret
+ */
+int Mole::testZeroShift(bool isSync) {
+    int ret;
+    me_ts_result_channel_t *results = new me_ts_result_channel_t[me_get_module_count(firstAddress, lastAddress) * channelCount];
+    switch(isSync) {
+        case true: {
+            ret = me_ts_zero_shift(descriptor, firstAddress, lastAddress, channelCount,
+                                   bytesInChannel, bytesInModule, bytesInLine,
+                                   results, &lastAddressActual);
+            if (ret < 0)
+                qDebug("[Error] Can't me_ts_zero_shift (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual,-ret);
+            else {
+                qDebug("[Success] me_ts_zero_shift");
+            }
+        } break;
+        case false: {
+            ret = me_ts_zero_shift_async(descriptor, firstAddress, lastAddress, channelCount,
+                                         bytesInChannel, bytesInModule, bytesInLine,
+                                         results, &lastAddressActual);
+            if (ret < 0)
+                qDebug("[Error] Can't me_ts_zero_shift_async (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual,-ret);
+            else {
+                qDebug("[Success] me_ts_zero_shift_async");
+            }
+        } break;
+    }
+    delete[] results;
+    return ret;
+}
+
+/*
+ * Mole test common mode rejection
+ * @param bool isSync
+ *
+ * @return int ret
+ */
+int Mole::testCommonModeRejection(bool isSync) {
+    int ret;
+    me_ts_result_channel_t *results = new me_ts_result_channel_t[me_get_module_count(firstAddress, lastAddress) * channelCount];
+    switch(isSync) {
+        case true: {
+            ret = me_ts_common_mode_rejection(descriptor, firstAddress, lastAddress, channelCount,
+                                              bytesInChannel, bytesInModule, bytesInLine,
+                                              results, &lastAddressActual);
+            if (ret < 0)
+                qDebug("[Error] Can't me_ts_common_mode_rejection (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
+            else {
+                qDebug("[Success] me_ts_common_mode_rejection");
+            }
+        } break;
+        case false: {
+            ret = me_ts_common_mode_rejection_async(descriptor, firstAddress, lastAddress, channelCount,
+                                                    bytesInChannel, bytesInModule, bytesInLine,
+                                                    results, &lastAddressActual);
+            if (ret < 0)
+                qDebug("[Error] Can't me_ts_common_mode_rejection_async (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
+            else {
+                qDebug("[Success] me_ts_common_mode_rejection_async");
+            }
+        } break;
+    }
+    delete[] results;
+    return ret;
 }
 
 Mole *Mole::instance = NULL;

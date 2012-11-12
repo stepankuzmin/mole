@@ -22,6 +22,10 @@ int main(int argc, char *argv[])
 
     QObject::connect(&w, SIGNAL(showRegistrationSettingsDialog()), &registrationSettingsDialog, SLOT(show()));
     QObject::connect(mole, SIGNAL(stageChanged(me_test_suite_stage)), &w, SLOT(setStage(me_test_suite_stage)));
+
+    QObject::connect(mole, SIGNAL(dataDump(uint8,uint8,uint16,QList<double>,QList<double>)),
+                     &w, SLOT(plotData(uint8,uint8,uint16,QList<double>,QList<double>)));
+
     //QObject::connect(mole, SIGNAL(stateChange(QString)), &w, SLOT(setStatusBarText(QString)));
     
     return a.exec();

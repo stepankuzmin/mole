@@ -1,6 +1,7 @@
 #ifndef MOLE_H
 #define MOLE_H
 
+#include <QList>
 #include <QObject>
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine.h"
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine-test-suite.h"
@@ -39,7 +40,10 @@ public:
     int hostMount();
     int hostUnmount();
     int testGainCoefficients(bool isSync);
-    void testNoiseFloor(bool isSync);
+    int testNoiseFloor(bool isSync);
+    int testTotalHarmonicDistortion(bool isSync);
+    int testZeroShift(bool isSync);
+    int testCommonModeRejection(bool isSync);
 
 private:
     int descriptor;
@@ -65,9 +69,13 @@ private:
                                      uint8 bytes_in_module, uint16 bytes_in_line,
                                      me_mole_module_datarate datarate,
                                      me_mole_module_gain gain,
-                                     uint16 samples, uint8 *seismic_data);
+                                     uint16 samples, uint8 *samples_data);
 
     void emitStageChanged(me_test_suite_stage stage);
+
+    void emitDataDump(uint8 moduleIndex, uint8 channelIndex,
+                       uint16 size, QList<double> samples, QList<double> data);
+
     static void stageChangedCallbackHandler(int mole_descriptor,
                                             me_test_suite_stage test_suite_stage);
 
@@ -76,6 +84,10 @@ protected:
     
 signals:
     void stageChanged(me_test_suite_stage stage);
+
+    void dataDump(uint8 moduleIndex, uint8 channelIndex,
+                   uint16 size, QList<double> samples, QList<double> data);
+
     //void stateChange(const QString&);
     //void stateChange(MoleState state);
     
