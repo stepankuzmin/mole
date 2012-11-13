@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+  <namespace>com.ursmu.mole</namespace>
+  <virtualFolder>doc</virtualFolder>
+  <filterSection>
+    <toc>
+      <section title="Mole" ref="index.html"></section>
+    </toc>
+  </filterSection>
+</QtHelpProject>
