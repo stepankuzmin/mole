@@ -6,5 +6,8 @@
     <toc>
       <section title="Mole" ref="index.html"></section>
     </toc>
+    <files>
+      <file>index.html</file>
+    </files>
   </filterSection>
 </QtHelpProject>

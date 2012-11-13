@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include "mole.h"
+#include <assistant.h>
+
 #include <QMainWindow>
 #include <QProgressBar>
 
@@ -51,8 +53,11 @@ private slots:
     void on_actionTestZeroShiftSync_triggered();
     void on_actionTestCommonModeRejectionSync_triggered();
 
+    void on_actionHelp_triggered();
+
 private:
     Ui::MainWindow *ui;
+    Assistant *assistant;
     QProgressBar *progressBar;
     QwtPlot *plot[6][3]; // 6 геофонов по три канала
     QwtPlotCurve *curve[6][3];

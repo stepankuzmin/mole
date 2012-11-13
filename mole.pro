@@ -26,7 +26,8 @@ win32: LIBS += -L$$PWD/3rdparty/mole-engine/lib/ -lmole-engine
 SOURCES += main.cpp\
         mainwindow.cpp \
         mole.cpp \
-        registrationsettingsdialog.cpp
+        registrationsettingsdialog.cpp \
+    assistant.cpp
 
 HEADERS  += mainwindow.h \
             mole.h \
@@ -36,6 +37,7 @@ HEADERS  += mainwindow.h \
             3rdparty/mole-engine/include/seg/Segy.h \
             3rdparty/mole-engine/include/shared/config.h \
             3rdparty/mole-engine/include/shared/common.h \
+    assistant.h
 
 FORMS    += mainwindow.ui \
             registrationsettingsdialog.ui

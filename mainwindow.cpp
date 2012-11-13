@@ -16,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->retranslateUi(this);
 
+    assistant = new Assistant();
+
     ui->progressBar->setTextVisible(false);
     ui->progressBar->setRange(0, 5);
 
@@ -25,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
         this->ui->COMPortComboBox->addItem(ports.at(i).friendName, QVariant(ports.at(i).portName));
     }
 
+    /*
     int ik;
     double jk;
     const int Size = 1000;
@@ -37,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
         yval[ik] = qSin(jk);
         jk+=0.1;
     }
+    */
 
     int geophonesCount = 6;
     int channelsCount = 3;
@@ -358,4 +362,9 @@ void MainWindow::on_actionClear_plots_triggered() {
             plot[i][j]->detachItems();
             plot[i][j]->replot();
         }
+}
+
+void MainWindow::on_actionHelp_triggered()
+{
+    assistant->showDocumentation("index.html");
 }
