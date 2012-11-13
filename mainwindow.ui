@@ -49,9 +49,12 @@
           <bool>false</bool>
          </property>
          <property name="title">
-          <string>Tests (sync)</string>
+          <string>Test suite (syncronous)</string>
          </property>
          <property name="flat">
+          <bool>false</bool>
+         </property>
+         <property name="checkable">
           <bool>false</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -146,6 +149,13 @@
              </widget>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QProgressBar" name="progressBar">
+            <property name="value">
+             <number>24</number>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="startTestsPushButton">
@@ -275,6 +285,9 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionRegistration">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Registration settings</string>
    </property>

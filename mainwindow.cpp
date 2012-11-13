@@ -16,6 +16,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->retranslateUi(this);
 
+    ui->progressBar->setTextVisible(false);
+    ui->progressBar->setRange(0, 5);
+
     // Connection settings
     QList<QextPortInfo> ports = QextSerialEnumerator::getPorts();
     for (int i=0; i<ports.size(); i++) {
@@ -282,6 +285,7 @@ void MainWindow::on_connectPushButton_toggled(bool checked)
             }
             else {
                 qDebug() << "[Success] Host mounted";
+                ui->actionRegistration->setEnabled(true);
                 ui->menuTests->setEnabled(true);
                 ui->testsGroupBox->setEnabled(true);
                 ui->connectPushButton->setText(tr("Disconnect"));
@@ -299,6 +303,7 @@ void MainWindow::on_connectPushButton_toggled(bool checked)
                 qDebug() << "[Error] Can't close connection";
             else {
                 qDebug() << "[Success] Connection closed";
+                ui->actionRegistration->setEnabled(false);
                 ui->menuTests->setEnabled(false);
                 ui->testsGroupBox->setEnabled(false);
                 ui->connectPushButton->setText(tr("Connect"));
@@ -309,25 +314,39 @@ void MainWindow::on_connectPushButton_toggled(bool checked)
 }
 
 void MainWindow::on_startTestsPushButton_clicked() {
+    ui->startTestsPushButton->setText(tr("Stop"));
+    ui->startTestsPushButton->setEnabled(false);
     if (ui->gainCoefficientsTestCheckBox->isChecked()) {
+        ui->gainCoefficientsStatusLabel->setText(tr("In progress"));
         on_actionTestGainCoefficientsSync_triggered();
     }
+    ui->progressBar->setValue(1);
 
     if (ui->noiseFloorTestCheckBox->isChecked()) {
+        ui->noiseFloorStatusLabel->setText(tr("In progress"));
         on_actionTestNoiseFloorSync_triggered();
     }
+    ui->progressBar->setValue(2);
 
     if (ui->totalHarmonicDistortionTestCheckBox->isChecked()) {
+        ui->totalHarmonicDistortionStatusLabel->setText(tr("In progress"));
         on_actionTestTotalHarmonicDistortionSync_triggered();
     }
+    ui->progressBar->setValue(3);
 
     if (ui->zeroShiftCheckBox->isChecked()) {
+        ui->zeroShiftStatusLabel->setText(tr("In progress"));
         on_actionTestZeroShiftSync_triggered();
     }
+    ui->progressBar->setValue(4);
 
     if (ui->commonModeRejectionCheckBox->isChecked()) {
+        ui->commonModeRejectionStatusLabel->setText(tr("In progress"));
         on_actionTestCommonModeRejectionSync_triggered();
     }
+    ui->progressBar->setValue(5);
+    ui->startTestsPushButton->setText(tr("Start"));
+    ui->startTestsPushButton->setEnabled(true);
 }
 
 /*

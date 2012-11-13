@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>RegistrationSettingsDialog</class>
  <widget class="QDialog" name="RegistrationSettingsDialog">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>428</width>
-    <height>344</height>
+    <width>375</width>
+    <height>199</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,13 +23,6 @@
       <string/>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="3" column="0">
-       <widget class="QLabel" name="inputLabel">
-        <property name="text">
-         <string>Input</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="1">
        <widget class="QComboBox" name="moduleDatarateComboBox">
         <property name="editable">
@@ -41,13 +37,10 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QComboBox" name="inputComboBox"/>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="modeLabel">
+      <item row="2" column="2">
+       <widget class="QPushButton" name="setDataratePushButton">
         <property name="text">
-         <string>Module mode</string>
+         <string>Set</string>
         </property>
        </widget>
       </item>
@@ -61,17 +54,10 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <widget class="QPushButton" name="setDataratePushButton">
+      <item row="0" column="0">
+       <widget class="QLabel" name="modeLabel">
         <property name="text">
-         <string>Set</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QPushButton" name="setInputPushButton">
-        <property name="text">
-         <string>Set</string>
+         <string>Module mode</string>
         </property>
        </widget>
       </item>
@@ -129,6 +115,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>moduleModeComboBox</tabstop>
+  <tabstop>setModuleModePushButton</tabstop>
+  <tabstop>moduleDatarateComboBox</tabstop>
+  <tabstop>setDataratePushButton</tabstop>
+  <tabstop>testGeneratorModeComboBox</tabstop>
+  <tabstop>setTestGeneratorModePushButton</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

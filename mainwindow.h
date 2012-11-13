@@ -3,6 +3,7 @@
 
 #include "mole.h"
 #include <QMainWindow>
+#include <QProgressBar>
 
 #include <qwt_plot.h>
 #include <qwt_plot_marker.h>
@@ -44,19 +45,15 @@ private slots:
     void on_actionTestGainCoefficientsAsync_triggered();
     void on_actionTestNoiseFloorSync_triggered();
     void on_connectPushButton_toggled(bool checked);
-
     void on_startTestsPushButton_clicked();
-
     void on_actionClear_plots_triggered();
-
     void on_actionTestTotalHarmonicDistortionSync_triggered();
-
     void on_actionTestZeroShiftSync_triggered();
-
     void on_actionTestCommonModeRejectionSync_triggered();
 
 private:
     Ui::MainWindow *ui;
+    QProgressBar *progressBar;
     QwtPlot *plot[6][3]; // 6 геофонов по три канала
     QwtPlotCurve *curve[6][3];
 
