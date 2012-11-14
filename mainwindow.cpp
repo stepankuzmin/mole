@@ -196,11 +196,9 @@ void MainWindow::on_actionTestGainCoefficientsSync_triggered()
 
     if (ret < 0) {
         ui->gainCoefficientsStatusLabel->setText(tr("<font color='red'>Failed</font"));
-        //QMessageBox::critical(0, "Error", "Gain coefficients test failed.");
     }
     else {
         ui->gainCoefficientsStatusLabel->setText(tr("<font color='green'>Succeed</font"));
-        //QMessageBox::information(0, "Information", "Gain coefficients test succeed.");
     }
 }
 
@@ -291,10 +289,10 @@ void MainWindow::on_connectPushButton_toggled(bool checked)
                 qDebug() << "[Success] Host mounted";
                 ui->actionRegistration->setEnabled(true);
                 ui->menuTests->setEnabled(true);
-                ui->testsGroupBox->setEnabled(true);
                 ui->connectPushButton->setText(tr("Disconnect"));
+                ui->startConversionPushButton->setEnabled(true);
+                ui->testsGroupBox->setEnabled(true);
                 ui->statusBar->showMessage(tr("Status: host mounted"));
-
             }
         }
     }
@@ -309,8 +307,9 @@ void MainWindow::on_connectPushButton_toggled(bool checked)
                 qDebug() << "[Success] Connection closed";
                 ui->actionRegistration->setEnabled(false);
                 ui->menuTests->setEnabled(false);
-                ui->testsGroupBox->setEnabled(false);
                 ui->connectPushButton->setText(tr("Connect"));
+                ui->startConversionPushButton->setEnabled(false);
+                ui->testsGroupBox->setEnabled(false);
                 ui->statusBar->showMessage(tr("Status: host unmounted"));
             }
         }
@@ -367,4 +366,34 @@ void MainWindow::on_actionClear_plots_triggered() {
 void MainWindow::on_actionHelp_triggered()
 {
     assistant->showDocumentation("index.html");
+}
+
+void MainWindow::on_startConversionPushButton_toggled(bool checked)
+{
+    Mole *mole = Mole::getInstance();
+    if (checked) {
+        if (mole->startConversion(4000, ME_MCS_EXTERNAL) < 0)
+            qDebug("[Error] me_host_start_conversion");
+        else {
+            qDebug("[Success] me_host_start_conversion");
+            ui->startConversionPushButton->setText(tr("Stop conversion"));
+            ui->statusBar->showMessage(tr("[Status] Conversation started"));
+
+            mole->getHostState();
+            //uint8 samplesData;
+
+            //mole->getSamplesDataAsync(4000, &samplesData);
+            //qDebug() << "samples data:";
+            //qDebug() << samplesData;
+        }
+    }
+    else {
+        if (mole->stopConversion() < 0)
+            qDebug("[Error] me_host_stop_conversion");
+        else {
+            qDebug("[Success] me_host_stop_conversion");
+            ui->startConversionPushButton->setText(tr("Start conversion"));
+            ui->statusBar->showMessage(tr("[Status] Conversation stopped"));
+        }
+    }
 }

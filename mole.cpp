@@ -85,8 +85,6 @@ void Mole::samplesDataCallbackHandler(int mole_descriptor,
 
     QList<double> samplesList;
     QList<double> dataList;
-    //QList<uint16> samplesList;
-    //QList<int32> dataList;
 
     for(uint8 moduleIndex = 0; moduleIndex < me_get_module_count(first_address, last_address); ++moduleIndex) {
         for(uint8 channelIndex = 0; channelIndex < channel_count; ++channelIndex) {
@@ -356,6 +354,67 @@ uint8 Mole::getLastAddressActual() {
     return this->lastAddressActual;
 }
 
+int Mole::getHostState() {
+    int ret;
+
+    me_mole_host_state hostState = ME_MHS_COUNT;
+    uint16 samplesInBuffer = 0;
+
+    ret =  me_host_state(descriptor, &hostState, &moduleMode, &samplesInBuffer);
+    qDebug("me_get_retries = %d\n", me_get_retries(descriptor));
+
+    if (ret < 0)
+        qDebug("[Error] Can't me_host_state (ret = 0x%.2x)", -ret);
+    else
+        qDebug("[Success] me_host_state");
+
+    switch(hostState) {
+        case ME_MHS_IDLE: {
+            qDebug("host state: ME_MHS_IDLE");
+        } break;
+        case ME_MHS_CONFIGURE_MODULES: {
+            qDebug("host state: ME_MHS_CONFIGURE_MODULES");
+        } break;
+        case ME_MHS_CONVERSION: {
+            qDebug("host state: ME_MHS_CONVERSION");
+        } break;
+        case ME_MHS_TEST: {
+            qDebug("host state: ME_MHS_TEST");
+        } break;
+    }
+
+    switch(moduleMode) {
+        case ME_MMM_SLEEP: {
+            qDebug("modules mode: ME_MMM_SLEEP");
+        } break;
+        case ME_MMM_SEISMIC: {
+            qDebug("modules mode: ME_MMM_SEISMIC");
+        } break;
+        case ME_MMM_INCLINOMETER: {
+            qDebug("modules mode: ME_MMM_INCLINOMETER");
+        } break;
+    }
+    qDebug("samples in buffer: %u\n", samplesInBuffer);
+
+    return ret;
+}
+
+/*
+ * Прочитать заданное число отсчётов
+ */
+int Mole::getSamplesData(uint16 samples, uint8 *samplesData) {
+    // @TODO: return samplesData
+    return me_host_get_samples_data(descriptor, samples, samplesData);
+}
+
+/*
+ * Асинхронно прочитать заданное число отсчётов
+ */
+int Mole::getSamplesDataAsync(uint16 samples, uint8 *samplesData) {
+    // @TODO: return samplesData
+    return me_host_get_samples_data_async(descriptor, samples, samplesData);
+}
+
 /*
  * Set module mode
  * @param me_mole_module_mode moduleMode
@@ -477,6 +536,38 @@ int Mole::setModuleTestGeneratorAll(me_mole_module_test_generator testGenerator)
         qDebug("[Success] me_module_set_test_generator_all");
 
     return ret;
+}
+
+/*
+ * Установить тип входного сигнала для всех модулей
+ * @param me_mole_module_input input тип входного сигнала
+ *
+ * @return int ret
+ */
+int Mole::setModuleInputAll(me_mole_module_input input) {
+    int ret;
+    ret = me_module_set_input_all(descriptor, input, lastAddress, &lastAddressActual);
+    if (ret < 0)
+        qDebug("[Error] Can't me_module_set_input_all (last_address_actual = %d) (ret = 0x%.2x)\n", lastAddressActual, -ret);
+    else
+        qDebug("[Success] me_module_set_input_all");
+}
+
+/*
+ * Начать регистрацию данных
+ * @param uint16 samples - количество дискретов
+ * @param me_mole_conversion_synchronization conversionSynchronization
+ */
+int Mole::startConversion(uint16 samples, me_mole_conversion_synchronization conversionSynchronization) {
+    return me_host_start_conversion(descriptor, samples, conversionSynchronization);
+}
+
+/*
+ * Остановить регистрацию данных
+ * @return int
+ */
+int Mole::stopConversion() {
+    return me_host_stop_conversion(descriptor);
 }
 
 /*

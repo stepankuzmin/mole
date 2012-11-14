@@ -12,6 +12,13 @@ RegistrationSettingsDialog::RegistrationSettingsDialog(QWidget *parent) :
     ui->moduleModeComboBox->addItem("Seismic",      QVariant(ME_MMM_SEISMIC));
     ui->moduleModeComboBox->addItem("Inclinometer", QVariant(ME_MMM_INCLINOMETER));
 
+    ui->inputModeComboBox->addItem("ME_MMI_TERMINATOR", QVariant(ME_MMI_TERMINATOR));
+    ui->inputModeComboBox->addItem("ME_MMI_GEOPHONE", QVariant(ME_MMI_GEOPHONE));
+    ui->inputModeComboBox->addItem("ME_MMI_SIN", QVariant(ME_MMI_SIN));
+    ui->inputModeComboBox->addItem("ME_MMI_IN_PHASE", QVariant(ME_MMI_IN_PHASE));
+    ui->inputModeComboBox->addItem("ME_MMI_GEOPHONE_WITH_SIN", QVariant(ME_MMI_GEOPHONE_WITH_SIN));
+    ui->inputModeComboBox->addItem("ME_MMI_COUNT", QVariant(ME_MMI_COUNT));
+
     ui->testGeneratorModeComboBox->addItem("ON", QVariant(ME_MMTG_ON));
     ui->testGeneratorModeComboBox->addItem("OFF", QVariant(ME_MMTG_OFF));
 
@@ -78,6 +85,31 @@ void RegistrationSettingsDialog::on_setTestGeneratorModePushButton_clicked()
         } break;
         case ME_MMTG_ON: {
             mole->setModuleTestGeneratorAll(ME_MMTG_OFF);
+        } break;
+    }
+}
+
+void RegistrationSettingsDialog::on_setInputModePushButton_clicked()
+{
+    Mole *mole = Mole::getInstance();
+    switch (ui->testGeneratorModeComboBox->itemData(ui->testGeneratorModeComboBox->currentIndex()).toInt()) {
+        case ME_MMI_TERMINATOR: {
+            mole->setModuleInputAll(ME_MMI_TERMINATOR);
+        } break;
+        case ME_MMI_GEOPHONE: {
+            mole->setModuleInputAll(ME_MMI_GEOPHONE);
+        } break;
+        case ME_MMI_SIN: {
+            mole->setModuleInputAll(ME_MMI_SIN);
+        } break;
+        case ME_MMI_IN_PHASE: {
+            mole->setModuleInputAll(ME_MMI_IN_PHASE);
+        } break;
+        case ME_MMI_GEOPHONE_WITH_SIN: {
+            mole->setModuleInputAll(ME_MMI_GEOPHONE_WITH_SIN);
+        } break;
+        case ME_MMI_COUNT: {
+            mole->setModuleInputAll(ME_MMI_COUNT);
         } break;
     }
 }

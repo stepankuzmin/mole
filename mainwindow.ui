@@ -44,6 +44,19 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="startConversionPushButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Start conversion</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="testsGroupBox">
          <property name="enabled">
           <bool>false</bool>

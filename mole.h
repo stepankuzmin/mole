@@ -33,6 +33,10 @@ public:
     uint16 getMaximumSamples();
     uint8 getLastAddressActual();
 
+    int getHostState();
+    int getSamplesData(uint16 samples, uint8 *samplesData);
+    int getSamplesDataAsync(uint16 samples, uint8 *samplesData);
+
     int setModuleMode(me_mole_module_mode moduleMode);
     int setModuleGainAll(me_mole_module_gain moduleGain);
     int setModuleGainXAll(me_mole_module_gain moduleGain);
@@ -40,9 +44,14 @@ public:
     int setModuleGainZAll(me_mole_module_gain moduleGain);
     int setModuleDatarate(me_mole_module_datarate moduleDatarate);
     int setModuleTestGeneratorAll(me_mole_module_test_generator testGenerator = ME_MMTG_COUNT);
+    int setModuleInputAll(me_mole_module_input input = ME_MMI_COUNT);
 
     int hostMount();
     int hostUnmount();
+
+    int startConversion(uint16 samples, me_mole_conversion_synchronization conversionSynchronization);
+    int stopConversion();
+
     int testGainCoefficients(bool isSync);
     int testNoiseFloor(bool isSync);
     int testTotalHarmonicDistortion(bool isSync);

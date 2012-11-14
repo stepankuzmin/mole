@@ -25,6 +25,8 @@ private slots:
 
     void on_setTestGeneratorModePushButton_clicked();
 
+    void on_setInputModePushButton_clicked();
+
 private:
     Ui::RegistrationSettingsDialog *ui;
 };

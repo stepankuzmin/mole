@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>375</width>
-    <height>199</height>
+    <width>425</width>
+    <height>358</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,6 +58,32 @@
        <widget class="QLabel" name="modeLabel">
         <property name="text">
          <string>Module mode</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="inputGroupBox">
+     <property name="title">
+      <string>Input</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Set input mode for all modules</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="inputModeComboBox"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="setInputModePushButton">
+        <property name="text">
+         <string>Set</string>
         </property>
        </widget>
       </item>

@@ -47,12 +47,12 @@ private slots:
     void on_actionTestGainCoefficientsAsync_triggered();
     void on_actionTestNoiseFloorSync_triggered();
     void on_connectPushButton_toggled(bool checked);
+    void on_startConversionPushButton_toggled(bool checked);
     void on_startTestsPushButton_clicked();
     void on_actionClear_plots_triggered();
     void on_actionTestTotalHarmonicDistortionSync_triggered();
     void on_actionTestZeroShiftSync_triggered();
     void on_actionTestCommonModeRejectionSync_triggered();
-
     void on_actionHelp_triggered();
 
 private:
