@@ -26,6 +26,9 @@ int main(int argc, char *argv[])
     QObject::connect(mole, SIGNAL(dataDump(uint8,uint8,uint16,QList<double>,QList<double>)),
                      &w, SLOT(plotData(uint8,uint8,uint16,QList<double>,QList<double>)));
 
+    QObject::connect(mole, SIGNAL(dataDump2(uint8,uint8,uint16,QVector<double>,QVector<double>)),
+                     &w, SLOT(plotData2(uint8,uint8,uint16,QVector<double>,QVector<double>)));
+
     //QObject::connect(mole, SIGNAL(stateChange(QString)), &w, SLOT(setStatusBarText(QString)));
     
     return a.exec();

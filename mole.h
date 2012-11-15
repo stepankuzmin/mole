@@ -2,6 +2,7 @@
 #define MOLE_H
 
 #include <QList>
+#include <QVector>
 #include <QObject>
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine.h"
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine-test-suite.h"
@@ -34,6 +35,7 @@ public:
     uint8 getLastAddressActual();
 
     int getHostState();
+    int getSamplesData2(uint16 samples);
     int getSamplesData(uint16 samples, uint8 *samplesData);
     int getSamplesDataAsync(uint16 samples, uint8 *samplesData);
 
@@ -89,6 +91,9 @@ private:
     void emitDataDump(uint8 moduleIndex, uint8 channelIndex,
                        uint16 size, QList<double> samples, QList<double> data);
 
+    void emitDataDump2(uint8 moduleIndex, uint8 channelIndex, uint16 size,
+                      QVector<double> samples, QVector<double> data);
+
     static void stageChangedCallbackHandler(int mole_descriptor,
                                             me_test_suite_stage test_suite_stage);
 
@@ -100,6 +105,9 @@ signals:
 
     void dataDump(uint8 moduleIndex, uint8 channelIndex,
                    uint16 size, QList<double> samples, QList<double> data);
+
+    void dataDump2(uint8 moduleIndex, uint8 channelIndex, uint16 size,
+                  QVector<double> samples, QVector<double> data);
 
     //void stateChange(const QString&);
     //void stateChange(MoleState state);

@@ -4,6 +4,8 @@
 #include "mole.h"
 #include <assistant.h>
 
+#include <QVector>
+#include <QTimer>
 #include <QMainWindow>
 #include <QProgressBar>
 
@@ -41,6 +43,9 @@ public slots:
     void plotData(uint8 moduleIndex, uint8 channelIndex,
                    uint16 size, QList<double> samples, QList<double> data);
 
+    void plotData2(uint8 moduleIndex, uint8 channelIndex, uint16 size,
+                  QVector<double> samples, QVector<double> data);
+
 private slots:
     void on_actionRegistration_triggered();
     void on_actionTestGainCoefficientsSync_triggered();
@@ -54,6 +59,7 @@ private slots:
     void on_actionTestZeroShiftSync_triggered();
     void on_actionTestCommonModeRejectionSync_triggered();
     void on_actionHelp_triggered();
+    void getConversationData();
 
 private:
     Ui::MainWindow *ui;
@@ -61,6 +67,11 @@ private:
     QProgressBar *progressBar;
     QwtPlot *plot[6][3]; // 6 геофонов по три канала
     QwtPlotCurve *curve[6][3];
+
+    QVector<double> *samplesVector[6][3];
+    QVector<double> *dataVector[6][3];
+
+    QTimer *timer;
 
     QVector< QVector<QwtPlot*> > *vplot;
 };

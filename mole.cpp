@@ -83,6 +83,7 @@ void Mole::samplesDataCallbackHandler(int mole_descriptor,
     }
     }
 
+    // @TODO:: QVector instead of QList
     QList<double> samplesList;
     QList<double> dataList;
 
@@ -176,6 +177,11 @@ void Mole::emitStageChanged(me_test_suite_stage stage) {
 void Mole::emitDataDump(uint8 moduleIndex, uint8 channelIndex,
                          uint16 size, QList<double> samples, QList<double> data) {
     emit dataDump(moduleIndex, channelIndex, size, samples, data);
+}
+
+void Mole::emitDataDump2(uint8 moduleIndex, uint8 channelIndex, uint16 size,
+                         QVector<double> samples, QVector<double> data) {
+    emit dataDump2(moduleIndex, channelIndex, size, samples, data);
 }
 
 /*
@@ -403,8 +409,30 @@ int Mole::getHostState() {
  * Прочитать заданное число отсчётов
  */
 int Mole::getSamplesData(uint16 samples, uint8 *samplesData) {
-    // @TODO: return samplesData
-    return me_host_get_samples_data(descriptor, samples, samplesData);
+    qDebug() << "[getSamplesData] " << qrand();
+
+    QVector<double> samplesVector;
+    QVector<double> dataVector;
+
+    uint8 *samplesData2 = new uint8[me_get_module_count(firstAddress, lastAddress) * channelCount * 10000];
+
+    for(uint8 moduleIndex = 0; moduleIndex < me_get_module_count(firstAddress, lastAddress); ++moduleIndex) {
+        for(uint8 channelIndex = 0; channelIndex < channelCount; ++channelIndex) {
+            for (uint16 sample = 0; sample < samples; ++sample) {
+                trace_data_t data = me_get_seismic_sample_data(moduleIndex, sample, channelIndex,
+                                           firstAddress, lastAddress,
+                                           bytesInChannel, bytesInModule, bytesInLine,
+                                           samplesData2);
+                samplesVector << sample;
+                dataVector << data;
+            }
+            ptrMole->emitDataDump2(moduleIndex, channelIndex,
+                                  samples, samplesVector, dataVector);
+
+            samplesVector.clear();
+            dataVector.clear();
+        }
+    }
 }
 
 /*

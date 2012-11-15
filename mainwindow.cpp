@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QLabel>
 #include <QDebug>
+#include <QTimer>
 #include <QMessageBox>
 #include <QProgressBar>
 #include "qextserialenumerator.h"
@@ -15,6 +16,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->retranslateUi(this);
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(getConversationData()));
 
     assistant = new Assistant();
 
@@ -88,6 +92,9 @@ MainWindow::MainWindow(QWidget *parent) :
             // Set data
              //this->curve[i][j]->setSamples(xval, yval, Size);
              //this->curve[i][j]->attach(this->plot[i][j]);
+
+            //this->samplesVector[i][j] = new QVector();
+            //this->dataVector[i][j] = new QVector();
 
              this->plot[i][j]->replot();
 
@@ -179,6 +186,34 @@ void MainWindow::plotData(uint8 moduleIndex, uint8 channelIndex, uint16 size, QL
     this->curve[module][channel]->setPen(QPen(Qt::white));
     this->curve[module][channel]->setSamples(samples.toVector(), data.toVector());
     this->curve[module][channel]->attach(this->plot[module][channel]);
+
+    this->plot[module][channel]->replot();
+}
+
+void MainWindow::plotData2(uint8 moduleIndex, uint8 channelIndex, uint16 size,
+                           QVector<double> samples, QVector<double> data) {
+    if (moduleIndex == 0)
+        return;
+
+    int module = moduleIndex - 1;
+    int channel = channelIndex;
+
+    //this->samplesVector[module][channel] << samples;
+    //this->dataVector[module][channel] += data;
+
+    // Remove previous curves
+    this->plot[module][channel]->detachItems();
+    this->plot[module][channel]->replot();
+
+    // Set data
+    this->curve[module][channel] = new QwtPlotCurve();
+    this->curve[module][channel]->setRenderHint(QwtPlotItem::RenderAntialiased);
+    this->curve[module][channel]->setPen(QPen(Qt::red));
+    this->curve[module][channel]->setSamples(samples, data);
+
+    this->curve[module][channel]->attach(this->plot[module][channel]);
+
+    //this->curve[module][channel]->get
 
     this->plot[module][channel]->replot();
 }
@@ -297,6 +332,10 @@ void MainWindow::on_connectPushButton_toggled(bool checked)
         }
     }
     else {
+        // Stop conversion
+        if (ui->startConversionPushButton->isChecked()) {
+            on_startConversionPushButton_toggled(false);
+        }
         if (mole->hostUnmount() < 0)
             qDebug() << "[Error] Can't unmount host";
         else {
@@ -372,22 +411,17 @@ void MainWindow::on_startConversionPushButton_toggled(bool checked)
 {
     Mole *mole = Mole::getInstance();
     if (checked) {
-        if (mole->startConversion(4000, ME_MCS_EXTERNAL) < 0)
+        if (mole->startConversion(1000, ME_MCS_EXTERNAL) < 0)
             qDebug("[Error] me_host_start_conversion");
         else {
             qDebug("[Success] me_host_start_conversion");
             ui->startConversionPushButton->setText(tr("Stop conversion"));
             ui->statusBar->showMessage(tr("[Status] Conversation started"));
-
-            mole->getHostState();
-            //uint8 samplesData;
-
-            //mole->getSamplesDataAsync(4000, &samplesData);
-            //qDebug() << "samples data:";
-            //qDebug() << samplesData;
+            timer->start(5000);
         }
     }
     else {
+        timer->stop();
         if (mole->stopConversion() < 0)
             qDebug("[Error] me_host_stop_conversion");
         else {
@@ -396,4 +430,16 @@ void MainWindow::on_startConversionPushButton_toggled(bool checked)
             ui->statusBar->showMessage(tr("[Status] Conversation stopped"));
         }
     }
+}
+
+void MainWindow::getConversationData() {
+    Mole *mole = Mole::getInstance();
+
+    uint8 firstAddress = mole->getFirstAddress();
+    uint8 lastAddress = mole->getLastAddress();
+    uint8 channelCount = mole->getChannelCount();
+    int size = me_get_module_count(firstAddress, lastAddress) * channelCount * 10000;
+    uint8 *samplesData = new uint8[size];
+
+    mole->getSamplesData(1000, samplesData);
 }
