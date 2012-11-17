@@ -210,10 +210,7 @@ void MainWindow::plotData2(uint8 moduleIndex, uint8 channelIndex, uint16 size,
     this->curve[module][channel]->setRenderHint(QwtPlotItem::RenderAntialiased);
     this->curve[module][channel]->setPen(QPen(Qt::red));
     this->curve[module][channel]->setSamples(samples, data);
-
     this->curve[module][channel]->attach(this->plot[module][channel]);
-
-    //this->curve[module][channel]->get
 
     this->plot[module][channel]->replot();
 }

@@ -22,3 +22,9 @@
 
 # QExtSerialPort
 include/qextserialport
+
+# Makefiles
+Makefile*
+
+# UI
+ui_*
