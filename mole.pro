@@ -22,6 +22,7 @@ win32: INCLUDEPATH += $$PWD/3rdparty/Qwt-6.0.1/include
 win32: LIBS += -L$$PWD/3rdparty/Qwt-6.0.1/lib -lqwt
 win32: LIBS += -L$$PWD/3rdparty/mole-engine/include
 win32: LIBS += -L$$PWD/3rdparty/mole-engine/lib/ -lmole-engine
+win32: include(3rdparty/qextserialport/src/qextserialport.pri)
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -42,3 +43,4 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui \
             registrationsettingsdialog.ui
 
+ RC_FILE = resources.rc

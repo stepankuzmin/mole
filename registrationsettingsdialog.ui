@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>425</width>
-    <height>358</height>
+    <width>375</width>
+    <height>394</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,48 +18,86 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="registrationSettingsGroupBox">
+    <widget class="QGroupBox" name="RegistrationModeGroupBox">
      <property name="title">
-      <string/>
+      <string>Registration mode</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="2" column="1">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QRadioButton" name="TestingModeRadioButton">
+        <property name="text">
+         <string>Testing</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="ExternalModeRadioButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>External</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="SoftwareModeRadioButton">
+        <property name="text">
+         <string>Software</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="moduleDatarateGroupBox">
+     <property name="title">
+      <string>Module datarate (milliseconds)</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
        <widget class="QComboBox" name="moduleDatarateComboBox">
         <property name="editable">
          <bool>true</bool>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="datarateLabel">
-        <property name="text">
-         <string>Datarate</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
+      <item>
        <widget class="QPushButton" name="setDataratePushButton">
         <property name="text">
          <string>Set</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="moduleModeComboBox"/>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="registrationSettingsGroupBox">
+     <property name="title">
+      <string/>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0">
+       <widget class="QLabel" name="modeLabel">
+        <property name="text">
+         <string>Module mode</string>
+        </property>
+       </widget>
       </item>
-      <item row="0" column="2">
+      <item row="1" column="2">
        <widget class="QPushButton" name="setModuleModePushButton">
         <property name="text">
          <string>Set</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="modeLabel">
-        <property name="text">
-         <string>Module mode</string>
-        </property>
-       </widget>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="moduleModeComboBox"/>
       </item>
      </layout>
     </widget>
@@ -145,8 +183,6 @@
   <tabstop>buttonBox</tabstop>
   <tabstop>moduleModeComboBox</tabstop>
   <tabstop>setModuleModePushButton</tabstop>
-  <tabstop>moduleDatarateComboBox</tabstop>
-  <tabstop>setDataratePushButton</tabstop>
   <tabstop>testGeneratorModeComboBox</tabstop>
   <tabstop>setTestGeneratorModePushButton</tabstop>
  </tabstops>

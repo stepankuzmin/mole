@@ -15,19 +15,28 @@ int main(int argc, char *argv[])
 
     Mole *mole = Mole::getInstance();
 
-    MainWindow w;
+    MainWindow mainWindow;
     RegistrationSettingsDialog registrationSettingsDialog;
 
-    w.showMaximized();
+    mainWindow.showMaximized();
 
-    QObject::connect(&w, SIGNAL(showRegistrationSettingsDialog()), &registrationSettingsDialog, SLOT(show()));
-    QObject::connect(mole, SIGNAL(stageChanged(me_test_suite_stage)), &w, SLOT(setStage(me_test_suite_stage)));
+    QObject::connect(&mainWindow,                   SIGNAL(showRegistrationSettingsDialog()),
+                     &registrationSettingsDialog,   SLOT(show()));
 
-    QObject::connect(mole, SIGNAL(dataDump(uint8,uint8,uint16,QList<double>,QList<double>)),
-                     &w, SLOT(plotData(uint8,uint8,uint16,QList<double>,QList<double>)));
+    QObject::connect(&registrationSettingsDialog,   SIGNAL(registrationModeChanged(QString)),
+                     &mainWindow,                   SLOT(setRegistrationMode(QString)));
 
-    QObject::connect(mole, SIGNAL(dataDump2(uint8,uint8,uint16,QVector<double>,QVector<double>)),
-                     &w, SLOT(plotData2(uint8,uint8,uint16,QVector<double>,QVector<double>)));
+    QObject::connect(&registrationSettingsDialog,   SIGNAL(moduleDatarateChanged(int)),
+                     &mainWindow,                   SLOT(setModuleDatarate(int)));
+
+    QObject::connect(mole,          SIGNAL(stageChanged(me_test_suite_stage)),
+                     &mainWindow,   SLOT(setStage(me_test_suite_stage)));
+
+    QObject::connect(mole,          SIGNAL(dataDump(uint8,uint8,uint16,QList<double>,QList<double>)),
+                     &mainWindow,   SLOT(plotData(uint8,uint8,uint16,QList<double>,QList<double>)));
+
+    QObject::connect(mole,          SIGNAL(dataDump2(uint8,uint8,uint16,QVector<double>,QVector<double>)),
+                     &mainWindow,   SLOT(plotData2(uint8,uint8,uint16,QVector<double>,QVector<double>)));
 
     //QObject::connect(mole, SIGNAL(stateChange(QString)), &w, SLOT(setStatusBarText(QString)));
     

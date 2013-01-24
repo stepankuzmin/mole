@@ -38,6 +38,8 @@ signals:
     void showRegistrationSettingsDialog();
 
 public slots:
+    void setRegistrationMode(QString registrationMode);
+    void setModuleDatarate(int moduleDatarate);
     void setStage(me_test_suite_stage stage);
 
     void plotData(uint8 moduleIndex, uint8 channelIndex,

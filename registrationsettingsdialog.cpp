@@ -8,6 +8,7 @@ RegistrationSettingsDialog::RegistrationSettingsDialog(QWidget *parent) :
     ui(new Ui::RegistrationSettingsDialog)
 {
     ui->setupUi(this);
+
     ui->moduleModeComboBox->addItem("Sleep",        QVariant(ME_MMM_SLEEP));
     ui->moduleModeComboBox->addItem("Seismic",      QVariant(ME_MMM_SEISMIC));
     ui->moduleModeComboBox->addItem("Inclinometer", QVariant(ME_MMM_INCLINOMETER));
@@ -22,11 +23,13 @@ RegistrationSettingsDialog::RegistrationSettingsDialog(QWidget *parent) :
     ui->testGeneratorModeComboBox->addItem("ON", QVariant(ME_MMTG_ON));
     ui->testGeneratorModeComboBox->addItem("OFF", QVariant(ME_MMTG_OFF));
 
-    ui->moduleDatarateComboBox->addItem("ME_MMD_250",   QVariant(ME_MMD_250));
-    ui->moduleDatarateComboBox->addItem("ME_MMD_500",   QVariant(ME_MMD_500));
-    ui->moduleDatarateComboBox->addItem("ME_MMD_1000",  QVariant(ME_MMD_1000));
-    ui->moduleDatarateComboBox->addItem("ME_MMD_2000",  QVariant(ME_MMD_2000));
-    ui->moduleDatarateComboBox->addItem("ME_MMD_4000",  QVariant(ME_MMD_4000));
+    ui->moduleDatarateComboBox->addItem("250",   QVariant(ME_MMD_250));
+    ui->moduleDatarateComboBox->addItem("500",   QVariant(ME_MMD_500));
+    ui->moduleDatarateComboBox->addItem("1000",  QVariant(ME_MMD_1000));
+    ui->moduleDatarateComboBox->addItem("2000",  QVariant(ME_MMD_2000));
+    ui->moduleDatarateComboBox->addItem("4000",  QVariant(ME_MMD_4000));
+
+    emit registrationModeChanged(QString("Testing!11"));
 }
 
 RegistrationSettingsDialog::~RegistrationSettingsDialog()
@@ -36,6 +39,7 @@ RegistrationSettingsDialog::~RegistrationSettingsDialog()
 
 void RegistrationSettingsDialog::on_buttonBox_accepted()
 {
+    emit registrationModeChanged(QString("Testing"));
 }
 
 void RegistrationSettingsDialog::on_setModuleModePushButton_clicked()
@@ -56,8 +60,11 @@ void RegistrationSettingsDialog::on_setModuleModePushButton_clicked()
 
 void RegistrationSettingsDialog::on_setDataratePushButton_clicked()
 {
+    int moduleDatarate;
+    moduleDatarate = ui->moduleDatarateComboBox->itemData(ui->moduleDatarateComboBox->currentIndex()).toInt();
+
     Mole *mole = Mole::getInstance();
-    switch (ui->moduleDatarateComboBox->itemData(ui->moduleDatarateComboBox->currentIndex()).toInt()) {
+    switch (moduleDatarate) {
     case ME_MMD_250: {
         mole->setModuleDatarate(ME_MMD_250);
     } break;
@@ -74,6 +81,8 @@ void RegistrationSettingsDialog::on_setDataratePushButton_clicked()
         mole->setModuleDatarate(ME_MMD_4000);
     } break;
     }
+
+    emit moduleDatarateChanged(moduleDatarate);
 }
 
 void RegistrationSettingsDialog::on_setTestGeneratorModePushButton_clicked()

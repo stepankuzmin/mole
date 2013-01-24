@@ -29,6 +29,10 @@ private slots:
 
 private:
     Ui::RegistrationSettingsDialog *ui;
+
+signals:
+    void registrationModeChanged(QString registrationMode);
+    void moduleDatarateChanged(int moduleDatarate);
 };
 
 #endif // REGISTRATIONSETTINGSDIALOG_H

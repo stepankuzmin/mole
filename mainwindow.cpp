@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     */
 
-    int geophonesCount = 6;
+    int geophonesCount = 3;
     int channelsCount = 3;
 
     QLabel *plotLabel[geophonesCount];
@@ -79,6 +79,10 @@ MainWindow::MainWindow(QWidget *parent) :
             // Plot settings
             this->plot[i][j]->setAutoFillBackground(true);
             this->plot[i][j]->setPalette(Qt::black);
+            this->plot[i][j]->enableAxis(QwtPlot::yLeft, false);
+            this->plot[i][j]->enableAxis(QwtPlot::xBottom, false);
+            this->plot[i][j]->setAxisAutoScale(QwtPlot::xBottom,true);
+            this->plot[i][j]->setAxisAutoScale(QwtPlot::yLeft,true);
             (void) new QwtPlotPanner(plot[i][j]->canvas());
             (void) new QwtPlotMagnifier(plot[i][j]->canvas());
 
@@ -102,10 +106,14 @@ MainWindow::MainWindow(QWidget *parent) :
             plotLayout[i]->addWidget(this->plot[i][j]);
         }
         plotWidget[i]->setLayout(plotLayout[i]);
+        ui->plotsLayout->addWidget(plotWidget[i]);
+
+        /*
         if (i<3)
             ui->gridLayout->addWidget(plotWidget[i], 0, i);
         else
             ui->gridLayout->addWidget(plotWidget[i], 1, i-3);
+        */
     }
 }
 
@@ -323,6 +331,7 @@ void MainWindow::on_connectPushButton_toggled(bool checked)
                 ui->menuTests->setEnabled(true);
                 ui->connectPushButton->setText(tr("Disconnect"));
                 ui->startConversionPushButton->setEnabled(true);
+                ui->startTestsPushButton->setEnabled(true);
                 ui->testsGroupBox->setEnabled(true);
                 ui->statusBar->showMessage(tr("Status: host mounted"));
             }
@@ -435,8 +444,19 @@ void MainWindow::getConversationData() {
     uint8 firstAddress = mole->getFirstAddress();
     uint8 lastAddress = mole->getLastAddress();
     uint8 channelCount = mole->getChannelCount();
-    int size = me_get_module_count(firstAddress, lastAddress) * channelCount * 10000;
+    int size = me_get_module_count(firstAddress, lastAddress) * channelCount;
     uint8 *samplesData = new uint8[size];
+    //qDebug() << "size: " << size;
 
-    mole->getSamplesData(1000, samplesData);
+    mole->getSamplesData(1024, samplesData);
+
+    //qDebug() << &samplesData;
+}
+
+void MainWindow::setRegistrationMode(QString registrationMode) {
+    ui->registrationModeLabel->setText(registrationMode);
+}
+
+void MainWindow::setModuleDatarate(int moduleDatarate) {
+    ui->moduleDatarateLabel->setText(QString::number(moduleDatarate));
 }

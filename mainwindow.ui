@@ -20,6 +20,12 @@
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <widget class="QWidget" name="leftWidget" native="true">
+      <property name="maximumSize">
+       <size>
+        <width>400</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QGroupBox" name="connectionGroupBox">
@@ -44,16 +50,57 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="startConversionPushButton">
-         <property name="enabled">
-          <bool>false</bool>
+        <widget class="QGroupBox" name="registrationSettingsGroupBox">
+         <property name="title">
+          <string>Registration settings</string>
          </property>
-         <property name="text">
-          <string>Start conversion</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <layout class="QFormLayout" name="registrationSettingsFormLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="registrationModeTextLabel">
+              <property name="text">
+               <string>Registration mode:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="registrationModeLabel">
+              <property name="text">
+               <string>Testing</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="moduleDatarateTextLabel">
+              <property name="text">
+               <string>Module datarate (ms):</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="moduleDatarateLabel">
+              <property name="text">
+               <string>250</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="startConversionPushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Start conversion</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
@@ -200,11 +247,8 @@
      </widget>
     </item>
     <item>
-     <layout class="QGridLayout" name="gridLayout">
-      <property name="spacing">
-       <number>1</number>
-      </property>
-      <item row="0" column="0">
+     <layout class="QVBoxLayout" name="plotsLayout">
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
