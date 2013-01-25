@@ -26,12 +26,12 @@ Mole::Mole(QObject *parent) :
     qDebug("Library build date: %s",me_get_version_build_date());
     qDebug("Library build time: %s",me_get_version_build_time());
 
-    int mole_descriptor = -1;
+    this->descriptor = -1;
     int ret = 0;
 
     ret = me_init();
 
-    if( ret < 0 ) {
+    if (ret < 0) {
         qDebug("Can't me_init (ret = 0x%.2x)", -ret);
     }
     qDebug("me_get_default_retries = %u", me_get_default_retries());
@@ -53,7 +53,36 @@ Mole::~Mole() {
     if (ret < 0)
         qDebug("[Error] Can't me_destroy (ret = 0x%.2x)", -ret);
     else
-        qDebug("[Success] me_destroy successfull\n");
+        qDebug("[Success] me_destroy successfull");
+}
+
+int Mole::open(const char *portString) {
+    this->descriptor = me_open_mole(portString);
+
+    if (this->descriptor < 0)
+        qDebug("[Error] Can't open mole (ret = 0x%.2x)", -this->descriptor);
+    else {
+        qDebug("[Success] %s opened successfull", portString);
+        emit connectionStatusChanged(ME_MCS_CONNECTED);
+    }
+
+    qDebug("mole_descriptor = %d", this->descriptor);
+
+    return this->descriptor;
+}
+
+int Mole::close() {
+    int ret = 0;
+    ret = me_close_mole(this->descriptor);
+
+    if (ret < 0)
+        qDebug("[Error] Can't close mole (ret = 0x%.2x)", -ret);
+    else {
+        qDebug("[Success] connection closed");
+        emit connectionStatusChanged(ME_MCS_DISCONNECTED);
+    }
+
+    return ret;
 }
 
 /////////////

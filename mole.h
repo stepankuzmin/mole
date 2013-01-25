@@ -27,6 +27,7 @@ protected:
     explicit Mole(QObject *parent = 0);
 
 private:
+    int descriptor;
     me_mole_connection_status connectionStatus;
     me_mole_conversion_synchronization conversionSynchronization;
 
@@ -46,7 +47,7 @@ signals:
     void conversionSynchronizationChanged(me_mole_conversion_synchronization conversionSynchronization);
     
 public slots:
-    int open();
+    int open(const char *portString);
     int close();
     int setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
 };

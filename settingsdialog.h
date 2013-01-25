@@ -1,6 +1,7 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
+#include <QMessageBox>
 #include <QDialog>
 #include "mole.h"
 #include "qextserialenumerator.h"

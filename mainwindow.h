@@ -23,6 +23,7 @@ signals:
     void showSettingsDialog();
 
 public slots:
+    void setConnectionStatus(me_mole_connection_status connectionStatus);
     void setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
 
 private slots:

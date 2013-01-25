@@ -25,9 +25,13 @@ void SettingsDialog::on_toggleConnectionPushButton_toggled(bool checked)
         QString portName = ui->COMPortsComboBox->itemData(ui->COMPortsComboBox->currentIndex()).toString();
         std::string str = portName.toStdString();
         const char *portString = str.c_str();
+        if (mole->open(portString) < 0) {
+            ui->toggleConnectionPushButton->setChecked(false);
+            QMessageBox::critical(0, "Error", "Can't open connection.");
+        }
     }
     else {
-
+        mole->close();
     }
 }
 
