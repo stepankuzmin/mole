@@ -22,15 +22,16 @@ void MainWindow::on_actionSettings_triggered()
     emit showSettingsDialog();
 }
 
-void MainWindow::setConnectionStatus(me_mole_connection_status connectionStatus) {
-    QString label;
+void MainWindow::on_actionTest_suite_triggered()
+{
+    emit showTestSuite();
+}
 
-    switch (connectionStatus) {
-        case ME_MCS_CONNECTED:      label = tr("Connected"); break;
-        case ME_MCS_DISCONNECTED:   label = tr("Disonnected"); break;
-    }
-
-    ui->connectionStatusLabel->setText(label);
+void MainWindow::setConnectionState(bool isConnected) {
+    if (isConnected)
+        ui->connectionStateLabel->setText(tr("Connected"));
+    else
+        ui->connectionStateLabel->setText(tr("Disconnected"));
 }
 
 void MainWindow::setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization) {

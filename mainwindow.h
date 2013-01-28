@@ -21,13 +21,15 @@ private:
 
 signals:
     void showSettingsDialog();
+    void showTestSuite();
 
 public slots:
-    void setConnectionStatus(me_mole_connection_status connectionStatus);
+    void setConnectionState(bool isConnected);
     void setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
 
 private slots:
     void on_actionSettings_triggered();
+    void on_actionTest_suite_triggered();
 };
 
 #endif // MAINWINDOW_H

@@ -20,11 +20,14 @@ win32: include(3rdparty/qextserialport/src/qextserialport.pri)
 SOURCES += main.cpp\
         mainwindow.cpp \
     settingsdialog.cpp \
-    mole.cpp
+    mole.cpp \
+    testsuite.cpp
 
 HEADERS  += mainwindow.h \
     settingsdialog.h \
-    mole.h
+    mole.h \
+    testsuite.h
 
 FORMS    += mainwindow.ui \
-    settingsdialog.ui
+    settingsdialog.ui \
+    testsuite.ui

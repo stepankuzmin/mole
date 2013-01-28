@@ -4,15 +4,6 @@
 Mole *ptrMole;
 
 /*
- * Mole get singleton instance
- */
-Mole *Mole::getInstance() {
-    if (!instance)
-        instance = new Mole();
-    return instance;
-}
-
-/*
  * Mole constructor
  */
 Mole::Mole(QObject *parent) :
@@ -31,15 +22,29 @@ Mole::Mole(QObject *parent) :
 
     ret = me_init();
 
-    if (ret < 0) {
-        qDebug("Can't me_init (ret = 0x%.2x)", -ret);
-    }
+    if (ret < 0)
+        qDebug("[Error] Can't me_init (ret = 0x%.2x)", -ret);
+    else
+        qDebug() << "[Success] initialization";
+
     qDebug("me_get_default_retries = %u", me_get_default_retries());
 
     me_ts_set_samples_data_callback(&Mole::samplesDataCallbackHandler);
     me_ts_set_stage_changed_callback(&Mole::stageChangedCallbackHandler);
 
     // Set default values
+    this->is_connected = false;
+
+    this->first_address = 0;
+    this->last_address = 0;
+    this->channel_count = 0;
+    this->bytes_in_channel = 0;
+    this->bytes_in_module = 0;
+    this->bytes_in_line = 0;
+    this->maximum_samples = 0;
+    this->last_address_actual = 0;
+    this->is_geophone_connected = false;
+
     this->conversionSynchronization = ME_MCS_COUNT;
     setConversionSynchronization(this->conversionSynchronization);
 }
@@ -48,40 +53,94 @@ Mole::Mole(QObject *parent) :
  * Mole destructor
  */
 Mole::~Mole() {
+    if (this->is_connected)
+        disconnect();
+
     int ret = me_destroy();
 
     if (ret < 0)
         qDebug("[Error] Can't me_destroy (ret = 0x%.2x)", -ret);
     else
-        qDebug("[Success] me_destroy successfull");
+        qDebug("[Success] destroyed successfull");
 }
 
-int Mole::open(const char *portString) {
-    this->descriptor = me_open_mole(portString);
+/*
+ * Mole get singleton instance
+ */
+Mole *Mole::getInstance() {
+    if (!instance)
+        instance = new Mole();
+    return instance;
+}
 
-    if (this->descriptor < 0)
-        qDebug("[Error] Can't open mole (ret = 0x%.2x)", -this->descriptor);
-    else {
-        qDebug("[Success] %s opened successfull", portString);
-        emit connectionStatusChanged(ME_MCS_CONNECTED);
+/*
+ * Is Mole connected?
+ *
+ * @return bool is connected
+ */
+bool Mole::isConnected() {
+    return is_connected;
+}
+
+int Mole::connect(const char *portString) {
+    if (!this->is_connected) {
+        this->descriptor = me_open_mole(portString);
+
+        if (this->descriptor < 0) {
+            qDebug("[Error] Can't open mole (ret = 0x%.2x)", -this->descriptor);
+            return this->descriptor;
+        }
+        else {
+            this->is_connected = true;
+            emit connectionStateChanged(true);
+            qDebug("[Success] connection opened at %s", portString);
+        }
+
+        int ret;
+
+        this->first_address = 1;
+        this->last_address = 0;
+        this->channel_count = 0;
+        this->bytes_in_channel = 0;
+        this->bytes_in_module = 0;
+        this->bytes_in_line = 0;
+        this->maximum_samples = 0;
+
+        ret =  me_host_mount_all(this->descriptor,
+                     &this->last_address,
+                     &this->channel_count,
+                     &this->bytes_in_channel,
+                     &this->bytes_in_module,
+                     &this->bytes_in_line,
+                     &this->maximum_samples);
+
+        if (ret < 0)
+            qDebug("[Error] Can't me_host_mount_all (ret = 0x%.2x)\n", -ret);
+        else
+            qDebug() << "[Success] host mount all";
+
+        return ret;
     }
-
-    qDebug("mole_descriptor = %d", this->descriptor);
-
-    return this->descriptor;
 }
 
-int Mole::close() {
+int Mole::disconnect() {
     int ret = 0;
-    ret = me_close_mole(this->descriptor);
+    if (this->is_connected) {
+        ret =  me_host_unmount(this->descriptor);
+        if (ret < 0)
+            qDebug("[Error] Can't me_host_unmount (ret = 0x%.2x)", -ret);
+        else
+            qDebug() << "[Success] host unmount";
 
-    if (ret < 0)
-        qDebug("[Error] Can't close mole (ret = 0x%.2x)", -ret);
-    else {
-        qDebug("[Success] connection closed");
-        emit connectionStatusChanged(ME_MCS_DISCONNECTED);
+        ret = me_close_mole(this->descriptor);
+        if (ret < 0)
+            qDebug("[Error] Can't close mole (ret = 0x%.2x)", -ret);
+        else {
+            qDebug("[Success] connection closed");
+            emit connectionStateChanged(false);
+            this->is_connected = false;
+        }
     }
-
     return ret;
 }
 

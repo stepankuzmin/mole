@@ -23,12 +23,24 @@ public:
     static Mole *getInstance();
     ~Mole();
 
+    bool isConnected();
+
 protected:
     explicit Mole(QObject *parent = 0);
 
 private:
     int descriptor;
-    me_mole_connection_status connectionStatus;
+    uint8 first_address;
+    uint8 last_address;
+    uint8 channel_count;
+    uint8 bytes_in_channel;
+    uint8 bytes_in_module;
+    uint16 bytes_in_line;
+    uint16 maximum_samples;
+    uint8 last_address_actual;
+    bool is_geophone_connected;
+
+    bool is_connected;
     me_mole_conversion_synchronization conversionSynchronization;
 
     static void samplesDataCallbackHandler(int mole_descriptor,
@@ -43,12 +55,12 @@ private:
                                             me_test_suite_stage test_suite_stage);
 
 signals:
-    void connectionStatusChanged(me_mole_connection_status connectionStatus);
+    void connectionStateChanged(bool isConnected);
     void conversionSynchronizationChanged(me_mole_conversion_synchronization conversionSynchronization);
     
 public slots:
-    int open(const char *portString);
-    int close();
+    int connect(const char *portString);
+    int disconnect();
     int setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
 };
 
