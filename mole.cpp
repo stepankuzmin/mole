@@ -311,4 +311,66 @@ int Mole::setConversionSynchronization(me_mole_conversion_synchronization conver
     return 0;
 }
 
+////////////////
+// Test suite //
+////////////////
+
+void read_serial_and_firmware(int mole_descriptor,
+                  uint8 first_address,uint8 last_address,
+                  serial_and_firmware_t *serial_and_firmware) {
+
+    uint8 last_address_actual = 0;
+    int ret = 0;
+    ret =  me_module_set_mode(mole_descriptor, ME_MMM_SLEEP, last_address, &last_address_actual);
+
+    if (ret < 0)
+        qDebug("Can't me_module_set_mode (last_address_actual = %d) (ret = 0x%.2x)\n", last_address_actual, -ret);
+
+    ret = me_get_serial_number(mole_descriptor, 0, &serial_and_firmware[0].serial_number, &serial_and_firmware[0].year, &serial_and_firmware[0].month);
+
+    if (ret < 0) {
+        serial_and_firmware[0].serial_number = 0xFFFF;
+        serial_and_firmware[0].year = 0xFF;
+        serial_and_firmware[0].month = 0xFF;
+
+        qDebug("Can't me_get_serial_number (ret = 0x%.2x)\n", -ret);
+    }
+
+    ret =  me_host_info(mole_descriptor,&serial_and_firmware[0].device_id,&serial_and_firmware[0].minor,&serial_and_firmware[0].major);
+
+    if (ret < 0)
+        qDebug("Can't me_host_info (ret = 0x%.2x)\n", -ret);
+
+    if (first_address != 0 && last_address != 0) {
+        for (uint8 i = first_address,j = 1; i <= last_address; ++i, ++j) {
+            ret =  me_get_serial_number(mole_descriptor,i,&serial_and_firmware[j].serial_number,&serial_and_firmware[j].year,&serial_and_firmware[j].month);
+
+            if (ret < 0) {
+                serial_and_firmware[j].serial_number = 0xFFFF;
+                serial_and_firmware[j].year = 0xFF;
+                serial_and_firmware[j].month = 0xFF;
+
+                qDebug("Can't me_get_serial_number (ret = 0x%.2x)\n",-ret);
+            }
+
+            ret =  me_module_info(mole_descriptor,i,&serial_and_firmware[j].device_id,&serial_and_firmware[j].minor,&serial_and_firmware[j].major);
+
+            if (ret < 0)
+                qDebug("Can't me_module_info (ret = 0x%.2x)\n", -ret);
+        }
+    }
+}
+
+int Mole::testSuiteGainCoefficients(bool isSync) {
+    me_ts_result_gain_channel_t *results = new me_ts_result_gain_channel_t[me_get_module_count(this->first_address, this->last_address) * this->channel_count];
+
+    serial_and_firmware_t *serial_and_firmware = new serial_and_firmware_t[me_get_module_count(this->first_address, this->last_address) + 1];
+    _serial_and_firmware = serial_and_firmware;
+
+    qDebug("Reading serial number and firmware version\n");
+    read_serial_and_firmware(this->descriptor, this->first_address, this->last_address, serial_and_firmware);
+
+    return 0;
+}
+
 Mole *Mole::instance = NULL;

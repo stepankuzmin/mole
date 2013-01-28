@@ -8,11 +8,27 @@
 #include <QObject>
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine.h"
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine-test-suite.h"
+//#include "3rdparty/mole-engine/include/mole-engine/test-mole-engine.cpp"
 
+/*
 enum me_mole_connection_status {
     ME_MCS_CONNECTED    = 0x1,
     ME_MCS_DISCONNECTED = 0x2
 };
+*/
+
+typedef struct
+{
+    uint16 serial_number;
+    uint8 year;
+    uint8 month;
+
+    uint16 device_id;
+    uint8 minor;
+    uint8 major;
+} serial_and_firmware_t;
+
+serial_and_firmware_t *_serial_and_firmware = NULL;
 
 class Mole : public QObject
 {
@@ -24,6 +40,9 @@ public:
     ~Mole();
 
     bool isConnected();
+
+    // Test suite
+    int testSuiteGainCoefficients(bool isSync = true);
 
 protected:
     explicit Mole(QObject *parent = 0);
