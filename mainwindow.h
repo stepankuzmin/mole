@@ -2,6 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMultiMap>
+#include <QList>
+#include <QVector>
+#include "qwt_plot.h"
+
 #include "mole.h"
 
 namespace Ui {
@@ -18,6 +23,8 @@ public:
     
 private:
     Ui::MainWindow *ui;
+    QMultiMap <int, QwtPlot*> plots;
+    QVector< QVector<QwtPlot*> > plotz;
 
 signals:
     void showSettingsDialog();

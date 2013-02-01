@@ -17,6 +17,7 @@ enum me_mole_connection_status {
 };
 */
 
+/*
 typedef struct
 {
     uint16 serial_number;
@@ -29,6 +30,7 @@ typedef struct
 } serial_and_firmware_t;
 
 serial_and_firmware_t *_serial_and_firmware = NULL;
+*/
 
 class Mole : public QObject
 {
@@ -41,8 +43,12 @@ public:
 
     bool isConnected();
 
+    int getModuleCount();
+    int getChannelCount();
+
     // Test suite
     int testSuiteGainCoefficients(bool isSync = true);
+    int testSuiteNoiseFloor(bool isSync = true);
 
 protected:
     explicit Mole(QObject *parent = 0);
@@ -60,6 +66,7 @@ private:
     bool is_geophone_connected;
 
     bool is_connected;
+    int module_count;
     me_mole_conversion_synchronization conversionSynchronization;
 
     static void samplesDataCallbackHandler(int mole_descriptor,

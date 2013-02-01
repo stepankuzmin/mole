@@ -28,10 +28,39 @@ void MainWindow::on_actionTest_suite_triggered()
 }
 
 void MainWindow::setConnectionState(bool isConnected) {
-    if (isConnected)
+    Mole *mole = Mole::getInstance();
+
+    if (isConnected) {
+        // Create plots
+        QVector< QVector<QwtPlot*> > plotz(mole->getModuleCount(), QVector<QwtPlot*>(mole->getChannelCount()));
+        for (int i = 0; i < plotz.size(); ++i) {
+            for (int j = 0; j < plotz.at(i).size(); ++j) {
+                plotz[i][j] = new QwtPlot();
+                plotz[i][j]->setAutoFillBackground(true);
+                plotz[i][j]->setPalette(Qt::black);
+                plotz[i][j]->enableAxis(QwtPlot::yLeft, false);
+                plotz[i][j]->enableAxis(QwtPlot::xBottom, false);
+                plotz[i][j]->setAxisAutoScale(QwtPlot::xBottom,true);
+                plotz[i][j]->setAxisAutoScale(QwtPlot::yLeft,true);
+                ui->plotsLayout->addWidget(plotz[i][j]);
+            }
+        }
+
         ui->connectionStateLabel->setText(tr("Connected"));
-    else
+    }
+    else {
+        // Delete plots
+        if (ui->plotsLayout->layout() != NULL) {
+            QLayoutItem* item;
+            while ((item = ui->plotsLayout->layout()->takeAt(0)) != NULL) {
+                delete item->widget();
+                delete item;
+            }
+        }
+        plotz.clear();
+
         ui->connectionStateLabel->setText(tr("Disconnected"));
+    }
 }
 
 void MainWindow::setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization) {

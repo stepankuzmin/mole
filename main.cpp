@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     QObject::connect(mole, SIGNAL(conversionSynchronizationChanged(me_mole_conversion_synchronization)),
                      &mainWindow, SLOT(setConversionSynchronization(me_mole_conversion_synchronization)));
 
-    mainWindow.show();
+    mainWindow.showMaximized();
     
     return a.exec();
 }
