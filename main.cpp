@@ -25,6 +25,8 @@ int main(int argc, char *argv[])
                      &mainWindow, SLOT(setConnectionState(bool)));
     QObject::connect(mole, SIGNAL(conversionSynchronizationChanged(me_mole_conversion_synchronization)),
                      &mainWindow, SLOT(setConversionSynchronization(me_mole_conversion_synchronization)));
+    QObject::connect(mole, SIGNAL(dataDump(uint8,uint8,uint16,QVector<double>,QVector<double>)),
+                     &mainWindow, SLOT(plotData(uint8,uint8,uint16,QVector<double>,QVector<double>)));
 
     mainWindow.showMaximized();
     

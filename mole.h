@@ -86,10 +86,15 @@ private:
     static void stageChangedCallbackHandler(int mole_descriptor,
                                             me_test_suite_stage test_suite_stage);
 
+    void emitDataDump(uint8 moduleIndex, uint8 channelIndex, uint16 size,
+                      QVector<double> samples, QVector<double> data);
+
 signals:
     void connectionStateChanged(bool isConnected);
     void conversionSynchronizationChanged(me_mole_conversion_synchronization conversionSynchronization);
-    
+    void dataDump(uint8 moduleIndex, uint8 channelIndex, uint16 size,
+                  QVector<double> samples, QVector<double> data);
+
 public slots:
     int connect(const char *portString);
     int disconnect();

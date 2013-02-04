@@ -249,6 +249,26 @@ void Mole::samplesDataCallbackHandler(int mole_descriptor,
         return;
     }
     }
+
+    QVector<double> samplesList;
+    QVector<double> dataList;
+
+    for(uint8 moduleIndex = 0; moduleIndex < me_get_module_count(first_address, last_address); ++moduleIndex) {
+        for(uint8 channelIndex = 0; channelIndex < channel_count; ++channelIndex) {
+            for (uint16 sample = 0; sample < samples; ++sample) {
+                trace_data_t data = me_get_seismic_sample_data(moduleIndex, sample, channelIndex,
+                                                               first_address, last_address,
+                                                               bytes_in_channel, bytes_in_module, bytes_in_line,
+                                                               samples_data);
+                samplesList << sample;
+                dataList << data;
+            }
+            ptrMole->emitDataDump(moduleIndex, channelIndex,
+                                  samples, samplesList, dataList);
+            samplesList.clear();
+            dataList.clear();
+        }
+    }
 }
 
 void Mole::stageChangedCallbackHandler(int mole_descriptor, me_test_suite_stage test_suite_stage) {
@@ -314,6 +334,20 @@ void Mole::stageChangedCallbackHandler(int mole_descriptor, me_test_suite_stage 
     default:
         qDebug("BUG: ME_TSS_COUNT");
     }
+}
+
+/*
+ * Emit Mole data dump signal
+ * @param uint8 moduleIndex
+ * @param uint8 channelIndex
+ * @param uint16 size
+ * @param QVector<double> sample
+ * @param QVector<double> data
+ */
+void Mole::emitDataDump(uint8 moduleIndex, uint8 channelIndex, uint16 size,
+                        QVector<double> samples, QVector<double> data) {
+    qDebug() << "Mole::emitDataDump";
+    emit dataDump(moduleIndex, channelIndex, size, samples, data);
 }
 
 //////////////////
