@@ -23,8 +23,7 @@ public:
     
 private:
     Ui::MainWindow *ui;
-    QMultiMap <int, QwtPlot*> plots;
-    QVector< QVector<QwtPlot*> > plotz;
+    QVector< QVector<QwtPlot*> > plots;
 
 signals:
     void showSettingsDialog();

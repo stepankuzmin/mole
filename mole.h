@@ -6,6 +6,8 @@
 
 #include <QDebug>
 #include <QObject>
+#include <QMutex>
+#include <QWaitCondition>
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine.h"
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine-test-suite.h"
 //#include "3rdparty/mole-engine/include/mole-engine/test-mole-engine.cpp"
@@ -68,6 +70,10 @@ private:
     bool is_connected;
     int module_count;
     me_mole_conversion_synchronization conversionSynchronization;
+
+    void sleep(int ms);
+    int _wait_test();
+    bool wait_test_with_error_handler();
 
     static void samplesDataCallbackHandler(int mole_descriptor,
                                            uint8 first_address, uint8 last_address,

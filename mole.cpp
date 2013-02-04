@@ -167,6 +167,12 @@ int Mole::getChannelCount() {
 // Private //
 ////////////
 
+void Mole::sleep(int ms) {
+    QWaitCondition sleep;
+    QMutex mutex;
+    sleep.wait(&mutex, ms);
+}
+
 /*
  * samples data callback handler
  * @param int mole_descriptor
@@ -334,34 +340,104 @@ int Mole::setConversionSynchronization(me_mole_conversion_synchronization conver
 // Test suite //
 ////////////////
 
+int Mole::_wait_test() {
+    int ret = ME_NO_ERROR;
+    me_mole_library_state library_state = ME_MLS_COUNT;
+    uint16 read_samples = 0;
+    do {
+        ret = me_get_library_state(this->descriptor, &library_state);
+        if(ret < 0) {
+            qDebug("[Error] Can't me_get_library_state (ret = 0x%.2x)\n", -ret);
+            break;
+        }
+        ret =  me_get_read_samples(this->descriptor, &read_samples);
+
+        if(ret < 0)
+            qDebug("[Error] Can't me_get_read_samples (ret = 0x%.2x)\n", -ret);
+        qDebug("read_samples %5u. please wait... ", read_samples);
+        sleep(500);
+    }
+    while(library_state != ME_MLS_IDLE);
+    return(ret);
+}
+
+bool Mole::wait_test_with_error_handler() {
+    int ret = _wait_test();
+    if(ret < 0) {
+        qDebug("[Error] Can't wait_test (ret = 0x%.2x)\n", -ret);
+        return(false);
+    }
+    else {
+        int ret_temp = ME_NO_ERROR;
+        ret_temp = me_get_last_error(this->descriptor, &ret);
+        if(ret_temp < 0) {
+            qDebug("[Error] Can't me_get_last_error (ret = 0x%.2x)\n", -ret_temp);
+            return(false);
+        }
+        else {
+            if(ret < 0) {
+                qDebug("[Error] Can't me_ts_* (async) (ret = 0x%.2x)\n", -ret);
+                return(false);
+            }
+            else {
+                return(true);
+            }
+        }
+    }
+}
+
+/*
+ * Mole gain coefficients test
+ * @param bool isSync
+ *
+ * @return int
+ */
 int Mole::testSuiteGainCoefficients(bool isSync) {
     int ret;
     me_ts_result_gain_channel_t *results = new me_ts_result_gain_channel_t[me_get_module_count(this->first_address, this->last_address) * this->channel_count];
-    if (isSync)
+    if (isSync) {
         ret = me_ts_gain_coefficients(this->descriptor, this->first_address, this->last_address, this->channel_count,
                                       this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
                                       results, &this->last_address_actual);
-    else
+    }
+    else {
         ret = me_ts_gain_coefficients_async(this->descriptor, this->first_address, this->last_address, this->channel_count,
                                             this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
                                             results, &this->last_address_actual);
+        if (ret < 0) {
+            qDebug("[Error] Can't me_ts_gain_coefficients_async (last_address_actual = %d) (ret = 0x%.2x)\n", this->last_address_actual, -ret);
+        }
+        else {
+            if(wait_test_with_error_handler()) {
+                qDebug() << "[Success] me_ts_gain_coefficients_async";
+            }
+        }
+    }
     delete[] results;
 
     return ret;
 }
 
+/*
+ * Mole noise floor test
+ * @param bool isSync
+ *
+ * @return int
+ */
 int Mole::testSuiteNoiseFloor(bool isSync) {
     int ret;
 
     me_ts_result_channel_t *results = new me_ts_result_channel_t[me_get_module_count(this->first_address, this->last_address) * this->channel_count];
-    if (isSync)
+    if (isSync) {
         ret = me_ts_noise_floor(this->descriptor, this->first_address, this->last_address, this->channel_count,
                                 this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
                                 results, &this->last_address_actual);
-    else
+    }
+    else {
         ret = me_ts_noise_floor_async(this->descriptor, this->first_address, this->last_address, this->channel_count,
                                       this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
                                       results, &this->last_address_actual);
+    }
     delete[] results;
 
     return ret;

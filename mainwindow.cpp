@@ -32,17 +32,19 @@ void MainWindow::setConnectionState(bool isConnected) {
 
     if (isConnected) {
         // Create plots
-        QVector< QVector<QwtPlot*> > plotz(mole->getModuleCount(), QVector<QwtPlot*>(mole->getChannelCount()));
-        for (int i = 0; i < plotz.size(); ++i) {
-            for (int j = 0; j < plotz.at(i).size(); ++j) {
-                plotz[i][j] = new QwtPlot();
-                plotz[i][j]->setAutoFillBackground(true);
-                plotz[i][j]->setPalette(Qt::black);
-                plotz[i][j]->enableAxis(QwtPlot::yLeft, false);
-                plotz[i][j]->enableAxis(QwtPlot::xBottom, false);
-                plotz[i][j]->setAxisAutoScale(QwtPlot::xBottom,true);
-                plotz[i][j]->setAxisAutoScale(QwtPlot::yLeft,true);
-                ui->plotsLayout->addWidget(plotz[i][j]);
+        QVector< QVector<QwtPlot*> > plots(mole->getModuleCount(),
+                                           QVector<QwtPlot*>(mole->getChannelCount()));
+
+        for (int i = 0; i < plots.size(); ++i) {
+            for (int j = 0; j < plots.at(i).size(); ++j) {
+                plots[i][j] = new QwtPlot();
+                plots[i][j]->setAutoFillBackground(true);
+                plots[i][j]->setPalette(Qt::black);
+                plots[i][j]->enableAxis(QwtPlot::yLeft, false);
+                plots[i][j]->enableAxis(QwtPlot::xBottom, false);
+                plots[i][j]->setAxisAutoScale(QwtPlot::xBottom,true);
+                plots[i][j]->setAxisAutoScale(QwtPlot::yLeft,true);
+                ui->plotsLayout->addWidget(plots[i][j]);
             }
         }
 
@@ -57,7 +59,7 @@ void MainWindow::setConnectionState(bool isConnected) {
                 delete item;
             }
         }
-        plotz.clear();
+        plots.clear();
 
         ui->connectionStateLabel->setText(tr("Disconnected"));
     }
