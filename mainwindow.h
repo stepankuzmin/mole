@@ -5,20 +5,13 @@
 #include <QMultiMap>
 #include <QList>
 #include <QVector>
+
 #include "qwt_plot.h"
 #include "qwt_plot_curve.h"
-
-#include <qwt_plot.h>
-#include <qwt_plot_marker.h>
-#include <qwt_plot_curve.h>
-#include <qwt_legend.h>
-#include <qwt_series_data.h>
+#include "qwt_scale_engine.h"
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_magnifier.h>
-#include <qwt_text.h>
-#include <qwt_math.h>
-#include <math.h>
 
 #include "mole.h"
 
@@ -45,6 +38,7 @@ signals:
 
 public slots:
     void setConnectionState(bool isConnected);
+    void setModulesMode(me_mole_module_mode modulesMode);
     void setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
     void plotData(uint8 moduleIndex, uint8 channelIndex, uint16 size,
                   QVector<double> samples, QVector<double> data);

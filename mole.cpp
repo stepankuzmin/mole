@@ -1,4 +1,4 @@
-#include "mole.h"
+    #include "mole.h"
 
 // Global pointer to Mole singleton object
 Mole *ptrMole;
@@ -346,13 +346,33 @@ void Mole::stageChangedCallbackHandler(int mole_descriptor, me_test_suite_stage 
  */
 void Mole::emitDataDump(uint8 moduleIndex, uint8 channelIndex, uint16 size,
                         QVector<double> samples, QVector<double> data) {
-    qDebug() << "Mole::emitDataDump";
     emit dataDump(moduleIndex, channelIndex, size, samples, data);
 }
 
 //////////////////
 // Public slots //
 //////////////////
+
+/*
+ * Set modules mode
+ * @param me_mole_modules_mode modulesMode
+ *
+ * @return int ret
+ */
+int Mole::setModulesMode(me_mole_module_mode modulesMode) {
+    int ret;
+    ret =  me_module_set_mode(this->descriptor, modulesMode, this->last_address, &this->last_address_actual);
+    if (ret < 0) {
+        qDebug("[Error] Can't me_module_set_mode (last_address_actual = %d) (ret = 0x%.2x)\n", this->last_address_actual, -ret);
+    }
+    else {
+        this->modulesMode = modulesMode;
+        emit modulesModeChanged(modulesMode);
+        qDebug() << "[Success] me_module_set_mode";
+    }
+
+    return ret;
+}
 
 /*
  * Set conversion synchronization

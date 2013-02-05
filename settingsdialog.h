@@ -28,6 +28,7 @@ private slots:
     void on_softwareSynchronizationRadioButton_clicked();
     void on_ExternalSynchronizationRadioButton_clicked();
     void on_toggleConnectionPushButton_toggled(bool checked);
+    void on_setModulesModePushButton_clicked();
 };
 
 #endif // SETTINGSDIALOG_H

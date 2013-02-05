@@ -20,14 +20,21 @@
       <item>
        <widget class="QLabel" name="connectionStateLabel">
         <property name="text">
-         <string>Unknown</string>
+         <string>Connection: Unknown</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="modulesModeLabel">
+        <property name="text">
+         <string>Modules mode: Not set</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="conversionSynchronizationLabel">
         <property name="text">
-         <string>Not set</string>
+         <string>Conversion synchronization: Not set</string>
         </property>
        </widget>
       </item>

@@ -10,15 +10,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete ui;
-
     // Destroy mole
     Mole *mole = Mole::getInstance();
     mole->~Mole();
+
+    delete ui;
 }
 
 ///////////////////
-// public slots //
+// public slots  //
 ///////////////////
 
 void MainWindow::setConnectionState(bool isConnected) {
@@ -37,10 +37,9 @@ void MainWindow::setConnectionState(bool isConnected) {
                 plots[i][j] = new QwtPlot();
                 plots[i][j]->setAutoFillBackground(true);
                 plots[i][j]->setPalette(Qt::black);
-                //plots[i][j]->enableAxis(QwtPlot::yLeft, false);
-                //plots[i][j]->enableAxis(QwtPlot::xBottom, false);
                 plots[i][j]->setAxisAutoScale(QwtPlot::xBottom, true);
                 plots[i][j]->setAxisAutoScale(QwtPlot::yLeft, true);
+                plots[i][j]->axisScaleEngine(QwtPlot::xBottom)->setAttribute(QwtScaleEngine::Floating, true);
                 (void) new QwtPlotPanner(plots[i][j]->canvas());
                 (void) new QwtPlotMagnifier(plots[i][j]->canvas());
                 ui->plotsLayout->addWidget(plots[i][j]);
@@ -69,16 +68,29 @@ void MainWindow::setConnectionState(bool isConnected) {
     }
 }
 
-void MainWindow::setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization) {
-    QString label;
+void MainWindow::setModulesMode(me_mole_module_mode modulesMode) {
+    QString text;
 
-    switch (conversionSynchronization) {
-        case ME_MCS_COUNT:      label = tr("ME_MCS_COUNT"); break;
-        case ME_MCS_SOFT:       label = tr("Software"); break;
-        case ME_MCS_EXTERNAL:   label = tr("External"); break;
+    switch (modulesMode) {
+        case ME_MMM_COUNT:          text = tr("ME_MMM_COUNT"); break;
+        case ME_MMM_SLEEP:          text = tr("Sleep"); break;
+        case ME_MMM_SEISMIC:        text = tr("Seismic"); break;
+        case ME_MMM_INCLINOMETER:   text = tr("Inclinometer"); break;
     }
 
-    ui->conversionSynchronizationLabel->setText(label);
+    ui->modulesModeLabel->setText(text);
+}
+
+void MainWindow::setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization) {
+    QString text;
+
+    switch (conversionSynchronization) {
+        case ME_MCS_COUNT:      text = tr("ME_MCS_COUNT"); break;
+        case ME_MCS_SOFT:       text = tr("Software"); break;
+        case ME_MCS_EXTERNAL:   text = tr("External"); break;
+    }
+
+    ui->conversionSynchronizationLabel->setText(text);
 }
 
 /*

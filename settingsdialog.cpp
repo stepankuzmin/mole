@@ -47,6 +47,20 @@ void SettingsDialog::on_ExternalSynchronizationRadioButton_clicked()
     mole->setConversionSynchronization(ME_MCS_EXTERNAL);
 }
 
+void SettingsDialog::on_setModulesModePushButton_clicked()
+{
+    Mole *mole = Mole::getInstance();
+    if (ui->moduleModeSleepRadioButton->isChecked()) {
+        mole->setModulesMode(ME_MMM_SLEEP);
+    }
+    else if(ui->moduleModeSeismicRadioButton->isChecked()) {
+        mole->setModulesMode(ME_MMM_SEISMIC);
+    }
+    else if(ui->moduleModeInclinometerRadioButton->isChecked()) {
+        mole->setModulesMode(ME_MMM_INCLINOMETER);
+    }
+}
+
 void SettingsDialog::on_buttonBox_accepted()
 {
 }
