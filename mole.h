@@ -21,6 +21,7 @@ public:
     ~Mole();
 
     bool isConnected();
+    bool isConversing();
 
     int getModuleCount();
     int getChannelCount();
@@ -45,6 +46,7 @@ private:
     bool is_geophone_connected;
 
     bool is_connected;
+    bool is_conversing;
     int module_count;
     me_mole_module_mode modulesMode;
     me_mole_conversion_synchronization conversionSynchronization;
@@ -76,9 +78,11 @@ signals:
 
 public slots:
     int connect(const char *portString);
-    int disconnect();
+    bool disconnect();
     int setModulesMode(me_mole_module_mode modulesMode);
     int setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
+    bool startConversion();
+    bool stopConversion();
 };
 
 #endif // MOLE_H

@@ -34,6 +34,7 @@ Mole::Mole(QObject *parent) :
 
     // Set default values
     this->is_connected = false;
+    this->is_conversing = false;
 
     this->first_address = 0;
     this->last_address = 0;
@@ -53,6 +54,9 @@ Mole::Mole(QObject *parent) :
  * Mole destructor
  */
 Mole::~Mole() {
+    if (this->is_conversing)
+        stopConversion();
+
     if (this->is_connected)
         disconnect();
 
@@ -117,7 +121,7 @@ int Mole::connect(const char *portString) {
     }
 }
 
-int Mole::disconnect() {
+bool Mole::disconnect() {
     int ret = 0;
     if (this->is_connected) {
         ret =  me_host_unmount(this->descriptor);
@@ -145,6 +149,15 @@ int Mole::disconnect() {
  */
 bool Mole::isConnected() {
     return is_connected;
+}
+
+/*
+ * Is Mole conversing?
+ *
+ * @return bool is conversing
+ */
+bool Mole::isConversing() {
+    return is_conversing;
 }
 
 /*
@@ -388,6 +401,60 @@ int Mole::setConversionSynchronization(me_mole_conversion_synchronization conver
     emit conversionSynchronizationChanged(conversionSynchronization);
 
     return 0;
+}
+
+/*
+ * Start conversion
+ *
+ * @return bool is success
+ */
+bool Mole::startConversion() {
+    int ret;
+    uint16 samples = 0;
+    switch(this->modulesMode) {
+        case ME_MMM_SLEEP:
+        case ME_MMM_SEISMIC:
+        case ME_MMM_COUNT: {
+            samples = 2048; // @TODO: User input
+        } break;
+        case ME_MMM_INCLINOMETER: {
+            samples = 0;
+            this->conversionSynchronization = ME_MCS_SOFT;
+            emit conversionSynchronizationChanged(ME_MCS_SOFT);
+        } break;
+    }
+
+    ret =  me_host_start_conversion(this->descriptor, samples, this->conversionSynchronization);
+    if (ret < 0) {
+        qDebug("[Error] Can't me_host_start_conversion (ret = 0x%.2x)\n", -ret);
+        return false;
+    }
+    else {
+        qDebug() << "[Success] me_host_start_conversion";
+        this->is_conversing = true;
+        return true;
+    }
+
+    return ret;
+}
+
+/*
+ * Stop conversion
+ *
+ * @return bool is success
+ */
+bool Mole::stopConversion() {
+    int ret;
+    ret =  me_host_stop_conversion(this->descriptor);
+    if (ret < 0) {
+        qDebug("[Error] Can't me_host_stop_conversion (ret = 0x%.2x)\n", -ret);
+        return false;
+    }
+    else {
+        qDebug() << "[Success] me_host_stop_conversion";
+        this->is_conversing = false;
+        return true;
+    }
 }
 
 ////////////////

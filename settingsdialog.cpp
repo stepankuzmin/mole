@@ -29,22 +29,15 @@ void SettingsDialog::on_toggleConnectionPushButton_toggled(bool checked)
             ui->toggleConnectionPushButton->setChecked(false);
             QMessageBox::critical(0, "Error", "Can't open connection.");
         }
+        else {
+            ui->toggleConnectionPushButton->setText(tr("Disconnect"));
+        }
     }
     else {
-        mole->disconnect();
+        if (mole->disconnect()) {
+            ui->toggleConnectionPushButton->setText(tr("Connect"));
+        }
     }
-}
-
-void SettingsDialog::on_softwareSynchronizationRadioButton_clicked()
-{
-    Mole *mole = Mole::getInstance();
-    mole->setConversionSynchronization(ME_MCS_SOFT);
-}
-
-void SettingsDialog::on_ExternalSynchronizationRadioButton_clicked()
-{
-    Mole *mole = Mole::getInstance();
-    mole->setConversionSynchronization(ME_MCS_EXTERNAL);
 }
 
 void SettingsDialog::on_setModulesModePushButton_clicked()
@@ -58,6 +51,33 @@ void SettingsDialog::on_setModulesModePushButton_clicked()
     }
     else if(ui->moduleModeInclinometerRadioButton->isChecked()) {
         mole->setModulesMode(ME_MMM_INCLINOMETER);
+    }
+}
+
+void SettingsDialog::on_toggleConversionPushButton_toggled(bool checked)
+{
+    Mole *mole = Mole::getInstance();
+    if (checked) {
+        if (ui->softwareSynchronizationRadioButton->isChecked()) {
+            mole->setConversionSynchronization(ME_MCS_SOFT);
+        }
+        else if (ui->ExternalSynchronizationRadioButton->isChecked()) {
+            mole->setConversionSynchronization(ME_MCS_EXTERNAL);
+        }
+        if (mole->startConversion()) {
+            ui->toggleConversionPushButton->setText(tr("Stop conversion"));
+        }
+        else {
+            ui->toggleConversionPushButton->setChecked(false);
+        }
+    }
+    else {
+        if (mole->stopConversion()) {
+            ui->toggleConversionPushButton->setText(tr("Start conversion"));
+        }
+        else {
+            ui->toggleConversionPushButton->setChecked(true);
+        }
     }
 }
 
