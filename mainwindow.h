@@ -46,6 +46,7 @@ public slots:
 private slots:
     void on_actionSettings_triggered();
     void on_actionTest_suite_triggered();
+    void on_getDataPushButton_clicked();
 };
 
 #endif // MAINWINDOW_H

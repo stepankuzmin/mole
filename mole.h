@@ -83,6 +83,7 @@ public slots:
     int setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
     bool startConversion();
     bool stopConversion();
+    bool getSeismicData(uint16 samples);
 };
 
 #endif // MOLE_H

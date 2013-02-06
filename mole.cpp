@@ -457,6 +457,95 @@ bool Mole::stopConversion() {
     }
 }
 
+bool Mole::getSeismicData(uint16 samples) {
+    qDebug() << "samples" << samples;
+    int ret;
+    //uint16 samples = 0;
+    uint16 first_sample_to_print = 0;
+    uint16 last_sample_to_print = 0;
+
+    switch(this->modulesMode) {
+        case ME_MMM_SLEEP:
+        case ME_MMM_SEISMIC:
+        case ME_MMM_COUNT: {
+            //samples = 2048; // @TODO: User input
+            first_sample_to_print = 0;
+            last_sample_to_print = samples;
+        } break;
+        case ME_MMM_INCLINOMETER: {
+            samples = 1;
+            first_sample_to_print = 0;
+            last_sample_to_print = 1;
+        } break;
+    }
+
+    uint8 *samples_data = new uint8[this->bytes_in_line * samples];
+    ret =  me_host_get_samples_data(this->descriptor, samples, samples_data);
+    if (ret < 0) {
+        qDebug("[Error] Can't me_host_get_samples_data (ret = 0x%.2x)\n", -ret);
+    }
+    else {
+        qDebug() << "[Success] me_host_get_samples_data";
+    }
+
+    uint16 read_samples = 0;
+    ret =  me_get_read_samples(this->descriptor, &read_samples);
+    qDebug("read_samples = %u\n", read_samples);
+
+    if (ret < 0) {
+        qDebug("[Error] Can't me_get_read_samples (ret = 0x%.2x)\n", -ret);
+    }
+    else {
+        qDebug() << "[Success] me_get_read_samples";
+        // TO FUNCTION
+
+        for(uint8 i = 0; i < me_get_module_count(this->first_address, this->last_address); ++i) {
+            for(uint8 j = 0; j < this->channel_count; ++j) {
+                qDebug("\n---> module %3u channel %u <---", i, j);
+
+                QVector<double> samplesVector;
+                QVector<double> dataVector;
+
+                for(uint16 s = first_sample_to_print; s < last_sample_to_print; ++s) {
+                    switch(this->modulesMode) {
+                        case ME_MMM_SLEEP:
+                        case ME_MMM_SEISMIC:
+                        case ME_MMM_COUNT: {
+
+                        samplesVector << s;
+                        dataVector << me_get_seismic_sample_data(i, s, j,
+                                                                 this->first_address, this->last_address,
+                                                                 this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
+                                                                 samples_data);
+
+                            /*qDebug("sample %5u value = %d", s, me_get_seismic_sample_data(i, s, j,
+                                                              this->first_address, this->last_address,
+                                                              this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
+                                                              samples_data));*/
+                        } break;
+                        case ME_MMM_INCLINOMETER: {
+                            angle_data_t angle_data = me_get_inclinometer_sample_data(i, j,
+                                                          this->first_address, this->last_address,
+                                                          this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
+                                                          samples_data);
+
+                            qDebug("sample value = %d degrees = %f",angle_data, angle_data * me_get_inclinometer_lsb_weight());
+                        } break;
+                    }
+                }
+                ptrMole->emitDataDump(i, j, samples, samplesVector, dataVector);
+                samplesVector.clear();
+                dataVector.clear();
+            }
+        }
+        // END
+    }
+
+    delete[] samples_data;
+
+    return true;
+}
+
 ////////////////
 // Test suite //
 ////////////////

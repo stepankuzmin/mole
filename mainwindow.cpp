@@ -129,3 +129,11 @@ void MainWindow::on_actionTest_suite_triggered()
 {
     emit showTestSuite();
 }
+
+void MainWindow::on_getDataPushButton_clicked()
+{
+    Mole *mole = Mole::getInstance();
+    uint16 samples;
+    samples = ui->lineEdit->text().toInt();
+    mole->getSeismicData(samples);
+}
