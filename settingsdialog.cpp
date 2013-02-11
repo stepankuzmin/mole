@@ -54,33 +54,18 @@ void SettingsDialog::on_setModulesModePushButton_clicked()
     }
 }
 
-void SettingsDialog::on_toggleConversionPushButton_toggled(bool checked)
+void SettingsDialog::on_setConversionSynchronizationPushButton_clicked()
 {
     Mole *mole = Mole::getInstance();
-    if (checked) {
-        if (ui->softwareSynchronizationRadioButton->isChecked()) {
-            mole->setConversionSynchronization(ME_MCS_SOFT);
-        }
-        else if (ui->ExternalSynchronizationRadioButton->isChecked()) {
-            mole->setConversionSynchronization(ME_MCS_EXTERNAL);
-        }
-        if (mole->startConversion()) {
-            ui->toggleConversionPushButton->setText(tr("Stop conversion"));
-        }
-        else {
-            ui->toggleConversionPushButton->setChecked(false);
-        }
+    if (ui->synchronizationSoftwareRadioButton->isChecked()) {
+        mole->setConversionSynchronization(ME_MCS_SOFT);
     }
-    else {
-        if (mole->stopConversion()) {
-            ui->toggleConversionPushButton->setText(tr("Start conversion"));
-        }
-        else {
-            ui->toggleConversionPushButton->setChecked(true);
-        }
+    else if (ui->synchronizationExternalRadioButton->isChecked()) {
+        mole->setConversionSynchronization(ME_MCS_EXTERNAL);
     }
 }
 
 void SettingsDialog::on_buttonBox_accepted()
 {
 }
+

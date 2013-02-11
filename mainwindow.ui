@@ -16,30 +16,13 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QVBoxLayout" name="leftLayout">
       <item>
        <widget class="QGroupBox" name="getDataGroupBox">
         <property name="title">
          <string>Get data</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QComboBox" name="samplesCountComboBox">
-           <property name="editable">
-            <bool>true</bool>
-           </property>
-           <item>
-            <property name="text">
-             <string>1024</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>2048</string>
-            </property>
-           </item>
-          </widget>
-         </item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="QLineEdit" name="lineEdit"/>
          </item>
@@ -47,6 +30,16 @@
           <widget class="QPushButton" name="getDataPushButton">
            <property name="text">
             <string>Get data</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="toggleTimerPushButton">
+           <property name="text">
+            <string>Timer</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
           </widget>
          </item>

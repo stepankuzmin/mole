@@ -85,7 +85,7 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QRadioButton" name="softwareSynchronizationRadioButton">
+         <widget class="QRadioButton" name="synchronizationSoftwareRadioButton">
           <property name="text">
            <string>Software</string>
           </property>
@@ -95,7 +95,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="ExternalSynchronizationRadioButton">
+         <widget class="QRadioButton" name="synchronizationExternalRadioButton">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -105,12 +105,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="toggleConversionPushButton">
+         <widget class="QPushButton" name="setConversionSynchronizationPushButton">
           <property name="text">
-           <string>Start conversion</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
+           <string>Set</string>
           </property>
          </widget>
         </item>

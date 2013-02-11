@@ -21,12 +21,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     settingsdialog.cpp \
     mole.cpp \
-    testsuite.cpp
+    testsuite.cpp \
+    sd3.cpp
 
 HEADERS  += mainwindow.h \
     settingsdialog.h \
     mole.h \
-    testsuite.h
+    testsuite.h \
+    sd3.h
 
 FORMS    += mainwindow.ui \
     settingsdialog.ui \

@@ -5,6 +5,7 @@
 #include <QMultiMap>
 #include <QList>
 #include <QVector>
+#include <QTimer>
 
 #include "qwt_plot.h"
 #include "qwt_plot_curve.h"
@@ -13,6 +14,7 @@
 #include <qwt_plot_panner.h>
 #include <qwt_plot_magnifier.h>
 
+#include "sd3.h"
 #include "mole.h"
 
 namespace Ui {
@@ -28,7 +30,11 @@ public:
     ~MainWindow();
     
 private:
+    QTimer *timer;
     Ui::MainWindow *ui;
+
+    QVector< QVector< QVector<double> > > continousData;
+
     QVector< QVector<QwtPlot*> > plots;
     QVector< QVector<QwtPlotCurve*> > curves;
 
@@ -40,13 +46,14 @@ public slots:
     void setConnectionState(bool isConnected);
     void setModulesMode(me_mole_module_mode modulesMode);
     void setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
-    void plotData(uint8 moduleIndex, uint8 channelIndex, uint16 size,
+    void plotData(uint8 moduleIndex, uint8 channelIndex,
                   QVector<double> samples, QVector<double> data);
 
 private slots:
     void on_actionSettings_triggered();
     void on_actionTest_suite_triggered();
     void on_getDataPushButton_clicked();
+    void on_toggleTimerPushButton_toggled(bool checked);
 };
 
 #endif // MAINWINDOW_H

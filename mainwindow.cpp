@@ -6,6 +6,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    /*
+    SD3 *file = new SD3(this);
+
+    qDebug() << "version: " << file->getVersion();
+    qDebug() << "datarate: " << file->getDatarate();
+    qDebug() << "samples count:" << file->getSamplesCount();
+    */
 }
 
 MainWindow::~MainWindow()
@@ -23,15 +30,20 @@ MainWindow::~MainWindow()
 
 void MainWindow::setConnectionState(bool isConnected) {
     Mole *mole = Mole::getInstance();
+    int moduleCount = mole->getModuleCount();
+    int channelCount = mole->getChannelCount();
 
     if (isConnected) {
         // Create plots
-        QVector< QVector<QwtPlot*> > plots(mole->getModuleCount(),
-                                           QVector<QwtPlot*>(mole->getChannelCount()));
-        // Create curves
-        QVector< QVector<QwtPlotCurve*> > curves(mole->getModuleCount(),
-                                                 QVector<QwtPlotCurve*>(mole->getChannelCount()));
+        QVector< QVector<QwtPlot*> > plots(moduleCount, QVector<QwtPlot*>(channelCount));
 
+        // Create curves
+        QVector< QVector<QwtPlotCurve*> > curves(moduleCount, QVector<QwtPlotCurve*>(channelCount));
+
+        // Initialize continous data vectors
+        QVector< QVector< QVector<double> > > continousData(moduleCount, QVector< QVector<double> >(channelCount));
+
+        // @TODO: change i and j to moduleIndex and channelIndex
         for (int i = 0; i < plots.size(); ++i) {
             for (int j = 0; j < plots.at(i).size(); ++j) {
                 plots[i][j] = new QwtPlot();
@@ -43,11 +55,14 @@ void MainWindow::setConnectionState(bool isConnected) {
                 (void) new QwtPlotPanner(plots[i][j]->canvas());
                 (void) new QwtPlotMagnifier(plots[i][j]->canvas());
                 ui->plotsLayout->addWidget(plots[i][j]);
+
+                QVector<double> continousData[i][j];
             }
         }
 
         this->plots = plots;
         this->curves = curves;
+        this->continousData = continousData;
 
         ui->connectionStateLabel->setText(tr("Connected"));
     }
@@ -101,8 +116,15 @@ void MainWindow::setConversionSynchronization(me_mole_conversion_synchronization
  * @param QVector<double> samples
  * @param QVector<double> data
  */
-void MainWindow::plotData(uint8 moduleIndex, uint8 channelIndex, uint16 size,
+void MainWindow::plotData(uint8 moduleIndex, uint8 channelIndex,
                           QVector<double> samples, QVector<double> data) {
+    this->continousData[moduleIndex][channelIndex] += data;
+
+    int size = this->continousData[moduleIndex][channelIndex].size();
+    QVector<double> continousSamples;
+    for (int i=0; i<size; i++)
+        continousSamples << i;
+
     plots[moduleIndex][channelIndex]->detachItems();
     plots[moduleIndex][channelIndex]->replot();
 
@@ -110,7 +132,8 @@ void MainWindow::plotData(uint8 moduleIndex, uint8 channelIndex, uint16 size,
     curves[moduleIndex][channelIndex] = new QwtPlotCurve();
     curves[moduleIndex][channelIndex]->setRenderHint(QwtPlotItem::RenderAntialiased);
     curves[moduleIndex][channelIndex]->setPen(QPen(Qt::red));
-    curves[moduleIndex][channelIndex]->setSamples(samples, data);
+    curves[moduleIndex][channelIndex]->setSamples(continousSamples, this->continousData[moduleIndex][channelIndex]);
+    //curves[moduleIndex][channelIndex]->setSamples(samples, data);
     curves[moduleIndex][channelIndex]->attach(plots[moduleIndex][channelIndex]);
 
     plots[moduleIndex][channelIndex]->replot();
@@ -132,8 +155,40 @@ void MainWindow::on_actionTest_suite_triggered()
 
 void MainWindow::on_getDataPushButton_clicked()
 {
+    /*
     Mole *mole = Mole::getInstance();
+
     uint16 samples;
     samples = ui->lineEdit->text().toInt();
-    mole->getSeismicData(samples);
+
+    if (mole->startConversion()) {
+        mole->getSeismicData(samples);
+        mole->stopConversion();
+    }
+    */
+}
+
+void MainWindow::on_toggleTimerPushButton_toggled(bool checked)
+{
+    // @TODO: move timer to mole!
+    /*
+    if (checked) {
+        this->timer = new QTimer(this);
+        connect(timer, SIGNAL(timeout()), this, SLOT(on_getDataPushButton_clicked()));
+        timer->start(1000);
+    }
+    else {
+        this->timer->stop();
+    }
+    */
+
+    Mole *mole = Mole::getInstance();
+    if (checked) {
+        uint16 samplesSize = ui->lineEdit->text().toInt();
+        mole->setSamplesSize(samplesSize);
+        mole->startTimer(1000);
+    }
+    else {
+        mole->stopTimer();
+    }
 }

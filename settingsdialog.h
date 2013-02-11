@@ -27,7 +27,7 @@ private slots:
     void on_buttonBox_accepted();
     void on_toggleConnectionPushButton_toggled(bool checked);
     void on_setModulesModePushButton_clicked();
-    void on_toggleConversionPushButton_toggled(bool checked);
+    void on_setConversionSynchronizationPushButton_clicked();
 };
 
 #endif // SETTINGSDIALOG_H
