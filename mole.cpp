@@ -127,21 +127,26 @@ bool Mole::disconnect() {
     int ret = 0;
     if (this->is_connected) {
         ret =  me_host_unmount(this->descriptor);
-        if (ret < 0)
+        if (ret < 0) {
             qDebug("[Error] Can't me_host_unmount (ret = 0x%.2x)", -ret);
-        else
+            return false;
+        }
+        else {
             qDebug() << "[Success] host unmount";
+        }
 
         ret = me_close_mole(this->descriptor);
-        if (ret < 0)
+        if (ret < 0) {
             qDebug("[Error] Can't close mole (ret = 0x%.2x)", -ret);
+            return false;
+        }
         else {
             qDebug("[Success] connection closed");
             emit connectionStateChanged(false);
             this->is_connected = false;
+            return true;
         }
     }
-    return ret;
 }
 
 /*
@@ -406,6 +411,8 @@ int Mole::setConversionSynchronization(me_mole_conversion_synchronization conver
 
 void Mole::setSamplesSize(uint16 samplesSize) {
     this->samplesSize = samplesSize;
+    emit samplesSizeChanged(samplesSize);
+
     qDebug("[Success] Mole samples size = %u", samplesSize);
 }
 

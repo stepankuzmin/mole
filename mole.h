@@ -79,6 +79,7 @@ signals:
     void connectionStateChanged(bool isConnected);
     void modulesModeChanged(me_mole_module_mode modulesMode);
     void conversionSynchronizationChanged(me_mole_conversion_synchronization conversionSynchronization);
+    void samplesSizeChanged(uint16 samplesSize);
     void dataDump(uint8 moduleIndex, uint8 channelIndex,
                   QVector<double> samples, QVector<double> data);
 

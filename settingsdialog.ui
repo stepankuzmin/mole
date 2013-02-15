@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>281</width>
-    <height>249</height>
+    <height>341</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -106,6 +106,39 @@
         </item>
         <item>
          <widget class="QPushButton" name="setConversionSynchronizationPushButton">
+          <property name="text">
+           <string>Set</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QGroupBox" name="samplesGroupBox">
+       <property name="title">
+        <string>Samples</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QComboBox" name="samplesComboBox">
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+          <item>
+           <property name="text">
+            <string>1024</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2048</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="setSamplesSizePushButton">
           <property name="text">
            <string>Set</string>
           </property>

@@ -18,32 +18,20 @@
     <item>
      <layout class="QVBoxLayout" name="leftLayout">
       <item>
-       <widget class="QGroupBox" name="getDataGroupBox">
-        <property name="title">
+       <widget class="QPushButton" name="getDataPushButton">
+        <property name="text">
          <string>Get data</string>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QLineEdit" name="lineEdit"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="getDataPushButton">
-           <property name="text">
-            <string>Get data</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="toggleTimerPushButton">
-           <property name="text">
-            <string>Timer</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="toggleTimerPushButton">
+        <property name="text">
+         <string>Timer</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>
@@ -68,6 +56,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="samplesSizeLabel">
+        <property name="text">
+         <string>Samples size: not set</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -83,11 +78,33 @@
      </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="plotsLayout">
-      <property name="spacing">
-       <number>0</number>
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
       </property>
-     </layout>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>200</width>
+         <height>223</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <layout class="QVBoxLayout" name="plotsLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -112,6 +129,16 @@
     </property>
     <addaction name="actionTest_suite"/>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
    <addaction name="menuTest_suite"/>
   </widget>
@@ -137,6 +164,21 @@
   <action name="actionTest_suite">
    <property name="text">
     <string>Test suite</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
    </property>
   </action>
  </widget>

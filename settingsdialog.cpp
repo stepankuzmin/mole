@@ -65,7 +65,13 @@ void SettingsDialog::on_setConversionSynchronizationPushButton_clicked()
     }
 }
 
+void SettingsDialog::on_setSamplesSizePushButton_clicked()
+{
+    Mole *mole = Mole::getInstance();
+    uint16 samplesSize = ui->samplesComboBox->currentText().toInt();
+    mole->setSamplesSize(samplesSize);
+}
+
 void SettingsDialog::on_buttonBox_accepted()
 {
 }
-

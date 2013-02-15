@@ -1,11 +1,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <fstream>
+
 #include <QMainWindow>
 #include <QMultiMap>
 #include <QList>
 #include <QVector>
 #include <QTimer>
+#include <QFile>
+#include <QFileDialog>
+#include <QScrollArea>
 
 #include "qwt_plot.h"
 #include "qwt_plot_curve.h"
@@ -30,30 +35,36 @@ public:
     ~MainWindow();
     
 private:
-    QTimer *timer;
+    //QFile *file;
     Ui::MainWindow *ui;
 
-    QVector< QVector< QVector<double> > > continousData;
+    QVector< QVector< QVector<double> > > data;
 
     QVector< QVector<QwtPlot*> > plots;
     QVector< QVector<QwtPlotCurve*> > curves;
+
+    bool isPlotsEnabled;
 
 signals:
     void showSettingsDialog();
     void showTestSuite();
 
 public slots:
+    void enablePlots(int moduleCount, int channelCount);
+    void disablePlots();
     void setConnectionState(bool isConnected);
     void setModulesMode(me_mole_module_mode modulesMode);
     void setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
+    void setSamplesSize(uint16 samplesSize);
     void plotData(uint8 moduleIndex, uint8 channelIndex,
                   QVector<double> samples, QVector<double> data);
 
 private slots:
     void on_actionSettings_triggered();
     void on_actionTest_suite_triggered();
-    void on_getDataPushButton_clicked();
     void on_toggleTimerPushButton_toggled(bool checked);
+    void on_getDataPushButton_clicked();
+    void on_actionOpen_triggered();
 };
 
 #endif // MAINWINDOW_H

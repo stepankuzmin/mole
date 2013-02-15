@@ -27,6 +27,8 @@ int main(int argc, char *argv[])
                      &mainWindow, SLOT(setModulesMode(me_mole_module_mode)));
     QObject::connect(mole, SIGNAL(conversionSynchronizationChanged(me_mole_conversion_synchronization)),
                      &mainWindow, SLOT(setConversionSynchronization(me_mole_conversion_synchronization)));
+    QObject::connect(mole, SIGNAL(samplesSizeChanged(uint16)),
+                     &mainWindow, SLOT(setSamplesSize(uint16)));
     QObject::connect(mole, SIGNAL(dataDump(uint8,uint8,QVector<double>,QVector<double>)),
                      &mainWindow, SLOT(plotData(uint8,uint8,QVector<double>,QVector<double>)));
 

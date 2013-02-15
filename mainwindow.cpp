@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     /*
     SD3 *file = new SD3(this);
 
@@ -28,58 +29,69 @@ MainWindow::~MainWindow()
 // public slots  //
 ///////////////////
 
+/*
+ * Enable plots
+ */
+void MainWindow::enablePlots(int moduleCount, int channelCount) {
+    QVector< QVector<QwtPlot*> >            plots(moduleCount, QVector<QwtPlot*>(channelCount));
+
+    QVector< QVector<QwtPlotCurve*> >       curves(moduleCount,
+                                                   QVector<QwtPlotCurve*>(channelCount));
+    QVector< QVector< QVector<double> > >   data(moduleCount,
+                                                 QVector< QVector<double> >(channelCount));
+
+    for (int moduleIndex = 0; moduleIndex < plots.size(); ++moduleIndex) {
+        for (int channelIndex = 0; channelIndex < plots.at(moduleIndex).size(); ++channelIndex) {
+            plots[moduleIndex][channelIndex] = new QwtPlot();
+            plots[moduleIndex][channelIndex]->setAutoFillBackground(true);
+            plots[moduleIndex][channelIndex]->setPalette(Qt::black);
+            plots[moduleIndex][channelIndex]->setAxisAutoScale(QwtPlot::xBottom, true);
+            plots[moduleIndex][channelIndex]->setAxisAutoScale(QwtPlot::yLeft, true);
+            plots[moduleIndex][channelIndex]->axisScaleEngine(QwtPlot::xBottom)->setAttribute(QwtScaleEngine::Floating, true);
+            //(void) new QwtPlotPanner(plots[moduleIndex][channelIndex]->canvas());
+            //(void) new QwtPlotMagnifier(plots[moduleIndex][channelIndex]->canvas());
+            ui->plotsLayout->addWidget(plots[moduleIndex][channelIndex]);
+
+            QVector<double> data[moduleIndex][channelIndex];
+        }
+    }
+
+    this->data = data;
+    this->plots = plots;
+    this->curves = curves;
+    this->isPlotsEnabled = true;
+}
+
+/*
+ * Disable plots
+ */
+void MainWindow::disablePlots() {
+    if (ui->plotsLayout->layout() != NULL) {
+        QLayoutItem* item;
+        while ((item = ui->plotsLayout->layout()->takeAt(0)) != NULL) {
+            delete item->widget();
+            delete item;
+        }
+    }
+    this->data.clear();
+    this->plots.clear();
+    this->curves.clear();
+    this->isPlotsEnabled = false;
+}
+
 void MainWindow::setConnectionState(bool isConnected) {
     Mole *mole = Mole::getInstance();
     int moduleCount = mole->getModuleCount();
     int channelCount = mole->getChannelCount();
 
     if (isConnected) {
-        // Create plots
-        QVector< QVector<QwtPlot*> > plots(moduleCount, QVector<QwtPlot*>(channelCount));
-
-        // Create curves
-        QVector< QVector<QwtPlotCurve*> > curves(moduleCount, QVector<QwtPlotCurve*>(channelCount));
-
-        // Initialize continous data vectors
-        QVector< QVector< QVector<double> > > continousData(moduleCount, QVector< QVector<double> >(channelCount));
-
-        // @TODO: change i and j to moduleIndex and channelIndex
-        for (int i = 0; i < plots.size(); ++i) {
-            for (int j = 0; j < plots.at(i).size(); ++j) {
-                plots[i][j] = new QwtPlot();
-                plots[i][j]->setAutoFillBackground(true);
-                plots[i][j]->setPalette(Qt::black);
-                plots[i][j]->setAxisAutoScale(QwtPlot::xBottom, true);
-                plots[i][j]->setAxisAutoScale(QwtPlot::yLeft, true);
-                plots[i][j]->axisScaleEngine(QwtPlot::xBottom)->setAttribute(QwtScaleEngine::Floating, true);
-                (void) new QwtPlotPanner(plots[i][j]->canvas());
-                (void) new QwtPlotMagnifier(plots[i][j]->canvas());
-                ui->plotsLayout->addWidget(plots[i][j]);
-
-                QVector<double> continousData[i][j];
-            }
-        }
-
-        this->plots = plots;
-        this->curves = curves;
-        this->continousData = continousData;
-
-        ui->connectionStateLabel->setText(tr("Connected"));
+        disablePlots();
+        enablePlots(moduleCount, channelCount);
+        ui->connectionStateLabel->setText(tr("Connection: Connected"));
     }
     else {
-        // Remove plots
-        if (ui->plotsLayout->layout() != NULL) {
-            QLayoutItem* item;
-            while ((item = ui->plotsLayout->layout()->takeAt(0)) != NULL) {
-                delete item->widget();
-                delete item;
-            }
-        }
-
-        plots.clear();
-        curves.clear();
-
-        ui->connectionStateLabel->setText(tr("Disconnected"));
+        disablePlots();
+        ui->connectionStateLabel->setText(tr("Connection: Disconnected"));
     }
 }
 
@@ -93,7 +105,7 @@ void MainWindow::setModulesMode(me_mole_module_mode modulesMode) {
         case ME_MMM_INCLINOMETER:   text = tr("Inclinometer"); break;
     }
 
-    ui->modulesModeLabel->setText(text);
+    ui->modulesModeLabel->setText(tr("Modules mode: %1").arg(text));
 }
 
 void MainWindow::setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization) {
@@ -105,7 +117,12 @@ void MainWindow::setConversionSynchronization(me_mole_conversion_synchronization
         case ME_MCS_EXTERNAL:   text = tr("External"); break;
     }
 
-    ui->conversionSynchronizationLabel->setText(text);
+    ui->conversionSynchronizationLabel->setText(tr("Conversion synchronization: %1").arg(text));
+}
+void MainWindow::setSamplesSize(uint16 samplesSize) {
+    QString text;
+
+    ui->samplesSizeLabel->setText(tr("Samples size: %1").arg(samplesSize));
 }
 
 /*
@@ -118,12 +135,14 @@ void MainWindow::setConversionSynchronization(me_mole_conversion_synchronization
  */
 void MainWindow::plotData(uint8 moduleIndex, uint8 channelIndex,
                           QVector<double> samples, QVector<double> data) {
+    /*
     this->continousData[moduleIndex][channelIndex] += data;
 
     int size = this->continousData[moduleIndex][channelIndex].size();
     QVector<double> continousSamples;
     for (int i=0; i<size; i++)
         continousSamples << i;
+    */
 
     plots[moduleIndex][channelIndex]->detachItems();
     plots[moduleIndex][channelIndex]->replot();
@@ -132,8 +151,8 @@ void MainWindow::plotData(uint8 moduleIndex, uint8 channelIndex,
     curves[moduleIndex][channelIndex] = new QwtPlotCurve();
     curves[moduleIndex][channelIndex]->setRenderHint(QwtPlotItem::RenderAntialiased);
     curves[moduleIndex][channelIndex]->setPen(QPen(Qt::red));
-    curves[moduleIndex][channelIndex]->setSamples(continousSamples, this->continousData[moduleIndex][channelIndex]);
-    //curves[moduleIndex][channelIndex]->setSamples(samples, data);
+    //curves[moduleIndex][channelIndex]->setSamples(continousSamples, this->continousData[moduleIndex][channelIndex]);
+    curves[moduleIndex][channelIndex]->setSamples(samples, data);
     curves[moduleIndex][channelIndex]->attach(plots[moduleIndex][channelIndex]);
 
     plots[moduleIndex][channelIndex]->replot();
@@ -153,42 +172,129 @@ void MainWindow::on_actionTest_suite_triggered()
     emit showTestSuite();
 }
 
-void MainWindow::on_getDataPushButton_clicked()
-{
-    /*
-    Mole *mole = Mole::getInstance();
-
-    uint16 samples;
-    samples = ui->lineEdit->text().toInt();
-
-    if (mole->startConversion()) {
-        mole->getSeismicData(samples);
-        mole->stopConversion();
-    }
-    */
-}
-
 void MainWindow::on_toggleTimerPushButton_toggled(bool checked)
 {
-    // @TODO: move timer to mole!
-    /*
-    if (checked) {
-        this->timer = new QTimer(this);
-        connect(timer, SIGNAL(timeout()), this, SLOT(on_getDataPushButton_clicked()));
-        timer->start(1000);
-    }
-    else {
-        this->timer->stop();
-    }
-    */
-
     Mole *mole = Mole::getInstance();
     if (checked) {
-        uint16 samplesSize = ui->lineEdit->text().toInt();
-        mole->setSamplesSize(samplesSize);
-        mole->startTimer(1000);
+        mole->startTimer(1000); // How do I choose time interval?
     }
     else {
         mole->stopTimer();
     }
+}
+
+void MainWindow::on_getDataPushButton_clicked()
+{
+    Mole *mole = Mole::getInstance();
+    mole->getData();
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+    if (this->isPlotsEnabled) {
+        disablePlots();
+    }
+
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open file"), "", tr("SD3 (*.sd3)"));
+    qDebug() << "Reading " << fileName;
+
+    QVector< QVector< QVector<double> > > data;
+    QVector< QVector< QVector<double> > > samples;
+
+    FILE *file;
+    file = fopen(fileName.toStdString().c_str(), "rb");
+
+    // @TODO: private structure to store sd3 data
+    int channelCount = 3;
+    int version;
+    int datarate;
+    int samples_count;
+    int mode;
+    int address;
+    int date;
+    int time;
+    int x_source;
+    int y_source;
+    int h_source;
+
+    int x_state;
+    int y_state;
+    int z_state;
+    int x_incl;
+    int y_incl;
+    int z_incl;
+    int x;
+    int y;
+    int h;
+
+    int size = sizeof(int);
+    int sizeOfFloat = sizeof(float);
+
+    fread(&version,         size, 1, file);
+    fread(&datarate,        size, 1, file);
+    fread(&samples_count,   size, 1, file);
+    fread(&mode,            size, 1, file);
+    fread(&address,         size, 1, file);
+    fread(&date,            size, 1, file);
+    fread(&time,            size, 1, file);
+    fread(&x_source,        size, 1, file);
+    fread(&y_source,        size, 1, file);
+    fread(&h_source,        size, 1, file);
+
+    qDebug() << "=== HEADER ===";
+    qDebug() << "version: "  << version;
+    qDebug() << "datarate: " << datarate;
+    qDebug() << "samples: "  << samples_count;
+    qDebug() << "mode: "     << mode;
+    qDebug() << "address: "  << address;
+    qDebug() << "date: "     << date;
+    qDebug() << "time: "     << time;
+    qDebug() << "x_source: " << x_source;
+    qDebug() << "y_source: " << y_source;
+    qDebug() << "h_source: " << h_source;
+
+    float sample;
+    float X[samples_count], Y[samples_count], Z[samples_count];
+
+    int moduleIndex = 0;
+    while (!feof(file)) {
+      // Record
+      fread(&x_state, size, 1, file);
+      fread(&y_state, size, 1, file);
+      fread(&z_state, size, 1, file);
+
+      fread(&x_incl, size, 1, file);
+      fread(&y_incl, size, 1, file);
+      fread(&z_incl, size, 1, file);
+
+      fread(&x, size, 1, file);
+      fread(&y, size, 1, file);
+      fread(&h, size, 1, file);
+
+      fseek(file, size, SEEK_CUR); // Skip reserved field
+
+      // Rad record
+      QVector< QVector<double> > dataRecord(channelCount);
+      QVector< QVector<double> > samplesRecord(channelCount);
+      for (int channelIndex=0; channelIndex<channelCount; channelIndex++) {
+          for (int i=0; i<samples_count; i++) {
+              fread(&sample, sizeOfFloat, 1, file);
+              dataRecord[channelIndex] << sample;
+              samplesRecord[channelIndex] << i;
+          }
+      }
+      data << dataRecord;
+      samples << samplesRecord;
+      moduleIndex++;
+    }
+    fclose(file);
+    int moduleCount = moduleIndex;
+
+    // Plot data
+    enablePlots(moduleCount, channelCount);
+    for (moduleIndex=0; moduleIndex<moduleCount; moduleIndex++)
+        for (int channelIndex=0; channelIndex<channelCount; channelIndex++) {
+            plotData(moduleIndex, channelIndex,
+                     samples[moduleIndex][channelIndex], data[moduleIndex][channelIndex]);
+        }
 }
