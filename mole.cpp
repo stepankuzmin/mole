@@ -549,7 +549,12 @@ bool Mole::getSeismicData(uint16 samples) { // @TODO: DEPRECATED
 }
 */
 
-bool Mole::getData() {
+sd3_file_t Mole::getData() {
+
+    sd3_file_t sd3_file;
+    sd3_file.version = 2;
+    sd3_file.samples_count = this->samplesSize;
+
     int ret;
     uint16 samples = this->samplesSize;
     uint16 first_sample_to_print = 0;
@@ -584,11 +589,12 @@ bool Mole::getData() {
     if (ret < 0) {
         qDebug("[Error] Can't me_get_read_samples (ret = 0x%.2x)\n", -ret);
         this->stopConversion();
-        return false;
+        //return NULL;
     }
     else {
         qDebug("[Success] me_get_read_samples = %u", read_samples);
         for(uint8 moduleIndex = 0; moduleIndex < me_get_module_count(this->first_address, this->last_address); ++moduleIndex) {
+            sd3_record_t record;
             for(uint8 channelIndex = 0; channelIndex < this->channel_count; ++channelIndex) {
                 QVector<double> samplesVector;
                 QVector<double> dataVector;
@@ -613,14 +619,22 @@ bool Mole::getData() {
                         } break;
                     }
                 }
+
+                switch (channelIndex) {
+                    case 0: record.x = dataVector; break;
+                    case 1: record.y = dataVector; break;
+                    case 2: record.z = dataVector; break;
+                }
+
                 ptrMole->emitDataDump(moduleIndex, channelIndex, samplesVector, dataVector);
                 samplesVector.clear();
                 dataVector.clear();
             }
+            sd3_file.records << record;
         }
         delete[] samples_data;
         this->stopConversion();
-        return true;
+        return sd3_file;
     }
 }
 

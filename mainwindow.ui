@@ -85,7 +85,7 @@
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
+      <widget class="QWidget" name="plotsLayout">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -94,15 +94,7 @@
          <height>223</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <layout class="QVBoxLayout" name="plotsLayout">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-         </layout>
-        </item>
-       </layout>
+       <layout class="QVBoxLayout" name="verticalLayout"/>
       </widget>
      </widget>
     </item>
@@ -151,6 +143,7 @@
    </attribute>
    <addaction name="actionSettings"/>
    <addaction name="actionTest_suite"/>
+   <addaction name="actionDisablePlots"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSettings">
@@ -179,6 +172,14 @@
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionDisablePlots">
+   <property name="text">
+    <string>Disable plots</string>
+   </property>
+   <property name="toolTip">
+    <string>Disable plots</string>
    </property>
   </action>
  </widget>

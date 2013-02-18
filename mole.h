@@ -4,6 +4,8 @@
 //#include <QList>
 //#include <QVector>
 
+#include "sd3.h"
+
 #include <QDebug>
 #include <QTimer>
 #include <QObject>
@@ -96,7 +98,7 @@ public slots:
     bool stopConversion();
     //bool getSeismicData(uint16 samples);
 
-    bool getData();
+    sd3_file_t getData();
 
     void startTimer(int msec);
     void stopTimer();

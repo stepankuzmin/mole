@@ -35,10 +35,11 @@ public:
     ~MainWindow();
     
 private:
-    //QFile *file;
+    sd3_file_t sd3_file;
     Ui::MainWindow *ui;
 
     QVector< QVector< QVector<double> > > data;
+    QVector< QVector< QVector<double> > > samples;
 
     QVector< QVector<QwtPlot*> > plots;
     QVector< QVector<QwtPlotCurve*> > curves;
@@ -58,6 +59,8 @@ public slots:
     void setSamplesSize(uint16 samplesSize);
     void plotData(uint8 moduleIndex, uint8 channelIndex,
                   QVector<double> samples, QVector<double> data);
+    void plotSD3();
+    void plotSD3(sd3_file_t sd3_file);
 
 private slots:
     void on_actionSettings_triggered();
@@ -65,6 +68,8 @@ private slots:
     void on_toggleTimerPushButton_toggled(bool checked);
     void on_getDataPushButton_clicked();
     void on_actionOpen_triggered();
+    void on_actionSave_triggered();
+    void on_actionDisablePlots_triggered();
 };
 
 #endif // MAINWINDOW_H
