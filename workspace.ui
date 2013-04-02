@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Workspace</class>
+ <widget class="QDialog" name="Workspace">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>474</width>
+    <height>326</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Workspace</string>
+  </property>
+  <property name="modal">
+   <bool>false</bool>
+  </property>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
