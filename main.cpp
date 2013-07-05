@@ -8,9 +8,9 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    MainWindow mainWindow;
     Mole *mole = Mole::getInstance();
 
-    MainWindow mainWindow;
     //SettingsDialog *settingsDialog = new SettingsDialog(&mainWindow);
     //TestSuite *testSuite = new TestSuite(&mainWindow);
 
@@ -33,8 +33,12 @@ int main(int argc, char *argv[])
                      &mainWindow, SLOT(setSamplesSize(uint16)));
     QObject::connect(mole, SIGNAL(datarateChanged(me_mole_module_datarate)),
                      &mainWindow, SLOT(setDatarate(me_mole_module_datarate)));
+
     QObject::connect(mole, SIGNAL(dataDump(uint8,uint8,QVector<double>,QVector<double>)),
                      &mainWindow, SLOT(plotData(uint8,uint8,QVector<double>,QVector<double>)));
+
+    QObject::connect(mole, SIGNAL(mdataDump(MData)),
+                     &mainWindow, SLOT(plotMData(MData)));
 
     mainWindow.showMaximized();
     

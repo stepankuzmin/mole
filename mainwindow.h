@@ -3,6 +3,8 @@
 
 #include <fstream>
 
+#include <QPointF>
+
 #include <QMainWindow>
 #include <QMultiMap>
 #include <QList>
@@ -21,6 +23,9 @@
 
 #include "sd3.h"
 #include "mole.h"
+
+typedef QVector< QVector<QwtPlot*> >        MPlot;
+typedef QVector< QVector<QwtPlotCurve*> >   MCurve;
 
 namespace Ui {
 class MainWindow;
@@ -44,6 +49,9 @@ private:
     QVector< QVector<QwtPlot*> > plots;
     QVector< QVector<QwtPlotCurve*> > curves;
 
+    //MPlot mplots;
+    //MCurve mcurves;
+
     bool isPlotsEnabled;
 
 signals:
@@ -60,14 +68,13 @@ public slots:
     void setDatarate(me_mole_module_datarate datarate);
     void plotData(uint8 moduleIndex, uint8 channelIndex,
                   QVector<double> samples, QVector<double> data);
+
+    void plotMData(MData mdata);
+
     void plotSD3();
     void plotSD3(sd3_file_t sd3_file);
 
 private slots:
-    //void on_actionSettings_triggered();
-    //void on_actionTest_suite_triggered();
-    //void on_toggleTimerPushButton_toggled(bool checked);
-    //void on_getDataPushButton_clicked();
     void on_actionOpen_triggered();
     void on_actionSave_triggered();
     void on_actionDisablePlots_triggered();

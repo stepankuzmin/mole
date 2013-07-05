@@ -270,6 +270,7 @@ void Mole::samplesDataCallbackHandler(int mole_descriptor,
     }
     }
 
+    MData mdata;
     QVector<double> samplesList;
     QVector<double> dataList;
 
@@ -282,12 +283,19 @@ void Mole::samplesDataCallbackHandler(int mole_descriptor,
                                                                samples_data);
                 samplesList << sample;
                 dataList << data;
+                /*
+                mdata[moduleIndex][channelIndex].push_back(
+                            QPointF((sample*datarate)/1000000, data));
+                            */
             }
+
             ptrMole->emitDataDump(moduleIndex, channelIndex, samplesList, dataList);
             samplesList.clear();
             dataList.clear();
+
         }
     }
+    //ptrMole->emitMDataDump(mdata);
 }
 
 void Mole::stageChangedCallbackHandler(int mole_descriptor, me_test_suite_stage test_suite_stage) {
@@ -368,6 +376,10 @@ void Mole::emitDataDump(uint8 moduleIndex, uint8 channelIndex,
     emit dataDump(moduleIndex, channelIndex, samples, data);
 }
 
+void Mole::emitMDataDump(MData mdata) {
+    emit mdataDump(mdata);
+}
+
 //////////////////
 // Public slots //
 //////////////////
@@ -426,7 +438,7 @@ int Mole::setDatarate(me_mole_module_datarate datarate) {
     else {
         this->datarate = datarate;
         emit datarateChanged(datarate);
-        qDebug() << "[Success] me_module_set_datarate";
+        qDebug() << "[Success] me_module_set_datarate = " << datarate;
     }
 
     return ret;
@@ -566,6 +578,8 @@ bool Mole::getSeismicData(uint16 samples) { // @TODO: DEPRECATED
 */
 
 sd3_file_t Mole::getData() {
+    MData mdata;
+    double data;
 
     sd3_file_t sd3_file;
     sd3_file.version = 2;
@@ -621,11 +635,19 @@ sd3_file_t Mole::getData() {
                         case ME_MMM_SEISMIC:
                         case ME_MMM_COUNT: {
 
-                        samplesVector << sample;
-                        dataVector << me_get_seismic_sample_data(moduleIndex, sample, channelIndex,
+                        data = me_get_seismic_sample_data(moduleIndex, sample, channelIndex,
                                                                  this->first_address, this->last_address,
                                                                  this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
                                                                  samples_data);
+                        /*
+                        mdata[moduleIndex][channelIndex].push_back(
+                                    QPointF((sample*this->datarate)/1000000, data));
+                                    */
+
+
+                        samplesVector << sample;
+                        dataVector << data;
+
                         } break;
                         case ME_MMM_INCLINOMETER: {
                             angle_data_t angle_data = me_get_inclinometer_sample_data(moduleIndex, channelIndex,
@@ -636,6 +658,9 @@ sd3_file_t Mole::getData() {
                     }
                 }
 
+                //ptrMole->emitMDataDump(mdata);
+
+
                 switch (channelIndex) {
                     case 0: record.x = dataVector; break;
                     case 1: record.y = dataVector; break;
@@ -645,12 +670,89 @@ sd3_file_t Mole::getData() {
                 ptrMole->emitDataDump(moduleIndex, channelIndex, samplesVector, dataVector);
                 samplesVector.clear();
                 dataVector.clear();
+
             }
             sd3_file.records << record;
         }
         delete[] samples_data;
         this->stopConversion();
         return sd3_file;
+    } // @TODO: emit succeed
+}
+
+void Mole::getMData() {
+
+    int datarate_raw = me_raw_value_to_datarate(this->datarate);
+
+    int moduleCount = me_get_module_count(this->first_address, this->last_address);
+    MData mdata(moduleCount, QVector< QVector<QPointF> >(this->channel_count));
+    double data, sample_raw;
+
+    int ret;
+    uint16 samples = this->samplesSize;
+    uint16 first_sample_to_print = 0;
+    uint16 last_sample_to_print = 0;
+
+    switch(this->modulesMode) {
+        case ME_MMM_SLEEP:
+        case ME_MMM_SEISMIC:
+        case ME_MMM_COUNT: {
+            first_sample_to_print = 0;
+            last_sample_to_print = samples;
+        } break;
+        case ME_MMM_INCLINOMETER: {
+            samples = 1;
+            first_sample_to_print = 0;
+            last_sample_to_print = 1;
+        } break;
+    }
+
+    this->startConversion();
+    uint8 *samples_data = new uint8[this->bytes_in_line * samples];
+    ret =  me_host_get_samples_data(this->descriptor, samples, samples_data);
+    if (ret < 0) {
+        qDebug("[Error] Can't me_host_get_samples_data (ret = 0x%.2x)\n", -ret);
+    }
+    else {
+        qDebug() << "[Success] me_host_get_samples_data";
+    }
+
+    uint16 read_samples = 0;
+    ret =  me_get_read_samples(this->descriptor, &read_samples);
+    if (ret < 0) {
+        qDebug("[Error] Can't me_get_read_samples (ret = 0x%.2x)\n", -ret);
+        this->stopConversion();
+        //return NULL;
+    }
+    else {
+        qDebug("[Success] me_get_read_samples = %u", read_samples);
+        for(uint8 moduleIndex = 0; moduleIndex < me_get_module_count(this->first_address, this->last_address); ++moduleIndex) {
+            for(uint8 channelIndex = 0; channelIndex < this->channel_count; ++channelIndex) {
+                for(uint16 sample = first_sample_to_print; sample < last_sample_to_print; ++sample) {
+                    switch(this->modulesMode) {
+                        case ME_MMM_SLEEP:
+                        case ME_MMM_SEISMIC:
+                        case ME_MMM_COUNT: {
+
+                        sample_raw = ((double) sample * (double) datarate_raw)/1000000;
+                        data = me_get_seismic_sample_data(moduleIndex, sample, channelIndex,
+                                                                 this->first_address, this->last_address,
+                                                                 this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
+                                                                 samples_data);
+                        mdata[moduleIndex][channelIndex].push_back(QPointF(sample_raw, data));
+                        } break;
+                        case ME_MMM_INCLINOMETER: {
+                            angle_data_t angle_data = me_get_inclinometer_sample_data(moduleIndex, channelIndex,
+                                                          this->first_address, this->last_address,
+                                                          this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
+                                                          samples_data);
+                        } break;
+                    }
+                }
+            }
+        }
+        this->stopConversion();
+        ptrMole->emitMDataDump(mdata);
     }
 }
 

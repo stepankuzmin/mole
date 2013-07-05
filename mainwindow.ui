@@ -150,21 +150,7 @@
        </layout>
       </widget>
       <widget class="QWidget" name="rightWidget" native="true">
-       <layout class="QVBoxLayout" name="plotsLayout">
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>114</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+       <layout class="QGridLayout" name="plotsLayout"/>
       </widget>
      </widget>
     </item>

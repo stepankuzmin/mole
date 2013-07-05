@@ -3,6 +3,7 @@
 
 #include <QDateTime>
 #include <QMessageBox>
+#include "qwt_plot_grid.h"
 #include "qextserialenumerator.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -34,42 +35,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->datarateComboBox->addItem("1000", QVariant(ME_MMD_1000));
     ui->datarateComboBox->addItem("2000", QVariant(ME_MMD_2000));
     ui->datarateComboBox->addItem("4000", QVariant(ME_MMD_4000));
-
-    /*
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open file"), "", tr("SD3 (*.sd3)"));
-    sd3_file_t sd3_file = SD3::read(fileName.toStdString().c_str());
-
-    QVector<double> samples;
-    for (int i=0; i<sd3_file.samples_count; i++) {
-        samples << i;
-    }
-
-    QwtPlot *plot = new QwtPlot();
-    plot->setAutoFillBackground(true);
-    plot->setPalette(Qt::white);
-    plot->setAxisAutoScale(QwtPlot::xBottom, true);
-    plot->setAxisAutoScale(QwtPlot::yLeft, true);
-    plot->axisScaleEngine(QwtPlot::xBottom)->setAttribute(QwtScaleEngine::Floating, true);
-
-    QwtPlotCurve *curve1 = new QwtPlotCurve();
-    curve1->setRenderHint(QwtPlotItem::RenderAntialiased);
-    curve1->setPen(QPen(Qt::black));
-    curve1->setSamples(samples, sd3_file.records[0].x);
-    curve1->attach(plot);
-    QwtPlotCurve *curve2 = new QwtPlotCurve();
-    curve2->setRenderHint(QwtPlotItem::RenderAntialiased);
-    curve2->setPen(QPen(Qt::black));
-    curve2->setSamples(samples, sd3_file.records[0].y);
-    curve2->attach(plot);
-    QwtPlotCurve *curve3 = new QwtPlotCurve();
-    curve3->setRenderHint(QwtPlotItem::RenderAntialiased);
-    curve3->setPen(QPen(Qt::black));
-    curve3->setSamples(samples, sd3_file.records[0].z);
-    curve3->attach(plot);
-    plot->replot();
-    */
-
-    //ui->plotsLayout->addWidget(plot);
 }
 
 MainWindow::~MainWindow()
@@ -100,15 +65,23 @@ void MainWindow::enablePlots(int moduleCount, int channelCount) {
         for (int channelIndex = 0; channelIndex < plots.at(moduleIndex).size(); ++channelIndex) {
             plots[moduleIndex][channelIndex] = new QwtPlot();
             plots[moduleIndex][channelIndex]->setAutoFillBackground(true);
-            plots[moduleIndex][channelIndex]->setPalette(Qt::black);
+            plots[moduleIndex][channelIndex]->setPalette(Qt::white);
             plots[moduleIndex][channelIndex]->setAxisAutoScale(QwtPlot::xBottom, true);
             plots[moduleIndex][channelIndex]->setAxisAutoScale(QwtPlot::yLeft, true);
-            plots[moduleIndex][channelIndex]->enableAxis(QwtPlot::xBottom, false);
-            plots[moduleIndex][channelIndex]->enableAxis(QwtPlot::yLeft, false);
+            plots[moduleIndex][channelIndex]->enableAxis(QwtPlot::xBottom, true);
+            plots[moduleIndex][channelIndex]->enableAxis(QwtPlot::yLeft, true);
             plots[moduleIndex][channelIndex]->axisScaleEngine(QwtPlot::xBottom)->setAttribute(QwtScaleEngine::Floating, true);
-            //(void) new QwtPlotPanner(plots[moduleIndex][channelIndex]->canvas());
-            //(void) new QwtPlotMagnifier(plots[moduleIndex][channelIndex]->canvas());
-            ui->plotsLayout->layout()->addWidget(plots[moduleIndex][channelIndex]);
+            (void) new QwtPlotPanner(plots[moduleIndex][channelIndex]->canvas());
+            (void) new QwtPlotMagnifier(plots[moduleIndex][channelIndex]->canvas());
+            //ui->plotsLayout->layout()->addWidget(plots[moduleIndex][channelIndex], moduleIndex, channelIndex)
+
+            QwtPlotGrid *grid = new QwtPlotGrid;
+            grid->enableXMin(true);
+            grid->setMajPen(QPen(Qt::gray, 0, Qt::DotLine));
+            grid->setMinPen(QPen(Qt::gray, 0, Qt::DotLine));
+            grid->attach(plots[moduleIndex][channelIndex]);
+
+            ui->plotsLayout->addWidget(plots[moduleIndex][channelIndex], moduleIndex, channelIndex);
 
             QVector<double> data[moduleIndex][channelIndex];
             QVector<double> samples[moduleIndex][channelIndex];
@@ -138,6 +111,29 @@ void MainWindow::disablePlots() {
     this->plots.clear();
     this->curves.clear();
     this->isPlotsEnabled = false;
+}
+
+void MainWindow::plotMData(MData mdata) {
+    for (int moduleIndex = 0; moduleIndex < mdata.size(); ++moduleIndex) {
+        for (int channelIndex = 0; channelIndex < mdata[moduleIndex].size(); ++channelIndex) {
+            this->plots[moduleIndex][channelIndex]->detachItems();
+            //this->plots[moduleIndex][channelIndex]->replot();
+
+            curves[moduleIndex][channelIndex] = new QwtPlotCurve();
+            curves[moduleIndex][channelIndex]->setPen(QPen(Qt::black));
+            curves[moduleIndex][channelIndex]->setBrush(Qt::black);
+            curves[moduleIndex][channelIndex]->setSamples(mdata[moduleIndex][channelIndex]);
+            curves[moduleIndex][channelIndex]->attach(this->plots[moduleIndex][channelIndex]);
+
+            QwtPlotGrid *grid = new QwtPlotGrid;
+            grid->enableXMin(true);
+            grid->setMajPen(QPen(Qt::gray, 0, Qt::DotLine));
+            grid->setMinPen(QPen(Qt::gray, 0, Qt::DotLine));
+            grid->attach(this->plots[moduleIndex][channelIndex]);
+
+            this->plots[moduleIndex][channelIndex]->replot();
+        }
+    }
 }
 
 void MainWindow::setConnectionState(bool isConnected) {
@@ -210,20 +206,32 @@ void MainWindow::setDatarate(me_mole_module_datarate datarate) {
 void MainWindow::plotData(uint8 moduleIndex, uint8 channelIndex,
                           QVector<double> samples, QVector<double> data) {
 
+    double *s = samples.data();
+    for (int i = 0; i < samples.size(); ++i) {
+        s[i] = (s[i]*250)/1000000;
+    }
+
     this->samples[moduleIndex][channelIndex] = samples;
     this->data[moduleIndex][channelIndex] = data;
 
-    plots[moduleIndex][channelIndex]->detachItems();
-    plots[moduleIndex][channelIndex]->replot();
+    this->plots[moduleIndex][channelIndex]->detachItems();
+    this->plots[moduleIndex][channelIndex]->replot();
 
     // Set data
     curves[moduleIndex][channelIndex] = new QwtPlotCurve();
     //curves[moduleIndex][channelIndex]->setRenderHint(QwtPlotItem::RenderAntialiased);
-    curves[moduleIndex][channelIndex]->setPen(QPen(Qt::red));
+    curves[moduleIndex][channelIndex]->setPen(QPen(Qt::black));
+    curves[moduleIndex][channelIndex]->setBrush(Qt::black);
     curves[moduleIndex][channelIndex]->setSamples(samples, data);
-    curves[moduleIndex][channelIndex]->attach(plots[moduleIndex][channelIndex]);
+    curves[moduleIndex][channelIndex]->attach(this->plots[moduleIndex][channelIndex]);
 
-    plots[moduleIndex][channelIndex]->replot();
+    QwtPlotGrid *grid = new QwtPlotGrid;
+    grid->enableXMin(true);
+    grid->setMajPen(QPen(Qt::gray, 0, Qt::DotLine));
+    grid->setMinPen(QPen(Qt::gray, 0, Qt::DotLine));
+    grid->attach(this->plots[moduleIndex][channelIndex]);
+
+    this->plots[moduleIndex][channelIndex]->replot();
 }
 
 void MainWindow::plotSD3() {
@@ -414,6 +422,5 @@ void MainWindow::on_startPushButton_clicked()
             mole->setDatarate(ME_MMD_4000);
         } break;
     }
-
-    this->sd3_file = mole->getData();
+    mole->getMData();
 }

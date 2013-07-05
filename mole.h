@@ -8,11 +8,14 @@
 
 #include <QDebug>
 #include <QTimer>
-#include <QObject>
 #include <QMutex>
+#include <QObject>
+#include <QPointF>
 #include <QWaitCondition>
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine.h"
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine-test-suite.h"
+
+typedef QVector< QVector< QVector<QPointF> > > MData;
 
 class Mole : public QObject
 {
@@ -77,6 +80,7 @@ private:
 
     void emitDataDump(uint8 moduleIndex, uint8 channelIndex,
                       QVector<double> samples, QVector<double> data);
+    void emitMDataDump(MData mdata);
 
 signals:
     void connectionStateChanged(bool isConnected);
@@ -86,6 +90,7 @@ signals:
     void datarateChanged(me_mole_module_datarate datarate);
     void dataDump(uint8 moduleIndex, uint8 channelIndex,
                   QVector<double> samples, QVector<double> data);
+    void mdataDump(MData mdata);
 
 public slots:
     int connect(const char *portString); // @TODO: set return value as bool (isConnected)
@@ -102,6 +107,7 @@ public slots:
     //bool getSeismicData(uint16 samples);
 
     sd3_file_t getData();
+    void getMData();
 
     void startTimer(int msec);
     void stopTimer();
