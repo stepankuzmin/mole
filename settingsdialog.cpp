@@ -1,11 +1,19 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 
+/*
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SettingsDialog)
 {
     ui->setupUi(this);
+
+    // Datarate items
+    ui->datarateComboBox->addItem("250", QVariant(ME_MMD_250));
+    ui->datarateComboBox->addItem("500", QVariant(ME_MMD_500));
+    ui->datarateComboBox->addItem("1000", QVariant(ME_MMD_1000));
+    ui->datarateComboBox->addItem("2000", QVariant(ME_MMD_2000));
+    ui->datarateComboBox->addItem("4000", QVariant(ME_MMD_4000));
 
     // List all available COM ports
     QList<QextPortInfo> ports = QextSerialEnumerator::getPorts();
@@ -72,6 +80,31 @@ void SettingsDialog::on_setSamplesSizePushButton_clicked()
     mole->setSamplesSize(samplesSize);
 }
 
+void SettingsDialog::on_setDataratePushButton_clicked()
+{
+    int datarate = ME_MMD_COUNT;
+    Mole *mole = Mole::getInstance();
+    datarate = ui->datarateComboBox->itemData(ui->datarateComboBox->currentIndex()).toInt();
+    switch (datarate) {
+        case ME_MMD_250: {
+            mole->setDatarate(ME_MMD_250);
+        } break;
+        case ME_MMD_500: {
+            mole->setDatarate(ME_MMD_500);
+        } break;
+        case ME_MMD_1000: {
+            mole->setDatarate(ME_MMD_1000);
+        } break;
+        case ME_MMD_2000: {
+            mole->setDatarate(ME_MMD_2000);
+        } break;
+        case ME_MMD_4000: {
+            mole->setDatarate(ME_MMD_4000);
+        } break;
+    }
+}
+
 void SettingsDialog::on_buttonBox_accepted()
 {
 }
+*/

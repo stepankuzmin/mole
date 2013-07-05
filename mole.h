@@ -58,6 +58,7 @@ private:
     me_mole_conversion_synchronization conversionSynchronization;
 
     uint16 samplesSize; // samples size (количество дискретов)
+    me_mole_module_datarate datarate;
 
     void sleep(int ms);
     int _wait_test();
@@ -82,6 +83,7 @@ signals:
     void modulesModeChanged(me_mole_module_mode modulesMode);
     void conversionSynchronizationChanged(me_mole_conversion_synchronization conversionSynchronization);
     void samplesSizeChanged(uint16 samplesSize);
+    void datarateChanged(me_mole_module_datarate datarate);
     void dataDump(uint8 moduleIndex, uint8 channelIndex,
                   QVector<double> samples, QVector<double> data);
 
@@ -93,6 +95,7 @@ public slots:
     int setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
 
     void setSamplesSize(uint16 samplesSize); // Set samples size
+    int setDatarate(me_mole_module_datarate datarate); // Set datarate
 
     bool startConversion();
     bool stopConversion();

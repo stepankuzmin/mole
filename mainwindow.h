@@ -57,19 +57,22 @@ public slots:
     void setModulesMode(me_mole_module_mode modulesMode);
     void setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
     void setSamplesSize(uint16 samplesSize);
+    void setDatarate(me_mole_module_datarate datarate);
     void plotData(uint8 moduleIndex, uint8 channelIndex,
                   QVector<double> samples, QVector<double> data);
     void plotSD3();
     void plotSD3(sd3_file_t sd3_file);
 
 private slots:
-    void on_actionSettings_triggered();
-    void on_actionTest_suite_triggered();
-    void on_toggleTimerPushButton_toggled(bool checked);
-    void on_getDataPushButton_clicked();
+    //void on_actionSettings_triggered();
+    //void on_actionTest_suite_triggered();
+    //void on_toggleTimerPushButton_toggled(bool checked);
+    //void on_getDataPushButton_clicked();
     void on_actionOpen_triggered();
     void on_actionSave_triggered();
     void on_actionDisablePlots_triggered();
+    void on_connectionPushButton_toggled(bool checked);
+    void on_startPushButton_clicked();
 };
 
 #endif // MAINWINDOW_H

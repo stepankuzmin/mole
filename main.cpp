@@ -11,15 +11,17 @@ int main(int argc, char *argv[])
     Mole *mole = Mole::getInstance();
 
     MainWindow mainWindow;
-    SettingsDialog *settingsDialog = new SettingsDialog(&mainWindow);
-    TestSuite *testSuite = new TestSuite(&mainWindow);
+    //SettingsDialog *settingsDialog = new SettingsDialog(&mainWindow);
+    //TestSuite *testSuite = new TestSuite(&mainWindow);
 
+    /*
     QObject::connect(&mainWindow, SIGNAL(showSettingsDialog()),
                      settingsDialog, SLOT(show()));
     QObject::connect(&mainWindow, SIGNAL(showTestSuite()),
                      testSuite, SLOT(show()));
     QObject::connect(testSuite, SIGNAL(showSettingsDialog()),
                      settingsDialog, SLOT(show()));
+                     */
 
     QObject::connect(mole, SIGNAL(connectionStateChanged(bool)),
                      &mainWindow, SLOT(setConnectionState(bool)));
@@ -29,6 +31,8 @@ int main(int argc, char *argv[])
                      &mainWindow, SLOT(setConversionSynchronization(me_mole_conversion_synchronization)));
     QObject::connect(mole, SIGNAL(samplesSizeChanged(uint16)),
                      &mainWindow, SLOT(setSamplesSize(uint16)));
+    QObject::connect(mole, SIGNAL(datarateChanged(me_mole_module_datarate)),
+                     &mainWindow, SLOT(setDatarate(me_mole_module_datarate)));
     QObject::connect(mole, SIGNAL(dataDump(uint8,uint8,QVector<double>,QVector<double>)),
                      &mainWindow, SLOT(plotData(uint8,uint8,QVector<double>,QVector<double>)));
 

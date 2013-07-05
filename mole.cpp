@@ -416,6 +416,22 @@ void Mole::setSamplesSize(uint16 samplesSize) {
     qDebug("[Success] Mole samples size = %u", samplesSize);
 }
 
+int Mole::setDatarate(me_mole_module_datarate datarate) {
+    int ret = 1;
+
+    ret =  me_module_set_datarate(this->descriptor, datarate, this->last_address, &this->last_address_actual);
+    if (ret < 0) {
+        qDebug("Can't me_module_set_datarate (last_address_actual = %d) (ret = 0x%.2x)\n", this->last_address_actual, -ret);
+    }
+    else {
+        this->datarate = datarate;
+        emit datarateChanged(datarate);
+        qDebug() << "[Success] me_module_set_datarate";
+    }
+
+    return ret;
+}
+
 /*
  * Start conversion
  *

@@ -59,6 +59,9 @@ sd3_file_t SD3::read(const char *fileName) {
         recordIndex++;
     }
     fclose(file);
+
+    //sd3_file.records.remove(recordIndex);
+
     qDebug() << "read sd3_file.records.size()" << sd3_file.records.size();
 
     return sd3_file;

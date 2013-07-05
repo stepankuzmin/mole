@@ -1,10 +1,10 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
-
-#include <QMessageBox>
+/*
+//#include <QMessageBox>
 #include <QDialog>
 #include "mole.h"
-#include "qextserialenumerator.h"
+//#include "qextserialenumerator.h"
 
 namespace Ui {
 class SettingsDialog;
@@ -29,6 +29,7 @@ private slots:
     void on_setModulesModePushButton_clicked();
     void on_setConversionSynchronizationPushButton_clicked();
     void on_setSamplesSizePushButton_clicked();
+    void on_setDataratePushButton_clicked();
 };
-
+*/
 #endif // SETTINGSDIALOG_H
