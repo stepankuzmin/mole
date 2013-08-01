@@ -1,8 +1,8 @@
 #ifndef MOLE_ENGINE_TEST_SUITE_H
 #define MOLE_ENGINE_TEST_SUITE_H
 
-#include "3rdparty/mole-engine/include/shared/common.h"
-#include "3rdparty/mole-engine/include/mole-engine/mole-engine.h"
+#include "common.h"
+#include "mole-engine.h"
 
 #pragma pack(push,1)
 
@@ -13,10 +13,15 @@ typedef struct
 	bool out_of_tolerance[ME_MMG_COUNT];
 } me_ts_result_gain_channel_t;
 
+/**
+ * is_geophone_connected - используется только для теста me_ts_voltage_damping_resistor,
+ * в остальных тестах принимает неопределёненое значение.
+ */
 typedef struct 
 {
 	double calculated_value;
 	bool out_of_tolerance;
+	bool is_geophone_connected; // needed for me_ts_voltage_damping_resistor
 } me_ts_result_channel_t;
 
 #pragma pack(pop)
@@ -30,19 +35,21 @@ enum me_test_suite_stage
 {
 	ME_TSS_IDLE				= 0x00,		// Бездействие
 	ME_TSS_GAIN_COEFFICIENTS		= 0x01,		// Настройка крота
-	ME_TSS_GAIN_COEFFICIENTS_1		= 0x02,		// � егистрация и обработка данных
-	ME_TSS_GAIN_COEFFICIENTS_2		= 0x03,		// � егистрация и обработка данных
-	ME_TSS_GAIN_COEFFICIENTS_4		= 0x04,		// � егистрация и обработка данных
-	ME_TSS_GAIN_COEFFICIENTS_8		= 0x05,		// � егистрация и обработка данных
-	ME_TSS_GAIN_COEFFICIENTS_16		= 0x06,		// � егистрация и обработка данных
-	ME_TSS_GAIN_COEFFICIENTS_32		= 0x07,		// � егистрация и обработка данных
-	ME_TSS_GAIN_COEFFICIENTS_64		= 0x08,		// � егистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_1		= 0x02,		// Регистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_2		= 0x03,		// Регистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_4		= 0x04,		// Регистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_8		= 0x05,		// Регистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_16		= 0x06,		// Регистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_32		= 0x07,		// Регистрация и обработка данных
+	ME_TSS_GAIN_COEFFICIENTS_64		= 0x08,		// Регистрация и обработка данных
 	ME_TSS_NOISE_FLOOR			= 0x09,		// Настройка крота, регистрация и обработка данных
 	ME_TSS_TOTAL_HARMONIC_DISTORTION	= 0x0A,		// Настройка крота, регистрация и обработка данных
 	ME_TSS_ZERO_SHIFT			= 0x0B,		// Настройка крота, регистрация и обработка данных
 	ME_TSS_COMMON_MODE_REJECTION_SIN	= 0x0C,		// Настройка крота, регистрация синуса и обработка данных
-	ME_TSS_COMMON_MODE_REJECTION_IN_PHASE	= 0x0D,		// � егистрация синфазного сигнала и обработка данных
-	ME_TSS_COUNT				= 0x0E,
+	ME_TSS_COMMON_MODE_REJECTION_IN_PHASE	= 0x0D,		// Регистрация синфазного сигнала и обработка данных
+	ME_TSS_ZERO_SHIFT_INPUT			= 0x0E,		// Настройка крота, регистрация и обработка данных
+	ME_TSS_VOLTAGE_DAMPING_RESISTOR		= 0x0F,		// Настройка крота, регистрация и обработка данных
+	ME_TSS_COUNT				= 0x10,
 };
 
 /**
@@ -72,7 +79,7 @@ typedef void(*me_ts_stage_changed_callback_t)(int mole_descriptor,me_test_suite_
 /**
  * Установить callback функцию.
  * Смотри me_ts_samples_data_callback_t.
- * � азрешается установка NULL - не будет вызываться callback функция. По умолчанию NULL.
+ * Разрешается установка NULL - не будет вызываться callback функция. По умолчанию NULL.
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL void me_ts_set_samples_data_callback(me_ts_samples_data_callback_t callback);
 
@@ -84,7 +91,7 @@ extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL me_ts_samples_data_callback_t me
 /**
  * Установить callback функцию.
  * Смотри me_ts_stage_changed_callback_t.
- * � азрешается установка NULL - не будет вызываться callback функция. По умолчанию NULL.
+ * Разрешается установка NULL - не будет вызываться callback функция. По умолчанию NULL.
  * Является альтернатиной для me_ts_get_stage.
  */
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL void me_ts_set_stage_changed_callback(me_ts_stage_changed_callback_t callback);
@@ -173,6 +180,36 @@ extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_common_mode_rejection(
 extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_common_mode_rejection_async(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
 										      uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
 										      me_ts_result_channel_t *results,uint8 *last_address_actual);
+
+/**
+ * Тест: "Уровень смещения нуля входа (тестирование входных цепей), мкВ"
+ */
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_zero_shift_input(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
+									   uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
+									   me_ts_result_channel_t *results,uint8 *last_address_actual);
+
+/**
+ * Тест: "Уровень смещения нуля входа (тестирование входных цепей), мкВ" (асинхронный вызов)
+ */
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_zero_shift_input_async(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
+										 uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
+										 me_ts_result_channel_t *results,uint8 *last_address_actual);
+
+/**
+* Тест: "Напряжение на демпфирующем резисторе (тестирование входных цепей), мВ"
+*/
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_voltage_damping_resistor(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
+										   uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
+										   me_ts_result_channel_t *results,uint8 *last_address_actual,
+										   bool is_geophone_connected);
+
+/**
+* Тест: "Напряжение на демпфирующем резисторе (тестирование входных цепей), мВ" (асинхронный вызов)
+*/
+extern MOLE_ENGINE_EXPORT_TYPE MOLE_ENGINE_DECL int me_ts_voltage_damping_resistor_async(int mole_descriptor,uint8 first_address,uint8 last_address,uint8 channel_count,
+											 uint8 bytes_in_channel,uint8 bytes_in_module,uint16 bytes_in_line,
+											 me_ts_result_channel_t *results,uint8 *last_address_actual,
+											 bool is_geophone_connected);
 
 /**
  * Получить информацию о том, какая стадия теста выполняется в данный момент над кротом.

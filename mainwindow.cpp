@@ -1,13 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QList>
-#include <QVector>
-#include <QLabel>
-#include <QDebug>
-#include <QTimer>
+#include <QDateTime>
 #include <QMessageBox>
-#include <QProgressBar>
+#include "qwt_plot_grid.h"
 #include "qextserialenumerator.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -15,448 +11,416 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->retranslateUi(this);
 
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(getConversationData()));
-
-    assistant = new Assistant();
-
-    ui->progressBar->setTextVisible(false);
-    ui->progressBar->setRange(0, 5);
-
-    // Connection settings
+    // List all available COM ports
     QList<QextPortInfo> ports = QextSerialEnumerator::getPorts();
-    for (int i=0; i<ports.size(); i++) {
-        this->ui->COMPortComboBox->addItem(ports.at(i).friendName, QVariant(ports.at(i).portName));
-    }
+    for (int i = 0; i < ports.size(); i++)
+        ui->COMPortsComboBox->addItem(ports.at(i).friendName,
+                                      QVariant(ports.at(i).portName));
 
-    /*
-    int ik;
-    double jk;
-    const int Size = 1000;
-    double xval[Size];
-    double yval[Size];
+    // Modules modes
+    ui->modulesModeComboBox->addItem("Seismic",         QVariant(ME_MMM_SEISMIC));
+    ui->modulesModeComboBox->addItem("Inclinometer",    QVariant(ME_MMM_INCLINOMETER));
+    ui->modulesModeComboBox->addItem("Sleep",           QVariant(ME_MMM_SLEEP));
+    ui->modulesModeComboBox->addItem("Count",           QVariant(ME_MMM_COUNT));
 
-    for(ik=0, jk=0; ik<Size; ik++)
-    {
-        xval[ik] = jk;
-        yval[ik] = qSin(jk);
-        jk+=0.1;
-    }
-    */
+    // Synchronization
+    ui->synchronizationComboBox->addItem("Software",    QVariant(ME_MCS_SOFT));
+    ui->synchronizationComboBox->addItem("External",    QVariant(ME_MCS_EXTERNAL));
+    ui->synchronizationComboBox->addItem("Count",       QVariant(ME_MCS_COUNT));
 
-    int geophonesCount = 3;
-    int channelsCount = 3;
-
-    QLabel *plotLabel[geophonesCount];
-    QWidget *plotWidget[geophonesCount];
-    QVBoxLayout *plotLayout[geophonesCount];
-    //QwtPlot *plot[geophonesCount][channelsCount];
-    // QwtPlotCurve *curve[geophonesCount][channelsCount];
-
-    for (int i=0; i<geophonesCount; i++) {
-        // Initialize widgets
-        plotLabel[i] = new QLabel();
-        plotWidget[i] = new QWidget();
-        //plotWidget[i] = new QWidget(this, Qt::Popup | Qt:: Dialog);
-        plotLayout[i] = new QVBoxLayout();
-
-        // Widget settings
-        plotLabel[i]->setText(tr("Geophon #%1").arg(i+1));
-        plotWidget[i]->setAutoFillBackground(true);
-        plotWidget[i]->setPalette(Qt::black);
-        //plotWidget[i]->setWindowModality(Qt::WindowModal);
-        //plotWidget[i]->showMaximized();
-
-        plotLayout[i]->addWidget(plotLabel[i]);
-
-        // Add plots to widget
-        for (int j=0; j<channelsCount; j++) {
-            // Initialize plot
-            this->plot[i][j] = new QwtPlot();
-
-            // Plot settings
-            this->plot[i][j]->setAutoFillBackground(true);
-            this->plot[i][j]->setPalette(Qt::black);
-            this->plot[i][j]->enableAxis(QwtPlot::yLeft, false);
-            this->plot[i][j]->enableAxis(QwtPlot::xBottom, false);
-            this->plot[i][j]->setAxisAutoScale(QwtPlot::xBottom,true);
-            this->plot[i][j]->setAxisAutoScale(QwtPlot::yLeft,true);
-            (void) new QwtPlotPanner(plot[i][j]->canvas());
-            (void) new QwtPlotMagnifier(plot[i][j]->canvas());
-
-            // Initialize curve
-             //this->curve[i][j] = new QwtPlotCurve();
-
-            // Curve settings
-             //this->curve[i][j]->setRenderHint(QwtPlotItem::RenderAntialiased);
-             //this->curve[i][j]->setPen(QPen(Qt::white));
-
-            // Set data
-             //this->curve[i][j]->setSamples(xval, yval, Size);
-             //this->curve[i][j]->attach(this->plot[i][j]);
-
-            //this->samplesVector[i][j] = new QVector();
-            //this->dataVector[i][j] = new QVector();
-
-             this->plot[i][j]->replot();
-
-            // Add plot to widget
-            plotLayout[i]->addWidget(this->plot[i][j]);
-        }
-        plotWidget[i]->setLayout(plotLayout[i]);
-        ui->plotsLayout->addWidget(plotWidget[i]);
-
-        /*
-        if (i<3)
-            ui->gridLayout->addWidget(plotWidget[i], 0, i);
-        else
-            ui->gridLayout->addWidget(plotWidget[i], 1, i-3);
-        */
-    }
+    // Datarate items
+    ui->datarateComboBox->addItem("250", QVariant(ME_MMD_250));
+    ui->datarateComboBox->addItem("500", QVariant(ME_MMD_500));
+    ui->datarateComboBox->addItem("1000", QVariant(ME_MMD_1000));
+    ui->datarateComboBox->addItem("2000", QVariant(ME_MMD_2000));
+    ui->datarateComboBox->addItem("4000", QVariant(ME_MMD_4000));
 }
 
 MainWindow::~MainWindow()
 {
-    if (ui->connectPushButton->isChecked())
-        this->on_connectPushButton_toggled(false);
-    delete ui;
-
     // Destroy mole
     Mole *mole = Mole::getInstance();
     mole->~Mole();
+
+    delete ui;
 }
 
-void MainWindow::setStage(me_test_suite_stage stage) {
-    switch (stage) {
-    case ME_TSS_IDLE: {
-        ui->statusBar->showMessage(tr("[Stage] IDLE"));
-    } break;
-    case ME_TSS_GAIN_COEFFICIENTS: {
-        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS"));
-    } break;
-    case ME_TSS_GAIN_COEFFICIENTS_1: {
-        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_1"));
-    } break;
-    case ME_TSS_GAIN_COEFFICIENTS_2: {
-        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_2"));
-    } break;
-    case ME_TSS_GAIN_COEFFICIENTS_4: {
-        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_4"));
-    } break;
-    case ME_TSS_GAIN_COEFFICIENTS_8: {
-        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_8"));
-    } break;
-    case ME_TSS_GAIN_COEFFICIENTS_16: {
-        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_16"));
-    } break;
-    case ME_TSS_GAIN_COEFFICIENTS_32: {
-        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_32"));
-    } break;
-    case ME_TSS_GAIN_COEFFICIENTS_64: {
-        ui->statusBar->showMessage(tr("[Stage] GAIN_COEFFICIENTS_64"));
-    } break;
-    case ME_TSS_NOISE_FLOOR: {
-        ui->statusBar->showMessage(tr("[Stage] NOISE FLOOR"));
-    } break;
-    case ME_TSS_TOTAL_HARMONIC_DISTORTION: {
-        ui->statusBar->showMessage(tr("[Stage] TOTAL HARMONIC DISTORTION"));
-    } break;
-    case ME_TSS_ZERO_SHIFT: {
-        ui->statusBar->showMessage(tr("[Stage:] ZERO SHIFT"));
-    } break;
-    case ME_TSS_COMMON_MODE_REJECTION_SIN: {
-        ui->statusBar->showMessage(tr("[Stage] COMMON MODE REJECTION SIN"));
-    } break;
-    case ME_TSS_COMMON_MODE_REJECTION_IN_PHASE: {
-        ui->statusBar->showMessage(tr("[Stage] COMMON MODE REJECTION IN PHASE"));
-    } break;
-    default:
-        qDebug("[Bug] ME_TSS_COUNT");
-    }
-}
+///////////////////
+// public slots  //
+///////////////////
 
-void MainWindow::plotData(uint8 moduleIndex, uint8 channelIndex, uint16 size, QList<double> samples, QList<double> data) {
-    if (moduleIndex == 0)
-        return;
+/*
+ * Enable plots
+ */
+void MainWindow::enablePlots(int moduleCount, int channelCount) {
+    QVector< QVector<QwtPlot*> >            plots(moduleCount, QVector<QwtPlot*>(channelCount));
+    QVector< QVector<QwtPlotCurve*> >       curves(moduleCount, QVector<QwtPlotCurve*>(channelCount));
+    QVector< QVector< QVector<double> > >   data(moduleCount,
+                                                 QVector< QVector<double> >(channelCount));
+    QVector< QVector< QVector<double> > >   samples(moduleCount,
+                                                 QVector< QVector<double> >(channelCount));
 
-    int module = moduleIndex - 1;
-    int channel = channelIndex;
+    for (int moduleIndex = 0; moduleIndex < plots.size(); ++moduleIndex) {
+        for (int channelIndex = 0; channelIndex < plots.at(moduleIndex).size(); ++channelIndex) {
+            plots[moduleIndex][channelIndex] = new QwtPlot();
+            plots[moduleIndex][channelIndex]->setAutoFillBackground(true);
+            plots[moduleIndex][channelIndex]->setPalette(Qt::white);
+            plots[moduleIndex][channelIndex]->setAxisAutoScale(QwtPlot::xBottom, true);
+            plots[moduleIndex][channelIndex]->setAxisAutoScale(QwtPlot::yLeft, true);
+            plots[moduleIndex][channelIndex]->enableAxis(QwtPlot::xBottom, true);
+            plots[moduleIndex][channelIndex]->enableAxis(QwtPlot::yLeft, true);
+            plots[moduleIndex][channelIndex]->axisScaleEngine(QwtPlot::xBottom)->setAttribute(QwtScaleEngine::Floating, true);
+            (void) new QwtPlotPanner(plots[moduleIndex][channelIndex]->canvas());
+            (void) new QwtPlotMagnifier(plots[moduleIndex][channelIndex]->canvas());
+            //ui->plotsLayout->layout()->addWidget(plots[moduleIndex][channelIndex], moduleIndex, channelIndex)
 
-    // Remove previous curves
-    this->plot[module][channel]->detachItems();
-    this->plot[module][channel]->replot();
+            QwtPlotGrid *grid = new QwtPlotGrid;
+            grid->enableXMin(true);
+            grid->setMajPen(QPen(Qt::gray, 0, Qt::DotLine));
+            grid->setMinPen(QPen(Qt::gray, 0, Qt::DotLine));
+            grid->attach(plots[moduleIndex][channelIndex]);
 
-    // Set data
-    this->curve[module][channel] = new QwtPlotCurve();
-    this->curve[module][channel]->setRenderHint(QwtPlotItem::RenderAntialiased);
-    this->curve[module][channel]->setPen(QPen(Qt::white));
-    this->curve[module][channel]->setSamples(samples.toVector(), data.toVector());
-    this->curve[module][channel]->attach(this->plot[module][channel]);
+            ui->plotsLayout->addWidget(plots[moduleIndex][channelIndex], moduleIndex, channelIndex);
 
-    this->plot[module][channel]->replot();
-}
-
-void MainWindow::plotData2(uint8 moduleIndex, uint8 channelIndex, uint16 size,
-                           QVector<double> samples, QVector<double> data) {
-    if (moduleIndex == 0)
-        return;
-
-    int module = moduleIndex - 1;
-    int channel = channelIndex;
-
-    //this->samplesVector[module][channel] << samples;
-    //this->dataVector[module][channel] += data;
-
-    // Remove previous curves
-    this->plot[module][channel]->detachItems();
-    this->plot[module][channel]->replot();
-
-    // Set data
-    this->curve[module][channel] = new QwtPlotCurve();
-    this->curve[module][channel]->setRenderHint(QwtPlotItem::RenderAntialiased);
-    this->curve[module][channel]->setPen(QPen(Qt::red));
-    this->curve[module][channel]->setSamples(samples, data);
-    this->curve[module][channel]->attach(this->plot[module][channel]);
-
-    this->plot[module][channel]->replot();
-}
-
-void MainWindow::on_actionRegistration_triggered()
-{
-    emit showRegistrationSettingsDialog();
-}
-
-void MainWindow::on_actionTestGainCoefficientsSync_triggered()
-{
-    int ret = 0;
-    Mole *mole = Mole::getInstance();
-    ret = mole->testGainCoefficients(true);
-
-    if (ret < 0) {
-        ui->gainCoefficientsStatusLabel->setText(tr("<font color='red'>Failed</font"));
-    }
-    else {
-        ui->gainCoefficientsStatusLabel->setText(tr("<font color='green'>Succeed</font"));
-    }
-}
-
-void MainWindow::on_actionTestGainCoefficientsAsync_triggered()
-{
-    Mole *mole = Mole::getInstance();
-    mole->testGainCoefficients(false);
-}
-
-void MainWindow::on_actionTestNoiseFloorSync_triggered()
-{
-    int ret;
-    Mole *mole = Mole::getInstance();
-    ret = mole->testNoiseFloor(true);
-
-    if (ret < 0) {
-        ui->noiseFloorStatusLabel->setText(tr("<font color='red'>Failed</font"));
-    }
-    else {
-        ui->noiseFloorStatusLabel->setText(tr("<font color='green'>Succeed</font"));
-    }
-}
-
-void MainWindow::on_actionTestTotalHarmonicDistortionSync_triggered()
-{
-    int ret;
-    Mole *mole = Mole::getInstance();
-    ret = mole->testTotalHarmonicDistortion(true);
-
-    if (ret < 0) {
-        ui->totalHarmonicDistortionStatusLabel->setText(tr("<font color='red'>Failed</font"));
-    }
-    else {
-        ui->totalHarmonicDistortionStatusLabel->setText(tr("<font color='green'>Succeed</font"));
-    }
-}
-
-void MainWindow::on_actionTestZeroShiftSync_triggered()
-{
-    int ret;
-    Mole *mole = Mole::getInstance();
-    ret = mole->testZeroShift(true);
-
-    if (ret < 0) {
-        ui->zeroShiftStatusLabel->setText(tr("<font color='red'>Failed</font"));
-    }
-    else {
-        ui->zeroShiftStatusLabel->setText(tr("<font color='green'>Succeed</font"));
-    }
-}
-
-void MainWindow::on_actionTestCommonModeRejectionSync_triggered()
-{
-    int ret;
-    Mole *mole = Mole::getInstance();
-    ret = mole->testCommonModeRejection(true);
-
-    if (ret < 0) {
-        ui->commonModeRejectionStatusLabel->setText(tr("<font color='red'>Failed</font"));
-    }
-    else {
-        ui->commonModeRejectionStatusLabel->setText(tr("<font color='green'>Succeed</font"));
-    }
-}
-
-void MainWindow::on_connectPushButton_toggled(bool checked)
-{
-    QString portName = this->ui->COMPortComboBox->itemData(this->ui->COMPortComboBox->currentIndex()).toString();
-    std::string str = portName.toStdString();
-    const char *portString = str.c_str();
-
-    Mole *mole = Mole::getInstance();
-    if (checked) {
-        if (mole->open(portString) < 0) {
-            ui->connectPushButton->setChecked(false);
-            qDebug() << "[Error] Can't open connection at " << portString;
-            QMessageBox::critical(0, "Error", "Can't open connection.");
-        }
-        else {
-            mole->getHostInfo();
-            qDebug() << "[Success] Connection opened at " << portString;
-            if (mole->hostMount() < 0) {
-                ui->connectPushButton->setChecked(false);
-                qDebug() << "[Error] Can't mount host";
-                QMessageBox::critical(0, "Error", "Can't mount host.");
-            }
-            else {
-                qDebug() << "[Success] Host mounted";
-                ui->actionRegistration->setEnabled(true);
-                ui->menuTests->setEnabled(true);
-                ui->connectPushButton->setText(tr("Disconnect"));
-                ui->startConversionPushButton->setEnabled(true);
-                ui->startTestsPushButton->setEnabled(true);
-                ui->testsGroupBox->setEnabled(true);
-                ui->statusBar->showMessage(tr("Status: host mounted"));
-            }
+            QVector<double> data[moduleIndex][channelIndex];
+            QVector<double> samples[moduleIndex][channelIndex];
         }
     }
-    else {
-        // Stop conversion
-        if (ui->startConversionPushButton->isChecked()) {
-            on_startConversionPushButton_toggled(false);
-        }
-        if (mole->hostUnmount() < 0)
-            qDebug() << "[Error] Can't unmount host";
-        else {
-            qDebug() << "[Success] Host unmounted";
-            if (mole->close() < 0)
-                qDebug() << "[Error] Can't close connection";
-            else {
-                qDebug() << "[Success] Connection closed";
-                ui->actionRegistration->setEnabled(false);
-                ui->menuTests->setEnabled(false);
-                ui->connectPushButton->setText(tr("Connect"));
-                ui->startConversionPushButton->setEnabled(false);
-                ui->testsGroupBox->setEnabled(false);
-                ui->statusBar->showMessage(tr("Status: host unmounted"));
-            }
-        }
-    }
-}
 
-void MainWindow::on_startTestsPushButton_clicked() {
-    ui->startTestsPushButton->setText(tr("Stop"));
-    ui->startTestsPushButton->setEnabled(false);
-    if (ui->gainCoefficientsTestCheckBox->isChecked()) {
-        ui->gainCoefficientsStatusLabel->setText(tr("In progress"));
-        on_actionTestGainCoefficientsSync_triggered();
-    }
-    ui->progressBar->setValue(1);
-
-    if (ui->noiseFloorTestCheckBox->isChecked()) {
-        ui->noiseFloorStatusLabel->setText(tr("In progress"));
-        on_actionTestNoiseFloorSync_triggered();
-    }
-    ui->progressBar->setValue(2);
-
-    if (ui->totalHarmonicDistortionTestCheckBox->isChecked()) {
-        ui->totalHarmonicDistortionStatusLabel->setText(tr("In progress"));
-        on_actionTestTotalHarmonicDistortionSync_triggered();
-    }
-    ui->progressBar->setValue(3);
-
-    if (ui->zeroShiftCheckBox->isChecked()) {
-        ui->zeroShiftStatusLabel->setText(tr("In progress"));
-        on_actionTestZeroShiftSync_triggered();
-    }
-    ui->progressBar->setValue(4);
-
-    if (ui->commonModeRejectionCheckBox->isChecked()) {
-        ui->commonModeRejectionStatusLabel->setText(tr("In progress"));
-        on_actionTestCommonModeRejectionSync_triggered();
-    }
-    ui->progressBar->setValue(5);
-    ui->startTestsPushButton->setText(tr("Start"));
-    ui->startTestsPushButton->setEnabled(true);
+    this->data = data;
+    this->samples = samples;
+    this->plots = plots;
+    this->curves = curves;
+    this->isPlotsEnabled = true;
 }
 
 /*
- * Clear all plots action
+ * Disable plots
  */
-void MainWindow::on_actionClear_plots_triggered() {
-    for (int i=0; i<6; i++)
-        for (int j=0; j<3; j++) {
-            plot[i][j]->detachItems();
-            plot[i][j]->replot();
+void MainWindow::disablePlots() {
+    if (ui->plotsLayout->layout() != NULL) {
+        QLayoutItem* item;
+        while ((item = ui->plotsLayout->layout()->takeAt(0)) != NULL) {
+            delete item->widget();
+            delete item;
         }
+    }
+    this->data.clear();
+    this->samples.clear();
+    this->plots.clear();
+    this->curves.clear();
+    this->isPlotsEnabled = false;
 }
 
-void MainWindow::on_actionHelp_triggered()
+void MainWindow::plotMData(MData mdata) {
+    for (int moduleIndex = 0; moduleIndex < mdata.size(); ++moduleIndex) {
+        for (int channelIndex = 0; channelIndex < mdata[moduleIndex].size(); ++channelIndex) {
+            this->plots[moduleIndex][channelIndex]->detachItems();
+            //this->plots[moduleIndex][channelIndex]->replot();
+
+            curves[moduleIndex][channelIndex] = new QwtPlotCurve();
+            curves[moduleIndex][channelIndex]->setPen(QPen(Qt::black));
+            curves[moduleIndex][channelIndex]->setBrush(Qt::black);
+            curves[moduleIndex][channelIndex]->setSamples(mdata[moduleIndex][channelIndex]);
+            curves[moduleIndex][channelIndex]->attach(this->plots[moduleIndex][channelIndex]);
+
+            QwtPlotGrid *grid = new QwtPlotGrid;
+            grid->enableXMin(true);
+            grid->setMajPen(QPen(Qt::gray, 0, Qt::DotLine));
+            grid->setMinPen(QPen(Qt::gray, 0, Qt::DotLine));
+            grid->attach(this->plots[moduleIndex][channelIndex]);
+
+            this->plots[moduleIndex][channelIndex]->replot();
+        }
+    }
+}
+
+void MainWindow::setConnectionState(bool isConnected) {
+    Mole *mole = Mole::getInstance();
+    int moduleCount = mole->getModuleCount();
+    int channelCount = mole->getChannelCount();
+
+    if (isConnected) {
+        disablePlots();
+        enablePlots(moduleCount, channelCount);
+        //ui->connectionStateLabel->setText(tr("Connection: Connected"));
+    }
+    else {
+        //disablePlots();
+        //ui->connectionStateLabel->setText(tr("Connection: Disconnected"));
+    }
+}
+
+void MainWindow::setModulesMode(me_mole_module_mode modulesMode) {
+    QString text;
+
+    switch (modulesMode) {
+        case ME_MMM_COUNT:          text = tr("ME_MMM_COUNT"); break;
+        case ME_MMM_SLEEP:          text = tr("Sleep"); break;
+        case ME_MMM_SEISMIC:        text = tr("Seismic"); break;
+        case ME_MMM_INCLINOMETER:   text = tr("Inclinometer"); break;
+    }
+
+    //ui->modulesModeLabel->setText(tr("Modules mode: %1").arg(text));
+}
+
+void MainWindow::setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization) {
+    QString text;
+
+    switch (conversionSynchronization) {
+        case ME_MCS_COUNT:      text = tr("ME_MCS_COUNT"); break;
+        case ME_MCS_SOFT:       text = tr("Software"); break;
+        case ME_MCS_EXTERNAL:   text = tr("External"); break;
+    }
+
+    //ui->conversionSynchronizationLabel->setText(tr("Conversion synchronization: %1").arg(text));
+}
+void MainWindow::setSamplesSize(uint16 samplesSize) {
+    QString text;
+
+    //ui->samplesSizeLabel->setText(tr("Samples size: %1").arg(samplesSize));
+}
+
+void MainWindow::setDatarate(me_mole_module_datarate datarate) {
+    QString text;
+    switch (datarate) {
+        case ME_MMD_250: text = "250 ms"; break;
+        case ME_MMD_500: text = "500 ms"; break;
+        case ME_MMD_1000: text = "1000 ms"; break;
+        case ME_MMD_2000: text = "2000 ms"; break;
+        case ME_MMD_4000: text = "4000 ms"; break;
+    }
+
+    //ui->datarateLabel->setText(tr("Datarate: %1").arg(text));
+}
+
+/*
+ * Plot data
+ * @param uint8 moduleIndex
+ * @param uint8 channelIndex
+ * @param uint16 size
+ * @param QVector<double> samples
+ * @param QVector<double> data
+ */
+void MainWindow::plotData(uint8 moduleIndex, uint8 channelIndex,
+                          QVector<double> samples, QVector<double> data) {
+
+    double *s = samples.data();
+    for (int i = 0; i < samples.size(); ++i) {
+        s[i] = (s[i]*250)/1000000;
+    }
+
+    this->samples[moduleIndex][channelIndex] = samples;
+    this->data[moduleIndex][channelIndex] = data;
+
+    this->plots[moduleIndex][channelIndex]->detachItems();
+    this->plots[moduleIndex][channelIndex]->replot();
+
+    // Set data
+    curves[moduleIndex][channelIndex] = new QwtPlotCurve();
+    //curves[moduleIndex][channelIndex]->setRenderHint(QwtPlotItem::RenderAntialiased);
+    curves[moduleIndex][channelIndex]->setPen(QPen(Qt::black));
+    curves[moduleIndex][channelIndex]->setBrush(Qt::black);
+    curves[moduleIndex][channelIndex]->setSamples(samples, data);
+    curves[moduleIndex][channelIndex]->attach(this->plots[moduleIndex][channelIndex]);
+
+    QwtPlotGrid *grid = new QwtPlotGrid;
+    grid->enableXMin(true);
+    grid->setMajPen(QPen(Qt::gray, 0, Qt::DotLine));
+    grid->setMinPen(QPen(Qt::gray, 0, Qt::DotLine));
+    grid->attach(this->plots[moduleIndex][channelIndex]);
+
+    this->plots[moduleIndex][channelIndex]->replot();
+}
+
+void MainWindow::plotSD3() {
+    plotSD3(this->sd3_file);
+}
+
+void MainWindow::plotSD3(sd3_file_t sd3_file) {
+    int channelCount = 3;
+    int moduleCount = sd3_file.records.size()-1; // @TODO: temporary solution to remove last void record
+    QVector<double> samples;
+    for (int i=0; i<sd3_file.samples_count; i++) {
+        samples << i;
+    }
+
+    disablePlots();
+    enablePlots(moduleCount, channelCount);
+
+    for (int moduleIndex=0; moduleIndex<moduleCount; ++moduleIndex) {
+        plotData(moduleIndex, 0, samples, sd3_file.records.at(moduleIndex).x);
+        plotData(moduleIndex, 1, samples, sd3_file.records.at(moduleIndex).y);
+        plotData(moduleIndex, 2, samples, sd3_file.records.at(moduleIndex).z);
+    }
+}
+
+///////////////////
+// private slots //
+///////////////////
+
+/*
+void MainWindow::on_actionSettings_triggered()
 {
-    assistant->showDocumentation("index.html");
+    emit showSettingsDialog();
 }
 
-void MainWindow::on_startConversionPushButton_toggled(bool checked)
+void MainWindow::on_actionTest_suite_triggered()
+{
+    emit showTestSuite();
+}
+
+void MainWindow::on_toggleTimerPushButton_toggled(bool checked)
 {
     Mole *mole = Mole::getInstance();
     if (checked) {
-        if (mole->startConversion(1000, ME_MCS_EXTERNAL) < 0)
-            qDebug("[Error] me_host_start_conversion");
-        else {
-            qDebug("[Success] me_host_start_conversion");
-            ui->startConversionPushButton->setText(tr("Stop conversion"));
-            ui->statusBar->showMessage(tr("[Status] Conversation started"));
-            timer->start(5000);
+        mole->startTimer(1000); // How do I choose time interval?
+    }
+    else {
+        mole->stopTimer();
+    }
+}
+
+void MainWindow::on_getDataPushButton_clicked()
+{
+    Mole *mole = Mole::getInstance();
+    this->sd3_file = mole->getData(); // PlotData;
+}
+*/
+
+void MainWindow::on_actionOpen_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open file"), "", tr("SD3 (*.sd3)"));
+    sd3_file_t sd3_file = SD3::read(fileName.toStdString().c_str());
+    this->sd3_file = sd3_file;
+    qDebug("open, size=%d", sd3_file.records.size());
+    plotSD3(sd3_file);
+
+    // Display SD3 information
+    /*
+    ui->plainTextEdit->clear();
+    ui->plainTextEdit->textCursor().insertText(tr("Version: %1\n").arg(this->sd3_file.version));
+    ui->plainTextEdit->textCursor().insertText(tr("Datarate: %1\n").arg(this->sd3_file.datarate));
+    ui->plainTextEdit->textCursor().insertText(tr("Samples count: %1\n").arg(this->sd3_file.samples_count));
+    ui->plainTextEdit->textCursor().insertText(tr("Mode: %1\n").arg(this->sd3_file.mode));
+    ui->plainTextEdit->textCursor().insertText(tr("Address: %1\n").arg(this->sd3_file.address));
+    ui->plainTextEdit->textCursor().insertText(tr("Date: %1\n").arg(this->sd3_file.date));
+    ui->plainTextEdit->textCursor().insertText(tr("Time: %1\n").arg(this->sd3_file.time));
+    ui->plainTextEdit->textCursor().insertText(tr("X source: %1\n").arg(this->sd3_file.x_source));
+    ui->plainTextEdit->textCursor().insertText(tr("Y source: %1\n").arg(this->sd3_file.y_source));
+
+    int moduleCount = this->sd3_file.records.size();
+    for (int i=0; i<this->sd3_file.records.size(); i++) {
+        ui->plainTextEdit->textCursor().insertText(tr("=== Module #%1===\n").arg(i));
+        ui->plainTextEdit->textCursor().insertText(tr("X state: %1\n").arg(this->sd3_file.records.at(i).x_state));
+        ui->plainTextEdit->textCursor().insertText(tr("Y state: %1\n").arg(this->sd3_file.records.at(i).y_state));
+        ui->plainTextEdit->textCursor().insertText(tr("Z state: %1\n").arg(this->sd3_file.records.at(i).z_state));
+        ui->plainTextEdit->textCursor().insertText(tr("X inclinometer: %1\n").arg(this->sd3_file.records.at(i).x_inclinometer));
+        ui->plainTextEdit->textCursor().insertText(tr("Y inclinometer: %1\n").arg(this->sd3_file.records.at(i).y_inclinometer));
+        ui->plainTextEdit->textCursor().insertText(tr("Z inclinometer: %1\n").arg(this->sd3_file.records.at(i).z_inclinometer));
+        ui->plainTextEdit->textCursor().insertText(tr("X receiver: %1\n").arg(this->sd3_file.records.at(i).x_receiver));
+        ui->plainTextEdit->textCursor().insertText(tr("Y receiver: %1\n").arg(this->sd3_file.records.at(i).y_receiver));
+        ui->plainTextEdit->textCursor().insertText(tr("H receiver: %1\n").arg(this->sd3_file.records.at(i).h_receiver));
+    }
+    */
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+    QString preferredFileName = QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss") + ".sd3";
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("Save file"),
+                                                    preferredFileName,
+                                                    tr("SD3 (*.sd3)"));
+    qDebug("save, size=%d", this->sd3_file.records.size());
+    SD3::write(fileName.toStdString().c_str(), this->sd3_file); // @TODO: is success?
+}
+
+void MainWindow::on_actionDisablePlots_triggered()
+{
+    disablePlots();
+}
+
+void MainWindow::on_connectionPushButton_toggled(bool checked)
+{
+    Mole *mole = Mole::getInstance();
+    if (checked) {
+        QString portName = ui->COMPortsComboBox->itemData(
+                    ui->COMPortsComboBox->currentIndex()).toString();
+        std::string str = portName.toStdString();
+        const char *portString = str.c_str();
+        if (mole->connect(portString) < 0) {
+            ui->connectionPushButton->setChecked(false);
+            QMessageBox::critical(0, "Error", "Can't open connection.");
+        }
+        else { // Connected successfully
+            ui->connectionPushButton->setText(tr("Disconnect"));
         }
     }
     else {
-        timer->stop();
-        if (mole->stopConversion() < 0)
-            qDebug("[Error] me_host_stop_conversion");
-        else {
-            qDebug("[Success] me_host_stop_conversion");
-            ui->startConversionPushButton->setText(tr("Start conversion"));
-            ui->statusBar->showMessage(tr("[Status] Conversation stopped"));
+        if (mole->disconnect()) {
+            ui->connectionPushButton->setText(tr("Connect"));
         }
     }
 }
 
-void MainWindow::getConversationData() {
+void MainWindow::on_startPushButton_clicked()
+{
     Mole *mole = Mole::getInstance();
 
-    uint8 firstAddress = mole->getFirstAddress();
-    uint8 lastAddress = mole->getLastAddress();
-    uint8 channelCount = mole->getChannelCount();
-    int size = me_get_module_count(firstAddress, lastAddress) * channelCount;
-    uint8 *samplesData = new uint8[size];
-    //qDebug() << "size: " << size;
+    int modulesMode = ui->modulesModeComboBox->itemData(
+                ui->modulesModeComboBox->currentIndex()).toInt();
+    switch (modulesMode) {
+        case ME_MMM_SEISMIC: {
+            mole->setModulesMode(ME_MMM_SEISMIC);
+        } break;
+        case ME_MMM_INCLINOMETER: {
+            mole->setModulesMode(ME_MMM_INCLINOMETER);
+        } break;
+        case ME_MMM_SLEEP: {
+            mole->setModulesMode(ME_MMM_SLEEP);
+        } break;
+        case ME_MMM_COUNT: {
+            mole->setModulesMode(ME_MMM_COUNT);
+        } break;
+    }
 
-    mole->getSamplesData(1024, samplesData);
+    int synchronization = ui->synchronizationComboBox->itemData(
+                ui->synchronizationComboBox->currentIndex()).toInt();
+    switch (synchronization) {
+        case ME_MCS_SOFT: {
+            mole->setConversionSynchronization(ME_MCS_SOFT);
+        } break;
+        case ME_MCS_EXTERNAL: {
+            mole->setConversionSynchronization(ME_MCS_EXTERNAL);
+        } break;
+        case ME_MCS_COUNT: {
+            mole->setConversionSynchronization(ME_MCS_COUNT);
+        } break;
+    }
 
-    //qDebug() << &samplesData;
-}
+    uint16 samplesSize = ui->samplesComboBox->currentText().toInt();
+    mole->setSamplesSize(samplesSize);
 
-void MainWindow::setRegistrationMode(QString registrationMode) {
-    ui->registrationModeLabel->setText(registrationMode);
-}
-
-void MainWindow::setModuleDatarate(int moduleDatarate) {
-    ui->moduleDatarateLabel->setText(QString::number(moduleDatarate));
+    int datarate = ui->datarateComboBox->itemData(
+                ui->datarateComboBox->currentIndex()).toInt();
+    switch (datarate) {
+        case ME_MMD_250: {
+            mole->setDatarate(ME_MMD_250);
+        } break;
+        case ME_MMD_500: {
+            mole->setDatarate(ME_MMD_500);
+        } break;
+        case ME_MMD_1000: {
+            mole->setDatarate(ME_MMD_1000);
+        } break;
+        case ME_MMD_2000: {
+            mole->setDatarate(ME_MMD_2000);
+        } break;
+        case ME_MMD_4000: {
+            mole->setDatarate(ME_MMD_4000);
+        } break;
+    }
+    mole->getMData();
 }

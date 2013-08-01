@@ -6,262 +6,153 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>520</width>
-    <height>413</height>
+    <width>587</width>
+    <height>368</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Mole</string>
   </property>
-  <property name="locale">
-   <locale language="English" country="UnitedStates"/>
-  </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <widget class="QWidget" name="leftWidget" native="true">
-      <property name="maximumSize">
-       <size>
-        <width>400</width>
-        <height>16777215</height>
-       </size>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QGroupBox" name="connectionGroupBox">
-         <property name="title">
-          <string>Connection</string>
-         </property>
-         <layout class="QFormLayout" name="formLayout">
-          <item row="0" column="0">
-           <widget class="QComboBox" name="COMPortComboBox"/>
-          </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="connectPushButton">
-            <property name="text">
-             <string>Connect</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="registrationSettingsGroupBox">
-         <property name="title">
-          <string>Registration settings</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <layout class="QFormLayout" name="registrationSettingsFormLayout">
-            <item row="0" column="0">
-             <widget class="QLabel" name="registrationModeTextLabel">
+      <widget class="QWidget" name="leftWidget" native="true">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QGroupBox" name="connectionGroupBox">
+          <property name="title">
+           <string>Connection settings</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout">
+           <property name="fieldGrowthPolicy">
+            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+           </property>
+           <item row="0" column="0">
+            <widget class="QComboBox" name="COMPortsComboBox"/>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="connectionPushButton">
+             <property name="text">
+              <string>Connect</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="registrationGroupBox">
+          <property name="title">
+           <string>Registration settings</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout_2">
+           <property name="fieldGrowthPolicy">
+            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="modulesModeLabel">
+             <property name="text">
+              <string>Modules mode</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="modulesModeComboBox"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="synchronizationLabel">
+             <property name="text">
+              <string>Synchronization</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="synchronizationComboBox"/>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="samplesLabel">
+             <property name="text">
+              <string>Samples</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QComboBox" name="samplesComboBox">
+             <property name="editable">
+              <bool>true</bool>
+             </property>
+             <item>
               <property name="text">
-               <string>Registration mode:</string>
+               <string>1024</string>
               </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLabel" name="registrationModeLabel">
+             </item>
+             <item>
               <property name="text">
-               <string>Testing</string>
+               <string>2048</string>
               </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="moduleDatarateTextLabel">
+             </item>
+             <item>
               <property name="text">
-               <string>Module datarate (ms):</string>
+               <string>4096</string>
               </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLabel" name="moduleDatarateLabel">
+             </item>
+             <item>
               <property name="text">
-               <string>250</string>
+               <string>8000</string>
               </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QPushButton" name="startConversionPushButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Start conversion</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="testsGroupBox">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="title">
-          <string>Test suite (syncronous)</string>
-         </property>
-         <property name="flat">
-          <bool>false</bool>
-         </property>
-         <property name="checkable">
-          <bool>false</bool>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <layout class="QFormLayout" name="testsFormLayout">
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-            </property>
-            <item row="0" column="0">
-             <widget class="QCheckBox" name="gainCoefficientsTestCheckBox">
-              <property name="text">
-               <string>Gain coefficients</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLabel" name="gainCoefficientsStatusLabel">
-              <property name="text">
-               <string>Not started</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QCheckBox" name="noiseFloorTestCheckBox">
-              <property name="text">
-               <string>Noise floor</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLabel" name="noiseFloorStatusLabel">
-              <property name="text">
-               <string>Not started</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QCheckBox" name="totalHarmonicDistortionTestCheckBox">
-              <property name="text">
-               <string>Total harmonic distortion</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLabel" name="totalHarmonicDistortionStatusLabel">
-              <property name="text">
-               <string>Not started</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QCheckBox" name="zeroShiftCheckBox">
-              <property name="text">
-               <string>Zero shift</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QLabel" name="zeroShiftStatusLabel">
-              <property name="text">
-               <string>Not started</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
-             <widget class="QCheckBox" name="commonModeRejectionCheckBox">
-              <property name="text">
-               <string>Common mode rejection</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
-             <widget class="QLabel" name="commonModeRejectionStatusLabel">
-              <property name="text">
-               <string>Not started</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QProgressBar" name="progressBar">
-            <property name="value">
-             <number>24</number>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="startTestsPushButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Start</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="datarateLabel">
+             <property name="text">
+              <string>Datarate</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QComboBox" name="datarateComboBox">
+             <property name="editable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="startPushButton">
+          <property name="text">
+           <string>Start</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="rightWidget" native="true">
+       <layout class="QGridLayout" name="plotsLayout"/>
+      </widget>
      </widget>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="plotsLayout">
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
     </item>
    </layout>
   </widget>
@@ -270,75 +161,20 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>520</width>
+     <width>587</width>
      <height>18</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuSettings">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>Settings</string>
+     <string>File</string>
     </property>
-    <addaction name="actionRegistration"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
-   <widget class="QMenu" name="menuTests">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="title">
-     <string>Diagnostics</string>
-    </property>
-    <widget class="QMenu" name="menuGain_coefficients">
-     <property name="title">
-      <string>Gain coefficients</string>
-     </property>
-     <addaction name="actionTestGainCoefficientsSync"/>
-     <addaction name="actionTestGainCoefficientsAsync"/>
-    </widget>
-    <widget class="QMenu" name="menuNoise_floor">
-     <property name="title">
-      <string>Noise floor</string>
-     </property>
-     <addaction name="actionTestNoiseFloorSync"/>
-     <addaction name="actionTestNoiseFloorAsync"/>
-    </widget>
-    <widget class="QMenu" name="menuTotal_harmonic_distortion">
-     <property name="title">
-      <string>Total harmonic distortion</string>
-     </property>
-     <addaction name="actionTestTotalHarmonicDistortionSync"/>
-     <addaction name="actionAsync"/>
-    </widget>
-    <widget class="QMenu" name="menuZero_shift">
-     <property name="title">
-      <string>Zero shift</string>
-     </property>
-     <addaction name="actionTestZeroShiftSync"/>
-     <addaction name="actionAsync_2"/>
-    </widget>
-    <widget class="QMenu" name="menuCommon_mode_rejection">
-     <property name="title">
-      <string>Common-mode rejection</string>
-     </property>
-     <addaction name="actionTestCommonModeRejectionSync"/>
-     <addaction name="actionAsync_3"/>
-    </widget>
-    <addaction name="menuGain_coefficients"/>
-    <addaction name="menuNoise_floor"/>
-    <addaction name="menuTotal_harmonic_distortion"/>
-    <addaction name="menuZero_shift"/>
-    <addaction name="menuCommon_mode_rejection"/>
-   </widget>
-   <widget class="QMenu" name="menuHelp">
-    <property name="title">
-     <string>Help</string>
-    </property>
-    <addaction name="actionHelp"/>
-   </widget>
-   <addaction name="menuSettings"/>
-   <addaction name="menuTests"/>
-   <addaction name="menuHelp"/>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -347,39 +183,18 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionRegistration"/>
-   <addaction name="actionClear_plots"/>
+   <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionRegistration">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
+  <action name="actionOpen">
    <property name="text">
-    <string>Registration settings</string>
-   </property>
-   <property name="shortcut">
-    <string>F3</string>
+    <string>Open</string>
    </property>
   </action>
-  <action name="actionTestGainCoefficientsSync">
+  <action name="actionSave">
    <property name="text">
-    <string>Sync</string>
-   </property>
-  </action>
-  <action name="actionTestGainCoefficientsAsync">
-   <property name="text">
-    <string>Async</string>
-   </property>
-  </action>
-  <action name="actionTestNoiseFloorSync">
-   <property name="text">
-    <string>Sync</string>
-   </property>
-  </action>
-  <action name="actionTestNoiseFloorAsync">
-   <property name="text">
-    <string>Async</string>
+    <string>Save</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -387,77 +202,16 @@
     <string>Quit</string>
    </property>
   </action>
-  <action name="actionTestTotalHarmonicDistortionSync">
+  <action name="actionDisablePlots">
    <property name="text">
-    <string>Sync</string>
+    <string>Disable plots</string>
    </property>
    <property name="toolTip">
-    <string>Sync</string>
-   </property>
-  </action>
-  <action name="actionAsync">
-   <property name="text">
-    <string>Async</string>
-   </property>
-  </action>
-  <action name="actionTestZeroShiftSync">
-   <property name="text">
-    <string>Sync</string>
-   </property>
-   <property name="toolTip">
-    <string>Sync</string>
-   </property>
-  </action>
-  <action name="actionAsync_2">
-   <property name="text">
-    <string>Async</string>
-   </property>
-  </action>
-  <action name="actionTestCommonModeRejectionSync">
-   <property name="text">
-    <string>Sync</string>
-   </property>
-   <property name="toolTip">
-    <string>Sync</string>
-   </property>
-  </action>
-  <action name="actionAsync_3">
-   <property name="text">
-    <string>Async</string>
-   </property>
-  </action>
-  <action name="actionClear_plots">
-   <property name="text">
-    <string>Clear plots</string>
-   </property>
-  </action>
-  <action name="actionHelp">
-   <property name="text">
-    <string>Help</string>
-   </property>
-   <property name="shortcut">
-    <string>F1</string>
+    <string>Disable plots</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
- <connections>
-  <connection>
-   <sender>actionQuit</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>233</x>
-     <y>182</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

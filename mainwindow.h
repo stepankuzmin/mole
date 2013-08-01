@@ -1,25 +1,31 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "mole.h"
-#include <assistant.h>
+#include <fstream>
 
+#include <QPointF>
+
+#include <QMainWindow>
+#include <QMultiMap>
+#include <QList>
 #include <QVector>
 #include <QTimer>
-#include <QMainWindow>
-#include <QProgressBar>
+#include <QFile>
+#include <QFileDialog>
+#include <QScrollArea>
 
-#include <qwt_plot.h>
-#include <qwt_plot_marker.h>
-#include <qwt_plot_curve.h>
-#include <qwt_legend.h>
-#include <qwt_series_data.h>
+#include "qwt_plot.h"
+#include "qwt_plot_curve.h"
+#include "qwt_scale_engine.h"
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_magnifier.h>
-#include <qwt_text.h>
-#include <qwt_math.h>
-#include <math.h>
+
+#include "sd3.h"
+#include "mole.h"
+
+typedef QVector< QVector<QwtPlot*> >        MPlot;
+typedef QVector< QVector<QwtPlotCurve*> >   MCurve;
 
 namespace Ui {
 class MainWindow;
@@ -33,49 +39,47 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     
+private:
+    sd3_file_t sd3_file;
+    Ui::MainWindow *ui;
+
+    QVector< QVector< QVector<double> > > data;
+    QVector< QVector< QVector<double> > > samples;
+
+    QVector< QVector<QwtPlot*> > plots;
+    QVector< QVector<QwtPlotCurve*> > curves;
+
+    //MPlot mplots;
+    //MCurve mcurves;
+
+    bool isPlotsEnabled;
+
 signals:
-    void showConnectionDialog();
-    void showRegistrationSettingsDialog();
+    void showSettingsDialog();
+    void showTestSuite();
 
 public slots:
-    void setRegistrationMode(QString registrationMode);
-    void setModuleDatarate(int moduleDatarate);
-    void setStage(me_test_suite_stage stage);
-
+    void enablePlots(int moduleCount, int channelCount);
+    void disablePlots();
+    void setConnectionState(bool isConnected);
+    void setModulesMode(me_mole_module_mode modulesMode);
+    void setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
+    void setSamplesSize(uint16 samplesSize);
+    void setDatarate(me_mole_module_datarate datarate);
     void plotData(uint8 moduleIndex, uint8 channelIndex,
-                   uint16 size, QList<double> samples, QList<double> data);
-
-    void plotData2(uint8 moduleIndex, uint8 channelIndex, uint16 size,
                   QVector<double> samples, QVector<double> data);
 
+    void plotMData(MData mdata);
+
+    void plotSD3();
+    void plotSD3(sd3_file_t sd3_file);
+
 private slots:
-    void on_actionRegistration_triggered();
-    void on_actionTestGainCoefficientsSync_triggered();
-    void on_actionTestGainCoefficientsAsync_triggered();
-    void on_actionTestNoiseFloorSync_triggered();
-    void on_connectPushButton_toggled(bool checked);
-    void on_startConversionPushButton_toggled(bool checked);
-    void on_startTestsPushButton_clicked();
-    void on_actionClear_plots_triggered();
-    void on_actionTestTotalHarmonicDistortionSync_triggered();
-    void on_actionTestZeroShiftSync_triggered();
-    void on_actionTestCommonModeRejectionSync_triggered();
-    void on_actionHelp_triggered();
-    void getConversationData();
-
-private:
-    Ui::MainWindow *ui;
-    Assistant *assistant;
-    QProgressBar *progressBar;
-    QwtPlot *plot[6][3]; // 6 геофонов по три канала
-    QwtPlotCurve *curve[6][3];
-
-    QVector<double> *samplesVector[6][3];
-    QVector<double> *dataVector[6][3];
-
-    QTimer *timer;
-
-    QVector< QVector<QwtPlot*> > *vplot;
+    void on_actionOpen_triggered();
+    void on_actionSave_triggered();
+    void on_actionDisablePlots_triggered();
+    void on_connectionPushButton_toggled(bool checked);
+    void on_startPushButton_clicked();
 };
 
 #endif // MAINWINDOW_H

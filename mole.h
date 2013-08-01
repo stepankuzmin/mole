@@ -1,11 +1,21 @@
 #ifndef MOLE_H
 #define MOLE_H
 
-#include <QList>
-#include <QVector>
+//#include <QList>
+//#include <QVector>
+
+#include "sd3.h"
+
+#include <QDebug>
+#include <QTimer>
+#include <QMutex>
 #include <QObject>
+#include <QPointF>
+#include <QWaitCondition>
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine.h"
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine-test-suite.h"
+
+typedef QVector< QVector< QVector<QPointF> > > MData;
 
 class Mole : public QObject
 {
@@ -16,108 +26,91 @@ public:
     static Mole *getInstance();
     ~Mole();
 
-    int getDescriptor();
-    void getHostInfo();
+    bool isConnected();
+    bool isConversing();
 
-    me_mole_module_mode getModuleMode();
-    me_mole_module_gain getModuleGain();
-    me_mole_module_datarate getModuleDatarate();
-    uint16 getDeviceId();
-    uint8 getMinor();
-    uint8 getMajor();
-    uint8 getFirstAddress();
-    uint8 getLastAddress();
-    uint8 getChannelCount();
-    uint8 getBytesInChannel();
-    uint8 getBytesInModule();
-    uint16 getBytesInLine();
-    uint16 getMaximumSamples();
-    uint8 getLastAddressActual();
+    int getModuleCount();
+    int getChannelCount();
 
-    int getHostState();
-    int getSamplesData2(uint16 samples);
-    int getSamplesData(uint16 samples, uint8 *samplesData);
-    int getSamplesDataAsync(uint16 samples, uint8 *samplesData);
+    // Test suite
+    int testSuiteGainCoefficients(bool isSync = true);
+    int testSuiteNoiseFloor(bool isSync = true);
 
-    int setModuleMode(me_mole_module_mode moduleMode);
-    int setModuleGainAll(me_mole_module_gain moduleGain);
-    int setModuleGainXAll(me_mole_module_gain moduleGain);
-    int setModuleGainYAll(me_mole_module_gain moduleGain);
-    int setModuleGainZAll(me_mole_module_gain moduleGain);
-    int setModuleDatarate(me_mole_module_datarate moduleDatarate);
-    int setModuleTestGeneratorAll(me_mole_module_test_generator testGenerator = ME_MMTG_COUNT);
-    int setModuleInputAll(me_mole_module_input input = ME_MMI_COUNT);
-
-    int hostMount();
-    int hostUnmount();
-
-    int startConversion(uint16 samples, me_mole_conversion_synchronization conversionSynchronization);
-    int stopConversion();
-
-    int testGainCoefficients(bool isSync);
-    int testNoiseFloor(bool isSync);
-    int testTotalHarmonicDistortion(bool isSync);
-    int testZeroShift(bool isSync);
-    int testCommonModeRejection(bool isSync);
+protected:
+    explicit Mole(QObject *parent = 0);
 
 private:
-    int descriptor;
+    QTimer *timer;
 
-    me_mole_module_datarate moduleDatarate;
-    me_mole_module_gain moduleGain;
-    me_mole_module_mode moduleMode;
-    uint16 deviceId;
-    uint8 minor;
-    uint8 major;
-    uint8 firstAddress;
-    uint8 lastAddress;
-    uint8 channelCount;
-    uint8 bytesInChannel;
-    uint8 bytesInModule;
-    uint16 bytesInLine;
-    uint16 maximumSamples;
-    uint8 lastAddressActual;
+    int descriptor;
+    uint8 first_address;
+    uint8 last_address;
+    int module_count; // @TODO: int to uint8
+    uint8 channel_count;
+    uint8 bytes_in_channel;
+    uint8 bytes_in_module;
+    uint16 bytes_in_line;
+    uint16 maximum_samples;
+    uint8 last_address_actual;
+    bool is_geophone_connected;
+
+    bool is_connected;
+    bool is_conversing;
+
+    me_mole_module_mode modulesMode;
+    me_mole_conversion_synchronization conversionSynchronization;
+
+    uint16 samplesSize; // samples size (количество дискретов)
+    me_mole_module_datarate datarate;
+
+    void sleep(int ms);
+    int _wait_test();
+    bool wait_test_with_error_handler();
 
     static void samplesDataCallbackHandler(int mole_descriptor,
-                                     uint8 first_address, uint8 last_address,
-                                     uint8 channel_count, uint8 bytes_in_channel,
-                                     uint8 bytes_in_module, uint16 bytes_in_line,
-                                     me_mole_module_datarate datarate,
-                                     me_mole_module_gain gain,
-                                     uint16 samples, uint8 *samples_data);
-
-    void emitStageChanged(me_test_suite_stage stage);
-
-    void emitDataDump(uint8 moduleIndex, uint8 channelIndex,
-                       uint16 size, QList<double> samples, QList<double> data);
-
-    void emitDataDump2(uint8 moduleIndex, uint8 channelIndex, uint16 size,
-                      QVector<double> samples, QVector<double> data);
+                                           uint8 first_address, uint8 last_address,
+                                           uint8 channel_count, uint8 bytes_in_channel,
+                                           uint8 bytes_in_module, uint16 bytes_in_line,
+                                           me_mole_module_datarate datarate,
+                                           me_mole_module_gain gain,
+                                           uint16 samples, uint8 *samples_data);
 
     static void stageChangedCallbackHandler(int mole_descriptor,
                                             me_test_suite_stage test_suite_stage);
 
-protected:
-    explicit Mole(QObject *parent = 0);
-    
+    void emitDataDump(uint8 moduleIndex, uint8 channelIndex,
+                      QVector<double> samples, QVector<double> data);
+    void emitMDataDump(MData mdata);
+
 signals:
-    void stageChanged(me_test_suite_stage stage);
-
+    void connectionStateChanged(bool isConnected);
+    void modulesModeChanged(me_mole_module_mode modulesMode);
+    void conversionSynchronizationChanged(me_mole_conversion_synchronization conversionSynchronization);
+    void samplesSizeChanged(uint16 samplesSize);
+    void datarateChanged(me_mole_module_datarate datarate);
     void dataDump(uint8 moduleIndex, uint8 channelIndex,
-                   uint16 size, QList<double> samples, QList<double> data);
-
-    void dataDump2(uint8 moduleIndex, uint8 channelIndex, uint16 size,
                   QVector<double> samples, QVector<double> data);
+    void mdataDump(MData mdata);
 
-    //void stateChange(const QString&);
-    //void stateChange(MoleState state);
-    
 public slots:
-    int open(const char *portString);
-    int close();
+    int connect(const char *portString); // @TODO: set return value as bool (isConnected)
+    bool disconnect();
 
-private slots:
+    int setModulesMode(me_mole_module_mode modulesMode);
+    int setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
 
+    void setSamplesSize(uint16 samplesSize); // Set samples size
+    int setDatarate(me_mole_module_datarate datarate); // Set datarate
+
+    bool startConversion();
+    bool stopConversion();
+    //bool getSeismicData(uint16 samples);
+
+    sd3_file_t getData();
+    void getMData();
+
+    void startTimer(int msec);
+    void stopTimer();
 };
 
 #endif // MOLE_H
