@@ -1,0 +1,12 @@
+bin/Makefile
+bin/ui_testsuite.h
+bin/ui_mainwindow.h
+bin/ui_settingsdialog.h
+bin/Makefile.Debug
+bin/Makefile.Release
+bin/object_script.mole.Debug
+bin/object_script.mole.Release
+
+bin/debug
+bin/release/*.o
+bin/release/*.cpp
