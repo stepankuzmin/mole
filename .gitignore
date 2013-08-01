@@ -1,3 +1,5 @@
+mole.pro.user
+
 bin/Makefile
 bin/ui_testsuite.h
 bin/ui_mainwindow.h
