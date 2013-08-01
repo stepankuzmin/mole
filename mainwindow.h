@@ -74,6 +74,7 @@ private slots:
     void on_actionDisablePlots_triggered();
     void on_connectionPushButton_toggled(bool checked);
     void on_startPushButton_clicked();
+    void on_actionTest_suite_triggered();
 };
 
 #endif // MAINWINDOW_H

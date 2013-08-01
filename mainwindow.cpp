@@ -338,3 +338,8 @@ void MainWindow::on_startPushButton_clicked()
         ui->statusBar->showMessage(tr("Status: error. See console log for details."));
     }
 }
+
+void MainWindow::on_actionTest_suite_triggered()
+{
+    emit showTestSuite();
+}

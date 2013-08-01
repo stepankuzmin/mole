@@ -11,17 +11,10 @@ int main(int argc, char *argv[])
     MainWindow mainWindow;
     Mole *mole = Mole::getInstance();
 
-    //SettingsDialog *settingsDialog = new SettingsDialog(&mainWindow);
-    //TestSuite *testSuite = new TestSuite(&mainWindow);
+    TestSuite *testSuite = new TestSuite(&mainWindow);
 
-    /*
-    QObject::connect(&mainWindow, SIGNAL(showSettingsDialog()),
-                     settingsDialog, SLOT(show()));
     QObject::connect(&mainWindow, SIGNAL(showTestSuite()),
                      testSuite, SLOT(show()));
-    QObject::connect(testSuite, SIGNAL(showSettingsDialog()),
-                     settingsDialog, SLOT(show()));
-                     */
 
     QObject::connect(mole, SIGNAL(connectionStateChanged(bool)),
                      &mainWindow, SLOT(setConnectionState(bool)));
