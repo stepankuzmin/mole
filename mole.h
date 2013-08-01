@@ -107,7 +107,7 @@ public slots:
     //bool getSeismicData(uint16 samples);
 
     sd3_file_t getData();
-    void getMData();
+    bool getMData();
 
     void startTimer(int msec);
     void stopTimer();

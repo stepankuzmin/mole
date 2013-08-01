@@ -1,8 +1,8 @@
 #ifndef MOLE_ENGINE_TEST_SUITE_H
 #define MOLE_ENGINE_TEST_SUITE_H
 
-#include "common.h"
-#include "mole-engine.h"
+#include "3rdparty/mole-engine/include/shared/common.h"
+#include "3rdparty/mole-engine/include/mole-engine/mole-engine.h"
 
 #pragma pack(push,1)
 

@@ -113,6 +113,9 @@ void MainWindow::disablePlots() {
     this->isPlotsEnabled = false;
 }
 
+/*
+ * Plot MData
+ */
 void MainWindow::plotMData(MData mdata) {
     for (int moduleIndex = 0; moduleIndex < mdata.size(); ++moduleIndex) {
         for (int channelIndex = 0; channelIndex < mdata[moduleIndex].size(); ++channelIndex) {
@@ -144,11 +147,10 @@ void MainWindow::setConnectionState(bool isConnected) {
     if (isConnected) {
         disablePlots();
         enablePlots(moduleCount, channelCount);
-        //ui->connectionStateLabel->setText(tr("Connection: Connected"));
+        ui->statusBar->showMessage(tr("Status: connected"));
     }
     else {
-        //disablePlots();
-        //ui->connectionStateLabel->setText(tr("Connection: Disconnected"));
+        ui->statusBar->showMessage(tr("Status: disconnected"));
     }
 }
 
@@ -162,7 +164,7 @@ void MainWindow::setModulesMode(me_mole_module_mode modulesMode) {
         case ME_MMM_INCLINOMETER:   text = tr("Inclinometer"); break;
     }
 
-    //ui->modulesModeLabel->setText(tr("Modules mode: %1").arg(text));
+    ui->statusBar->showMessage(tr("Status: modules mode is set to %1").arg(text));
 }
 
 void MainWindow::setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization) {
@@ -174,17 +176,18 @@ void MainWindow::setConversionSynchronization(me_mole_conversion_synchronization
         case ME_MCS_EXTERNAL:   text = tr("External"); break;
     }
 
-    //ui->conversionSynchronizationLabel->setText(tr("Conversion synchronization: %1").arg(text));
+    ui->statusBar->showMessage(tr("Status: conversion synchronization is set to %1").arg(text));
 }
 void MainWindow::setSamplesSize(uint16 samplesSize) {
     QString text;
 
-    //ui->samplesSizeLabel->setText(tr("Samples size: %1").arg(samplesSize));
+    ui->statusBar->showMessage(tr("Status: samples size is set to %1").arg(samplesSize));
 }
 
 void MainWindow::setDatarate(me_mole_module_datarate datarate) {
     QString text;
     switch (datarate) {
+        case ME_MMD_COUNT: text = "ME_MMD_COUNT"; break;
         case ME_MMD_250: text = "250 ms"; break;
         case ME_MMD_500: text = "500 ms"; break;
         case ME_MMD_1000: text = "1000 ms"; break;
@@ -192,46 +195,7 @@ void MainWindow::setDatarate(me_mole_module_datarate datarate) {
         case ME_MMD_4000: text = "4000 ms"; break;
     }
 
-    //ui->datarateLabel->setText(tr("Datarate: %1").arg(text));
-}
-
-/*
- * Plot data
- * @param uint8 moduleIndex
- * @param uint8 channelIndex
- * @param uint16 size
- * @param QVector<double> samples
- * @param QVector<double> data
- */
-void MainWindow::plotData(uint8 moduleIndex, uint8 channelIndex,
-                          QVector<double> samples, QVector<double> data) {
-
-    double *s = samples.data();
-    for (int i = 0; i < samples.size(); ++i) {
-        s[i] = (s[i]*250)/1000000;
-    }
-
-    this->samples[moduleIndex][channelIndex] = samples;
-    this->data[moduleIndex][channelIndex] = data;
-
-    this->plots[moduleIndex][channelIndex]->detachItems();
-    this->plots[moduleIndex][channelIndex]->replot();
-
-    // Set data
-    curves[moduleIndex][channelIndex] = new QwtPlotCurve();
-    //curves[moduleIndex][channelIndex]->setRenderHint(QwtPlotItem::RenderAntialiased);
-    curves[moduleIndex][channelIndex]->setPen(QPen(Qt::black));
-    curves[moduleIndex][channelIndex]->setBrush(Qt::black);
-    curves[moduleIndex][channelIndex]->setSamples(samples, data);
-    curves[moduleIndex][channelIndex]->attach(this->plots[moduleIndex][channelIndex]);
-
-    QwtPlotGrid *grid = new QwtPlotGrid;
-    grid->enableXMin(true);
-    grid->setMajPen(QPen(Qt::gray, 0, Qt::DotLine));
-    grid->setMinPen(QPen(Qt::gray, 0, Qt::DotLine));
-    grid->attach(this->plots[moduleIndex][channelIndex]);
-
-    this->plots[moduleIndex][channelIndex]->replot();
+    ui->statusBar->showMessage(tr("Status: datarate is set to %1").arg(text));
 }
 
 void MainWindow::plotSD3() {
@@ -250,44 +214,15 @@ void MainWindow::plotSD3(sd3_file_t sd3_file) {
     enablePlots(moduleCount, channelCount);
 
     for (int moduleIndex=0; moduleIndex<moduleCount; ++moduleIndex) {
-        plotData(moduleIndex, 0, samples, sd3_file.records.at(moduleIndex).x);
-        plotData(moduleIndex, 1, samples, sd3_file.records.at(moduleIndex).y);
-        plotData(moduleIndex, 2, samples, sd3_file.records.at(moduleIndex).z);
+        //plotData(moduleIndex, 0, samples, sd3_file.records.at(moduleIndex).x);
+        //plotData(moduleIndex, 1, samples, sd3_file.records.at(moduleIndex).y);
+        //plotData(moduleIndex, 2, samples, sd3_file.records.at(moduleIndex).z);
     }
 }
 
 ///////////////////
 // private slots //
 ///////////////////
-
-/*
-void MainWindow::on_actionSettings_triggered()
-{
-    emit showSettingsDialog();
-}
-
-void MainWindow::on_actionTest_suite_triggered()
-{
-    emit showTestSuite();
-}
-
-void MainWindow::on_toggleTimerPushButton_toggled(bool checked)
-{
-    Mole *mole = Mole::getInstance();
-    if (checked) {
-        mole->startTimer(1000); // How do I choose time interval?
-    }
-    else {
-        mole->stopTimer();
-    }
-}
-
-void MainWindow::on_getDataPushButton_clicked()
-{
-    Mole *mole = Mole::getInstance();
-    this->sd3_file = mole->getData(); // PlotData;
-}
-*/
 
 void MainWindow::on_actionOpen_triggered()
 {
@@ -296,34 +231,6 @@ void MainWindow::on_actionOpen_triggered()
     this->sd3_file = sd3_file;
     qDebug("open, size=%d", sd3_file.records.size());
     plotSD3(sd3_file);
-
-    // Display SD3 information
-    /*
-    ui->plainTextEdit->clear();
-    ui->plainTextEdit->textCursor().insertText(tr("Version: %1\n").arg(this->sd3_file.version));
-    ui->plainTextEdit->textCursor().insertText(tr("Datarate: %1\n").arg(this->sd3_file.datarate));
-    ui->plainTextEdit->textCursor().insertText(tr("Samples count: %1\n").arg(this->sd3_file.samples_count));
-    ui->plainTextEdit->textCursor().insertText(tr("Mode: %1\n").arg(this->sd3_file.mode));
-    ui->plainTextEdit->textCursor().insertText(tr("Address: %1\n").arg(this->sd3_file.address));
-    ui->plainTextEdit->textCursor().insertText(tr("Date: %1\n").arg(this->sd3_file.date));
-    ui->plainTextEdit->textCursor().insertText(tr("Time: %1\n").arg(this->sd3_file.time));
-    ui->plainTextEdit->textCursor().insertText(tr("X source: %1\n").arg(this->sd3_file.x_source));
-    ui->plainTextEdit->textCursor().insertText(tr("Y source: %1\n").arg(this->sd3_file.y_source));
-
-    int moduleCount = this->sd3_file.records.size();
-    for (int i=0; i<this->sd3_file.records.size(); i++) {
-        ui->plainTextEdit->textCursor().insertText(tr("=== Module #%1===\n").arg(i));
-        ui->plainTextEdit->textCursor().insertText(tr("X state: %1\n").arg(this->sd3_file.records.at(i).x_state));
-        ui->plainTextEdit->textCursor().insertText(tr("Y state: %1\n").arg(this->sd3_file.records.at(i).y_state));
-        ui->plainTextEdit->textCursor().insertText(tr("Z state: %1\n").arg(this->sd3_file.records.at(i).z_state));
-        ui->plainTextEdit->textCursor().insertText(tr("X inclinometer: %1\n").arg(this->sd3_file.records.at(i).x_inclinometer));
-        ui->plainTextEdit->textCursor().insertText(tr("Y inclinometer: %1\n").arg(this->sd3_file.records.at(i).y_inclinometer));
-        ui->plainTextEdit->textCursor().insertText(tr("Z inclinometer: %1\n").arg(this->sd3_file.records.at(i).z_inclinometer));
-        ui->plainTextEdit->textCursor().insertText(tr("X receiver: %1\n").arg(this->sd3_file.records.at(i).x_receiver));
-        ui->plainTextEdit->textCursor().insertText(tr("Y receiver: %1\n").arg(this->sd3_file.records.at(i).y_receiver));
-        ui->plainTextEdit->textCursor().insertText(tr("H receiver: %1\n").arg(this->sd3_file.records.at(i).h_receiver));
-    }
-    */
 }
 
 void MainWindow::on_actionSave_triggered()
@@ -422,5 +329,12 @@ void MainWindow::on_startPushButton_clicked()
             mole->setDatarate(ME_MMD_4000);
         } break;
     }
-    mole->getMData();
+
+    ui->statusBar->showMessage(tr("Status: conversion in progress..."));
+    if (mole->getMData()) {
+        ui->statusBar->showMessage(tr("Status: success"));
+    }
+    else {
+        ui->statusBar->showMessage(tr("Status: error. See console log for details."));
+    }
 }

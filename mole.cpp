@@ -680,8 +680,7 @@ sd3_file_t Mole::getData() {
     } // @TODO: emit succeed
 }
 
-void Mole::getMData() {
-
+bool Mole::getMData() {
     int datarate_raw = me_raw_value_to_datarate(this->datarate);
 
     int moduleCount = me_get_module_count(this->first_address, this->last_address);
@@ -712,6 +711,7 @@ void Mole::getMData() {
     ret =  me_host_get_samples_data(this->descriptor, samples, samples_data);
     if (ret < 0) {
         qDebug("[Error] Can't me_host_get_samples_data (ret = 0x%.2x)\n", -ret);
+        return false;
     }
     else {
         qDebug() << "[Success] me_host_get_samples_data";
@@ -722,7 +722,7 @@ void Mole::getMData() {
     if (ret < 0) {
         qDebug("[Error] Can't me_get_read_samples (ret = 0x%.2x)\n", -ret);
         this->stopConversion();
-        //return NULL;
+        return false;
     }
     else {
         qDebug("[Success] me_get_read_samples = %u", read_samples);
@@ -754,6 +754,7 @@ void Mole::getMData() {
         this->stopConversion();
         ptrMole->emitMDataDump(mdata);
     }
+    return true;
 }
 
 void Mole::startTimer(int msec) {

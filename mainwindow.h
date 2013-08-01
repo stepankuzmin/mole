@@ -49,9 +49,6 @@ private:
     QVector< QVector<QwtPlot*> > plots;
     QVector< QVector<QwtPlotCurve*> > curves;
 
-    //MPlot mplots;
-    //MCurve mcurves;
-
     bool isPlotsEnabled;
 
 signals:
@@ -66,9 +63,6 @@ public slots:
     void setConversionSynchronization(me_mole_conversion_synchronization conversionSynchronization);
     void setSamplesSize(uint16 samplesSize);
     void setDatarate(me_mole_module_datarate datarate);
-    void plotData(uint8 moduleIndex, uint8 channelIndex,
-                  QVector<double> samples, QVector<double> data);
-
     void plotMData(MData mdata);
 
     void plotSD3();

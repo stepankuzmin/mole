@@ -1,8 +1,8 @@
 #ifndef MOLE_ENGINE_H
 #define MOLE_ENGINE_H
 
-#include "common.h"
-#include "Segy.h"
+#include "3rdparty/mole-engine/include/shared/common.h"
+#include "3rdparty/mole-engine/include/seg/Segy.h"
 
 typedef int32 angle_data_t;
 
