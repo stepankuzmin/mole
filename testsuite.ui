@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>178</width>
-    <height>300</height>
+    <width>180</width>
+    <height>163</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,57 +15,42 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <widget class="QGroupBox" name="testGainCoefficientsGroupBox">
+    <widget class="QGroupBox" name="testSuiteGroupBox">
      <property name="title">
-      <string>Gain coefficients</string>
+      <string>Test suite</string>
      </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QRadioButton" name="testGainCoefficientsSyncRadioButton">
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="testGainCoefficientsCheckBox">
         <property name="text">
-         <string>Synchronous</string>
+         <string>Gain coefficients</string>
         </property>
         <property name="checked">
          <bool>true</bool>
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QRadioButton" name="testGainCoefficientsAsyncRadioButton">
+      <item row="0" column="1">
+       <widget class="QLabel" name="testGainCoefficientsLabel">
         <property name="text">
-         <string>Asynchronous</string>
+         <string>Status</string>
         </property>
        </widget>
       </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="testNoiseFloorGroupBox">
-     <property name="title">
-      <string>Noise floor</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="QRadioButton" name="testNoiseFloorSyncRadioButton">
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="testNoiseFloorCheckBox">
         <property name="text">
-         <string>Synchronous</string>
+         <string>Noise floor</string>
         </property>
         <property name="checked">
          <bool>true</bool>
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QRadioButton" name="testNoiseFloorAsyncRadioButton">
+      <item row="1" column="1">
+       <widget class="QLabel" name="testNoiseFloorLabel">
         <property name="text">
-         <string>Asynchronous</string>
+         <string>Status</string>
         </property>
        </widget>
       </item>

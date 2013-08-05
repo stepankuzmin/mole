@@ -48,9 +48,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="registrationGroupBox">
+         <widget class="QGroupBox" name="settingsGroupBox">
           <property name="title">
-           <string>Registration settings</string>
+           <string>Settings</string>
           </property>
           <layout class="QFormLayout" name="formLayout_2">
            <property name="fieldGrowthPolicy">

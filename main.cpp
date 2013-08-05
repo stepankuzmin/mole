@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     QObject::connect(mole, SIGNAL(mdataDump(MData)),
                      &mainWindow, SLOT(plotMData(MData)));
 
-    mainWindow.showMaximized();
+    mainWindow.show();
     
     return a.exec();
 }

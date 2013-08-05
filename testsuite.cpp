@@ -16,52 +16,39 @@ TestSuite::~TestSuite()
 void TestSuite::on_runTestsPushButton_clicked()
 {
     Mole *mole = Mole::getInstance();
+    bool isSync = true;
 
     if (mole->isConnected()) {
-        if (ui->testGainCoefficientsGroupBox->isChecked()) {
-            if (ui->testGainCoefficientsSyncRadioButton->isChecked()) {
-                if (mole->testSuiteGainCoefficients(true) > 0)
-                    qDebug() << "[Error] sync gain coefficients test failured";
-                else
-                    qDebug() << "[Success] sync gain coefficients succseed";
+        if (ui->testGainCoefficientsCheckBox->isChecked()) {
+            if (mole->testSuiteGainCoefficients(isSync) > 0) {
+                ui->testGainCoefficientsLabel->setText("<font color=\"Red\">Failed</font>");
+                qDebug() << "[Error] Gain coefficients test failed";
             }
-
-            if (ui->testGainCoefficientsAsyncRadioButton->isChecked()) {
-                if (mole->testSuiteGainCoefficients(false) > 0)
-                    qDebug() << "[Error] async gain coefficients test failured";
-                else
-                    qDebug() << "[Success] async gain coefficients succseed";
+            else {
+                ui->testGainCoefficientsLabel->setText("<font color=\"Green\">Succeed</font>");
+                qDebug() << "[Success] Gain coefficients test succeed";
             }
         }
-
-        if (ui->testNoiseFloorGroupBox->isChecked()) {
-            if (ui->testNoiseFloorSyncRadioButton->isChecked()) {
-                if (mole->testSuiteNoiseFloor(true) > 0)
-                    qDebug() << "[Error] sync noise floor test failured";
-                else
-                    qDebug() << "[Success] sync noise floor succseed";
+        if (ui->testNoiseFloorCheckBox->isChecked()) {
+            if (mole->testSuiteGainCoefficients(isSync) > 0) {
+                ui->testNoiseFloorLabel->setText("<font color=\"Red\">Failed</font>");
+                qDebug() << "[Error] Noise floor test failed";
             }
-
-            if (ui->testNoiseFloorAsyncRadioButton->isChecked()) {
-                if (mole->testSuiteNoiseFloor(false) > 0)
-                    qDebug() << "[Error] async noise floor test failured";
-                else
-                    qDebug() << "[Success] async noise floor succseed";
+            else {
+                ui->testNoiseFloorLabel->setText("<font color=\"Green\">Succeed</font>");
+                qDebug() << "[Success] Noise floor test succeed";
             }
         }
     }
     else {
-        QMessageBox messageBox;
-        QPushButton *settingsButton = messageBox.addButton(tr("Settings"), QMessageBox::ActionRole);
-        messageBox.setStandardButtons(QMessageBox::Cancel);
-        messageBox.setIcon(QMessageBox::Warning);
-        messageBox.setText(tr("Not connected"));
-        messageBox.setInformativeText(tr("Switch to settings?"));
+        QMessageBox *messageBox = new QMessageBox(this);
+        messageBox->setStandardButtons(QMessageBox::Ok);
+        messageBox->setIcon(QMessageBox::Warning);
+        messageBox->setText(tr("Mole is not connected"));
+        messageBox->setInformativeText(tr("Please connect first"));
 
-        messageBox.exec();
-        if (messageBox.clickedButton() == settingsButton) {
+        if (messageBox->exec() == QMessageBox::Ok) {
             this->close();
-            emit showSettingsDialog();
         }
     }
 }
