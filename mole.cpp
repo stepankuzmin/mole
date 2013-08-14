@@ -48,8 +48,6 @@ Mole::Mole(QObject *parent) :
 
     this->conversionSynchronization = ME_MCS_COUNT;
     setConversionSynchronization(this->conversionSynchronization);
-
-    this->timer = new QTimer(this);
 }
 
 /*
@@ -186,12 +184,6 @@ int Mole::getChannelCount() {
 /////////////
 // Private //
 ////////////
-
-void Mole::sleep(int ms) {
-    QWaitCondition sleep;
-    QMutex mutex;
-    sleep.wait(&mutex, ms);
-}
 
 /*
  * samples data callback handler
@@ -498,85 +490,6 @@ bool Mole::stopConversion() {
     }
 }
 
-/*
- * Get seismic data
- * @param uint16 samples
- *
- * @return bool is success
- */
-/*
-bool Mole::getSeismicData(uint16 samples) { // @TODO: DEPRECATED
-    int ret;
-    uint16 first_sample_to_print = 0;
-    uint16 last_sample_to_print = 0;
-
-    switch(this->modulesMode) {
-        case ME_MMM_SLEEP:
-        case ME_MMM_SEISMIC:
-        case ME_MMM_COUNT: {
-            first_sample_to_print = 0;
-            last_sample_to_print = samples;
-        } break;
-        case ME_MMM_INCLINOMETER: {
-            samples = 1;
-            first_sample_to_print = 0;
-            last_sample_to_print = 1;
-        } break;
-    }
-
-    uint8 *samples_data = new uint8[this->bytes_in_line * samples];
-    ret =  me_host_get_samples_data(this->descriptor, samples, samples_data);
-    if (ret < 0) {
-        qDebug("[Error] Can't me_host_get_samples_data (ret = 0x%.2x)\n", -ret);
-    }
-    else {
-        qDebug() << "[Success] me_host_get_samples_data";
-    }
-
-    uint16 read_samples = 0;
-    ret =  me_get_read_samples(this->descriptor, &read_samples);
-    if (ret < 0) {
-        qDebug("[Error] Can't me_get_read_samples (ret = 0x%.2x)\n", -ret);
-        return false;
-    }
-    else {
-        qDebug("[Success] me_get_read_samples = %u", read_samples);
-        for(uint8 moduleIndex = 0; moduleIndex < me_get_module_count(this->first_address, this->last_address); ++moduleIndex) {
-            for(uint8 channelIndex = 0; channelIndex < this->channel_count; ++channelIndex) {
-                QVector<double> samplesVector;
-                QVector<double> dataVector;
-
-                for(uint16 s = first_sample_to_print; s < last_sample_to_print; ++s) {
-                    switch(this->modulesMode) {
-                        case ME_MMM_SLEEP:
-                        case ME_MMM_SEISMIC:
-                        case ME_MMM_COUNT: {
-
-                        samplesVector << s;
-                        dataVector << me_get_seismic_sample_data(moduleIndex, s, channelIndex,
-                                                                 this->first_address, this->last_address,
-                                                                 this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
-                                                                 samples_data);
-                        } break;
-                        case ME_MMM_INCLINOMETER: {
-                            angle_data_t angle_data = me_get_inclinometer_sample_data(moduleIndex, channelIndex,
-                                                          this->first_address, this->last_address,
-                                                          this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
-                                                          samples_data);
-                        } break;
-                    }
-                }
-                ptrMole->emitDataDump(moduleIndex, channelIndex, samplesVector, dataVector);
-                samplesVector.clear();
-                dataVector.clear();
-            }
-        }
-        delete[] samples_data;
-        return true;
-    }
-}
-*/
-
 sd3_file_t Mole::getData() {
     MData mdata;
     double data;
@@ -757,64 +670,9 @@ bool Mole::getMData() {
     return true;
 }
 
-void Mole::startTimer(int msec) {
-    QObject::connect(this->timer, SIGNAL(timeout()), this, SLOT(getData()));
-    this->timer->start(msec);
-}
-
-void Mole::stopTimer() {
-    this->timer->stop();
-}
-
 ////////////////
 // Test suite //
 ////////////////
-
-int Mole::_wait_test() {
-    int ret = ME_NO_ERROR;
-    me_mole_library_state library_state = ME_MLS_COUNT;
-    uint16 read_samples = 0;
-    do {
-        ret = me_get_library_state(this->descriptor, &library_state);
-        if(ret < 0) {
-            qDebug("[Error] Can't me_get_library_state (ret = 0x%.2x)\n", -ret);
-            break;
-        }
-        ret =  me_get_read_samples(this->descriptor, &read_samples);
-
-        if(ret < 0)
-            qDebug("[Error] Can't me_get_read_samples (ret = 0x%.2x)\n", -ret);
-        qDebug("read_samples %5u. please wait... ", read_samples);
-        sleep(500);
-    }
-    while(library_state != ME_MLS_IDLE);
-    return(ret);
-}
-
-bool Mole::wait_test_with_error_handler() {
-    int ret = _wait_test();
-    if(ret < 0) {
-        qDebug("[Error] Can't wait_test (ret = 0x%.2x)\n", -ret);
-        return(false);
-    }
-    else {
-        int ret_temp = ME_NO_ERROR;
-        ret_temp = me_get_last_error(this->descriptor, &ret);
-        if(ret_temp < 0) {
-            qDebug("[Error] Can't me_get_last_error (ret = 0x%.2x)\n", -ret_temp);
-            return(false);
-        }
-        else {
-            if(ret < 0) {
-                qDebug("[Error] Can't me_ts_* (async) (ret = 0x%.2x)\n", -ret);
-                return(false);
-            }
-            else {
-                return(true);
-            }
-        }
-    }
-}
 
 /*
  * Mole gain coefficients test
@@ -838,9 +696,11 @@ int Mole::testSuiteGainCoefficients(bool isSync) {
             qDebug("[Error] Can't me_ts_gain_coefficients_async (last_address_actual = %d) (ret = 0x%.2x)\n", this->last_address_actual, -ret);
         }
         else {
+            /*
             if(wait_test_with_error_handler()) {
                 qDebug() << "[Success] me_ts_gain_coefficients_async";
             }
+            */
         }
     }
     delete[] results;
@@ -867,6 +727,33 @@ int Mole::testSuiteNoiseFloor(bool isSync) {
         ret = me_ts_noise_floor_async(this->descriptor, this->first_address, this->last_address, this->channel_count,
                                       this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
                                       results, &this->last_address_actual);
+    }
+    delete[] results;
+
+    return ret;
+}
+
+/*
+ * Mole total harmonic distortion test
+ * @param bool isSync
+ *
+ * @return int
+ */
+int Mole::testTotalHarmonicDistortion(bool isSync) {
+    int ret;
+
+    me_ts_result_channel_t *results = new me_ts_result_channel_t[me_get_module_count(
+                this->first_address, this->last_address) * this->channel_count];
+
+    if(isSync) {
+        ret = me_ts_total_harmonic_distortion(this->descriptor,
+                                              this->first_address, this->last_address,
+                                              this->channel_count,
+                                              this->bytes_in_channel, this->bytes_in_module, this->bytes_in_line,
+                                              results, &this->last_address_actual);
+    }
+    else {
+        // @TODO: async
     }
     delete[] results;
 

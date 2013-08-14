@@ -1,17 +1,11 @@
 #ifndef MOLE_H
 #define MOLE_H
 
-//#include <QList>
-//#include <QVector>
-
 #include "sd3.h"
 
 #include <QDebug>
-#include <QTimer>
-#include <QMutex>
 #include <QObject>
 #include <QPointF>
-#include <QWaitCondition>
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine.h"
 #include "3rdparty/mole-engine/include/mole-engine/mole-engine-test-suite.h"
 
@@ -35,13 +29,16 @@ public:
     // Test suite
     int testSuiteGainCoefficients(bool isSync = true);
     int testSuiteNoiseFloor(bool isSync = true);
+    int testTotalHarmonicDistortion(bool isSync = true);
+    int testZeroShift(bool isSync = true);
+    int testCommonModeRejection(bool isSync = true);
+    int testZeroShiftOnInput(bool isSync);
+    int testVoltageMeasurment(bool isSync = true); // on the damping resistor
 
 protected:
     explicit Mole(QObject *parent = 0);
 
 private:
-    QTimer *timer;
-
     int descriptor;
     uint8 first_address;
     uint8 last_address;
@@ -62,10 +59,6 @@ private:
 
     uint16 samplesSize; // samples size (количество дискретов)
     me_mole_module_datarate datarate;
-
-    void sleep(int ms);
-    int _wait_test();
-    bool wait_test_with_error_handler();
 
     static void samplesDataCallbackHandler(int mole_descriptor,
                                            uint8 first_address, uint8 last_address,
@@ -104,13 +97,9 @@ public slots:
 
     bool startConversion();
     bool stopConversion();
-    //bool getSeismicData(uint16 samples);
 
     sd3_file_t getData();
     bool getMData();
-
-    void startTimer(int msec);
-    void stopTimer();
 };
 
 #endif // MOLE_H

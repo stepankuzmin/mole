@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>180</width>
-    <height>163</height>
+    <width>218</width>
+    <height>302</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <string>Test suite</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
+      <item row="1" column="0">
        <widget class="QCheckBox" name="testGainCoefficientsCheckBox">
         <property name="text">
          <string>Gain coefficients</string>
@@ -30,14 +30,14 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="1" column="1">
        <widget class="QLabel" name="testGainCoefficientsLabel">
         <property name="text">
          <string>Status</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QCheckBox" name="testNoiseFloorCheckBox">
         <property name="text">
          <string>Noise floor</string>
@@ -47,8 +47,94 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QLabel" name="testNoiseFloorLabel">
+        <property name="text">
+         <string>Status</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="testTotalHarmonicDistortionCheckBox">
+        <property name="text">
+         <string>Total harmonic distortion</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="testTotalHarmonicDistortionLabel">
+        <property name="text">
+         <string>Status</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QCheckBox" name="testZeroShiftCheckBox">
+        <property name="text">
+         <string>Zero shift</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLabel" name="testZeroShiftLabel">
+        <property name="text">
+         <string>Status</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QCheckBox" name="testCommonModeRejectionCheckBox">
+        <property name="text">
+         <string>Common-mode rejection</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLabel" name="testCommonModeRejectionLabel">
+        <property name="text">
+         <string>Status</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QCheckBox" name="testZeroShiftOnInputCheckBox">
+        <property name="text">
+         <string>Zero shift on input</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QLabel" name="testZeroShiftOnInputLabel">
+        <property name="text">
+         <string>Status</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QCheckBox" name="testVoltageMeasurmentCheckBox">
+        <property name="text">
+         <string>Voltage measurment
+on the damping resistor</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLabel" name="testVoltageMeasurmentLabel">
         <property name="text">
          <string>Status</string>
         </property>

@@ -16,11 +16,11 @@ TestSuite::~TestSuite()
 void TestSuite::on_runTestsPushButton_clicked()
 {
     Mole *mole = Mole::getInstance();
-    bool isSync = true;
 
     if (mole->isConnected()) {
         if (ui->testGainCoefficientsCheckBox->isChecked()) {
-            if (mole->testSuiteGainCoefficients(isSync) > 0) {
+            ui->testGainCoefficientsLabel->setText(tr("In progress..."));
+            if (mole->testSuiteGainCoefficients() > 0) {
                 ui->testGainCoefficientsLabel->setText("<font color=\"Red\">Failed</font>");
                 qDebug() << "[Error] Gain coefficients test failed";
             }
@@ -30,13 +30,25 @@ void TestSuite::on_runTestsPushButton_clicked()
             }
         }
         if (ui->testNoiseFloorCheckBox->isChecked()) {
-            if (mole->testSuiteGainCoefficients(isSync) > 0) {
+            ui->testNoiseFloorLabel->setText(tr("In progress..."));
+            if (mole->testSuiteGainCoefficients() > 0) {
                 ui->testNoiseFloorLabel->setText("<font color=\"Red\">Failed</font>");
                 qDebug() << "[Error] Noise floor test failed";
             }
             else {
                 ui->testNoiseFloorLabel->setText("<font color=\"Green\">Succeed</font>");
                 qDebug() << "[Success] Noise floor test succeed";
+            }
+        }
+        if (ui->testTotalHarmonicDistortionCheckBox->isChecked()) {
+            ui->testTotalHarmonicDistortionLabel->setText(tr("In progress..."));
+            if (mole->testTotalHarmonicDistortion() > 0) {
+                ui->testTotalHarmonicDistortionLabel->setText("<font color=\"Red\">Failed</font>");
+                qDebug() << "[Error] Total harmonic distortion test failed";
+            }
+            else {
+                ui->testTotalHarmonicDistortionLabel->setText("<font color=\"Green\">Succeed</font>");
+                qDebug() << "[Success] Total harmonic distortion test succeed";
             }
         }
     }
