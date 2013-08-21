@@ -12,6 +12,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->rightWidget->hide();
+
     // List all available COM ports
     QList<QextPortInfo> ports = QextSerialEnumerator::getPorts();
     for (int i = 0; i < ports.size(); i++)
@@ -54,6 +56,8 @@ MainWindow::~MainWindow()
  * Enable plots
  */
 void MainWindow::enablePlots(int moduleCount, int channelCount) {
+    ui->rightWidget->show();
+
     QVector< QVector<QwtPlot*> >            plots(moduleCount, QVector<QwtPlot*>(channelCount));
     QVector< QVector<QwtPlotCurve*> >       curves(moduleCount, QVector<QwtPlotCurve*>(channelCount));
     QVector< QVector< QVector<double> > >   data(moduleCount,
@@ -111,6 +115,8 @@ void MainWindow::disablePlots() {
     this->plots.clear();
     this->curves.clear();
     this->isPlotsEnabled = false;
+
+    ui->rightWidget->hide();
 }
 
 /*
@@ -226,11 +232,107 @@ void MainWindow::plotSD3(sd3_file_t sd3_file) {
 
 void MainWindow::on_actionOpen_triggered()
 {
+    Mole *mole = Mole::getInstance();
+    MData mdata;
+    qDebug() << mdata;
+
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open file"), "", tr("SD3 (*.sd3)"));
+
+    FILE *file;
+    file = fopen(fileName.toStdString().c_str(), "rb");
+
+    int sizeOfInt = sizeof(int);
+    int sizeOfFloat = sizeof(float);
+
+    int version;
+    int datarate;
+    int samples_count;
+    int mode;
+    int address;
+    int date;
+    int time;
+    int x_source;
+    int y_source;
+    int h_source;
+
+    fread(&version, sizeOfInt, 1, file);
+    fread(&datarate, sizeOfInt, 1, file);
+    fread(&samples_count, sizeOfInt, 1, file);
+    fread(&mode, sizeOfInt, 1, file);
+    fread(&address, sizeOfInt, 1, file);
+    fread(&date, sizeOfInt, 1, file);
+    fread(&time, sizeOfInt, 1, file);
+    fread(&x_source, sizeOfInt, 1, file);
+    fread(&y_source, sizeOfInt, 1, file);
+    fread(&h_source, sizeOfInt, 1, file);
+
+    float sample;
+    int recordIndex=0;
+
+    int x_state;
+    int y_state;
+    int z_state;
+    int x_inclinometer;
+    int y_inclinometer;
+    int z_inclinometer;
+    int x_receiver;
+    int y_receiver;
+    int h_receiver;
+    while (!feof(file)) {
+        QVector< QVector<QPointF> > record;
+        fread(&x_state, sizeOfInt, 1, file);
+        fread(&y_state, sizeOfInt, 1, file);
+        fread(&z_state, sizeOfInt, 1, file);
+        fread(&x_inclinometer, sizeOfInt, 1, file);
+        fread(&y_inclinometer, sizeOfInt, 1, file);
+        fread(&z_inclinometer, sizeOfInt, 1, file);
+        fread(&x_receiver, sizeOfInt, 1, file);
+        fread(&y_receiver, sizeOfInt, 1, file);
+        fread(&h_receiver, sizeOfInt, 1, file);
+        fseek(file, sizeOfInt, SEEK_CUR); // Skip reserved field
+
+        QVector<QPointF> x(samples_count);
+        for (int i=0; i<samples_count; i++) {
+            fread(&sample, sizeOfFloat, 1, file);
+            x.push_back(QPointF(i, sample));
+        }
+        record.push_back(x);
+
+        QVector<QPointF> y(samples_count);
+        for (int i=0; i<samples_count; i++) {
+            fread(&sample, sizeOfFloat, 1, file);
+            y.push_back(QPointF(i, sample));
+        }
+        record.push_back(y);
+
+        QVector<QPointF> z(samples_count);
+        for (int i=0; i<samples_count; i++) {
+            fread(&sample, sizeOfFloat, 1, file);
+            z.push_back(QPointF(i, sample));
+        }
+        record.push_back(z);
+
+        mdata.push_back(record);
+
+        qDebug("Reading record #%d", recordIndex);
+        recordIndex++;
+    }
+    //mdata.remove(recordIndex-1); // Remove last void record
+    qDebug() << "mdata.size() =" << mdata.size();
+    qDebug() << "mdata[0].size() =" << mdata[0].size();
+    qDebug() << "mdata[0][0].size() =" << mdata[0][0].size();
+    fclose(file);
+
+    enablePlots(recordIndex, 3);
+    //enablePlots(recordIndex-1, 3);
+    plotMData(mdata);
+
+    /*
     sd3_file_t sd3_file = SD3::read(fileName.toStdString().c_str());
     this->sd3_file = sd3_file;
     qDebug("open, size=%d", sd3_file.records.size());
     plotSD3(sd3_file);
+    */
 }
 
 void MainWindow::on_actionSave_triggered()
@@ -342,4 +444,12 @@ void MainWindow::on_startPushButton_clicked()
 void MainWindow::on_actionTest_suite_triggered()
 {
     emit showTestSuite();
+}
+
+void MainWindow::on_actionToggle_sidebar_triggered(bool checked)
+{
+    if (checked)
+        ui->leftWidget->show();
+    else
+        ui->leftWidget->hide();
 }

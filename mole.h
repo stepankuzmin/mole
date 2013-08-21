@@ -32,7 +32,7 @@ public:
     int testTotalHarmonicDistortion(bool isSync = true);
     int testZeroShift(bool isSync = true);
     int testCommonModeRejection(bool isSync = true);
-    int testZeroShiftOnInput(bool isSync);
+    int testZeroShiftOnInput(bool isSync = true);
     int testVoltageMeasurment(bool isSync = true); // on the damping resistor
 
 protected:

@@ -75,6 +75,7 @@ private slots:
     void on_connectionPushButton_toggled(bool checked);
     void on_startPushButton_clicked();
     void on_actionTest_suite_triggered();
+    void on_actionToggle_sidebar_triggered(bool checked);
 };
 
 #endif // MAINWINDOW_H
