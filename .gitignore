@@ -38,3 +38,4 @@ bin/object_script.mole.Release
 bin/debug
 bin/release/*.o
 bin/release/*.cpp
+*.sd3

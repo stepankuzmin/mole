@@ -295,7 +295,7 @@ void MainWindow::on_actionOpen_triggered()
         fseek(file, sizeOfInt, SEEK_CUR);
 
         for (int i = 0; i < channelCount; i++) {
-            QVector<QPointF> channelRecord(samples_count);
+            QVector<QPointF> channelRecord;
             for (int j = 0; j < samples_count; j++) {
                 fread(&sample, sizeOfFloat, 1, file);
                 channelRecord.push_back(QPointF(j, sample));
@@ -312,20 +312,98 @@ void MainWindow::on_actionOpen_triggered()
     recordIndex--;
     mdata.remove(recordIndex);
 
+    this->mdata = mdata;
+
     // Plot data
     enablePlots(recordIndex, channelCount);
     plotMData(mdata);
+
+    ui->statusBar->showMessage(tr("%1 opened").arg(fileName));
 }
 
 void MainWindow::on_actionSave_triggered()
 {
+    if (this->mdata.isEmpty()) {
+        QMessageBox::information(this, tr("Nothing to save"), tr("There is nothing to save."));
+        return;
+    }
+
     QString preferredFileName = QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss") + ".sd3";
     QString fileName = QFileDialog::getSaveFileName(this,
                                                     tr("Save file"),
                                                     preferredFileName,
                                                     tr("SD3 (*.sd3)"));
-    qDebug("save, size=%d", this->sd3_file.records.size());
-    SD3::write(fileName.toStdString().c_str(), this->sd3_file); // @TODO: is success?
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    FILE *file;
+    file = fopen(fileName.toStdString().c_str(), "wb");
+
+    int sizeOfInt = sizeof(int);
+    int sizeOfFloat = sizeof(float);
+
+    int version;
+    int datarate;
+    int samples_count = this->mdata[0][0].size();
+    int mode;
+    int address;
+    int date;
+    int time;
+    int x_source;
+    int y_source;
+    int h_source;
+
+    fwrite(&version,         sizeOfInt, 1, file);
+    fwrite(&datarate,        sizeOfInt, 1, file);
+    fwrite(&samples_count,   sizeOfInt, 1, file);
+    fwrite(&mode,            sizeOfInt, 1, file);
+    fwrite(&address,         sizeOfInt, 1, file);
+    fwrite(&date,            sizeOfInt, 1, file);
+    fwrite(&time,            sizeOfInt, 1, file);
+    fwrite(&x_source,        sizeOfInt, 1, file);
+    fwrite(&y_source,        sizeOfInt, 1, file);
+    fwrite(&h_source,        sizeOfInt, 1, file);
+
+    float sample;
+    int x_state;
+    int y_state;
+    int z_state;
+    int x_inclinometer;
+    int y_inclinometer;
+    int z_inclinometer;
+    int x_receiver;
+    int y_receiver;
+    int h_receiver;
+
+    int modulesCount = this->mdata.size();
+    int channelsCount = this->mdata[0].size();
+
+    for (int moduleIndex = 0; moduleIndex < modulesCount; ++moduleIndex) {
+        fwrite(&x_state, sizeOfInt, 1, file);
+        fwrite(&y_state, sizeOfInt, 1, file);
+        fwrite(&z_state, sizeOfInt, 1, file);
+        fwrite(&x_inclinometer, sizeOfInt, 1, file);
+        fwrite(&y_inclinometer, sizeOfInt, 1, file);
+        fwrite(&z_inclinometer, sizeOfInt, 1, file);
+        fwrite(&x_receiver, sizeOfInt, 1, file);
+        fwrite(&y_receiver, sizeOfInt, 1, file);
+        fwrite(&h_receiver, sizeOfInt, 1, file);
+
+        // Skeep reserved field
+        fseek(file, sizeOfInt, SEEK_CUR);
+
+        for (int channelIndex = 0; channelIndex < channelsCount; channelIndex++) {
+            for (int i = 0; i < samples_count; i++) {
+                sample = this->mdata[moduleIndex][channelIndex][i].y();
+                fwrite(&sample, sizeOfFloat, 1, file);
+            }
+        }
+    }
+    fclose(file);
+
+    this->isUnsavedChanges = false;
+    ui->statusBar->showMessage(tr("%1 saved").arg(fileName));
 }
 
 void MainWindow::on_actionDisablePlots_triggered()

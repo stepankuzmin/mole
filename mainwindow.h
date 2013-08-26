@@ -43,6 +43,9 @@ private:
     sd3_file_t sd3_file;
     Ui::MainWindow *ui;
 
+    MData mdata;
+    bool isUnsavedChanges;
+
     QVector< QVector< QVector<double> > > data;
     QVector< QVector< QVector<double> > > samples;
 
