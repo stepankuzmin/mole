@@ -126,7 +126,6 @@ void MainWindow::plotMData(MData mdata) {
     for (int moduleIndex = 0; moduleIndex < mdata.size(); ++moduleIndex) {
         for (int channelIndex = 0; channelIndex < mdata[moduleIndex].size(); ++channelIndex) {
             this->plots[moduleIndex][channelIndex]->detachItems();
-            //this->plots[moduleIndex][channelIndex]->replot();
 
             curves[moduleIndex][channelIndex] = new QwtPlotCurve();
             curves[moduleIndex][channelIndex]->setPen(QPen(Qt::black));
@@ -233,8 +232,10 @@ void MainWindow::plotSD3(sd3_file_t sd3_file) {
 void MainWindow::on_actionOpen_triggered()
 {
     Mole *mole = Mole::getInstance();
+
+    int channelCount = 3;
+    // int channelCount = mole->getChannelCount(); // @TODO
     MData mdata;
-    qDebug() << mdata;
 
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open file"), "", tr("SD3 (*.sd3)"));
 
@@ -267,7 +268,7 @@ void MainWindow::on_actionOpen_triggered()
     fread(&h_source, sizeOfInt, 1, file);
 
     float sample;
-    int recordIndex=0;
+    int recordIndex = 0;
 
     int x_state;
     int y_state;
@@ -279,7 +280,7 @@ void MainWindow::on_actionOpen_triggered()
     int y_receiver;
     int h_receiver;
     while (!feof(file)) {
-        QVector< QVector<QPointF> > record;
+        QVector< QVector<QPointF> > moduleRecord;
         fread(&x_state, sizeOfInt, 1, file);
         fread(&y_state, sizeOfInt, 1, file);
         fread(&z_state, sizeOfInt, 1, file);
@@ -289,50 +290,31 @@ void MainWindow::on_actionOpen_triggered()
         fread(&x_receiver, sizeOfInt, 1, file);
         fread(&y_receiver, sizeOfInt, 1, file);
         fread(&h_receiver, sizeOfInt, 1, file);
-        fseek(file, sizeOfInt, SEEK_CUR); // Skip reserved field
 
-        QVector<QPointF> x(samples_count);
-        for (int i=0; i<samples_count; i++) {
-            fread(&sample, sizeOfFloat, 1, file);
-            x.push_back(QPointF(i, sample));
+        // Skip reserved field
+        fseek(file, sizeOfInt, SEEK_CUR);
+
+        for (int i = 0; i < channelCount; i++) {
+            QVector<QPointF> channelRecord(samples_count);
+            for (int j = 0; j < samples_count; j++) {
+                fread(&sample, sizeOfFloat, 1, file);
+                channelRecord.push_back(QPointF(j, sample));
+            }
+            moduleRecord.push_back(channelRecord);
         }
-        record.push_back(x);
 
-        QVector<QPointF> y(samples_count);
-        for (int i=0; i<samples_count; i++) {
-            fread(&sample, sizeOfFloat, 1, file);
-            y.push_back(QPointF(i, sample));
-        }
-        record.push_back(y);
-
-        QVector<QPointF> z(samples_count);
-        for (int i=0; i<samples_count; i++) {
-            fread(&sample, sizeOfFloat, 1, file);
-            z.push_back(QPointF(i, sample));
-        }
-        record.push_back(z);
-
-        mdata.push_back(record);
-
-        qDebug("Reading record #%d", recordIndex);
+        mdata.push_back(moduleRecord);
         recordIndex++;
     }
-    //mdata.remove(recordIndex-1); // Remove last void record
-    qDebug() << "mdata.size() =" << mdata.size();
-    qDebug() << "mdata[0].size() =" << mdata[0].size();
-    qDebug() << "mdata[0][0].size() =" << mdata[0][0].size();
     fclose(file);
 
-    enablePlots(recordIndex, 3);
-    //enablePlots(recordIndex-1, 3);
-    plotMData(mdata);
+    // Remove last void record
+    recordIndex--;
+    mdata.remove(recordIndex);
 
-    /*
-    sd3_file_t sd3_file = SD3::read(fileName.toStdString().c_str());
-    this->sd3_file = sd3_file;
-    qDebug("open, size=%d", sd3_file.records.size());
-    plotSD3(sd3_file);
-    */
+    // Plot data
+    enablePlots(recordIndex, channelCount);
+    plotMData(mdata);
 }
 
 void MainWindow::on_actionSave_triggered()
